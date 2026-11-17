@@ -154,9 +154,9 @@ void main() {
       expect(icon.size, const Size(24, 24));
       expect(icon.center.dx, 20, reason: 'the 16 icon sits 12 from the edge');
       expect(tester.getSize(find.byType(Image)), const Size(16, 16));
-      final name = tester.getRect(find.text('纯粹直播'));
+      final name = tester.getRect(find.text('棱镜直播'));
       expect(name.left, greaterThan(icon.right));
-      final style = tester.widget<Text>(find.text('纯粹直播')).style!;
+      final style = tester.widget<Text>(find.text('棱镜直播')).style!;
       expect((style.fontSize, style.fontWeight), (13, FontWeight.w600));
 
       final buttons = [
@@ -225,7 +225,7 @@ void main() {
       await tester.tap(_key('title-bar-icon'));
       await tester.pump();
       expect(controls.calls, ['menu']);
-      await tester.tapAt(tester.getCenter(find.text('纯粹直播')), buttons: kSecondaryMouseButton);
+      await tester.tapAt(tester.getCenter(find.text('棱镜直播')), buttons: kSecondaryMouseButton);
       await tester.pump();
       expect(controls.calls, ['menu', 'menu']);
       await tester.tapAt(const Offset(600, 16), buttons: kSecondaryMouseButton);
@@ -234,7 +234,7 @@ void main() {
 
       // A click on the name opens nothing; a double click maximizes, a drag
       // moves the window.
-      await tester.tap(find.text('纯粹直播'));
+      await tester.tap(find.text('棱镜直播'));
       await tester.pump(const Duration(seconds: 1));
       expect(controls.calls, hasLength(3));
       await tester.tapAt(const Offset(600, 16));
@@ -273,7 +273,7 @@ void main() {
       await _pumpWindow(tester);
       final light = const LiveTheme(primaryColor: _seed).light.colorScheme;
       expect(tester.widget<Material>(_key('title-bar')).color, light.surface);
-      expect(tester.widget<Text>(find.text('纯粹直播')).style!.color, light.onSurface);
+      expect(tester.widget<Text>(find.text('棱镜直播')).style!.color, light.onSurface);
 
       await _pumpWindow(tester, mode: ThemeMode.dark);
       final dark = const LiveTheme(primaryColor: _seed).dark.colorScheme;
@@ -294,7 +294,7 @@ void main() {
       await tester.pumpAndSettle();
     });
 
-    testWidgets('in a room: "纯粹直播 · 晚风"; the taskbar name "晚风 - 纯粹直播"; menus over it keep it (c11)', (tester) async {
+    testWidgets('in a room: "棱镜直播 · 晚风"; the taskbar name "晚风 - 棱镜直播"; menus over it keep it (c11)', (tester) async {
       await _pumpWindow(tester);
       final navigator = tester.state<NavigatorState>(find.byType(Navigator).last)
         ..push(
@@ -310,9 +310,9 @@ void main() {
       expect(find.text(' · 晚风'), findsOneWidget);
       final room = tester.widget<Text>(_key('title-bar-room')).style!;
       expect(room.fontWeight, FontWeight.w400);
-      expect(tester.getRect(_key('title-bar-room')).left, greaterThan(tester.getRect(find.text('纯粹直播')).right - 1));
+      expect(tester.getRect(_key('title-bar-room')).left, greaterThan(tester.getRect(find.text('棱镜直播')).right - 1));
       expect(roomNameOf(liveRouteObserver.topPage.value), '晚风');
-      expect(nativeWindowTitle('纯粹直播', roomNameOf(liveRouteObserver.topPage.value)), '晚风 - 纯粹直播');
+      expect(nativeWindowTitle('棱镜直播', roomNameOf(liveRouteObserver.topPage.value)), '晚风 - 棱镜直播');
 
       unawaited(
         showDialog<void>(
@@ -329,7 +329,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(_key('title-bar-room'), findsNothing);
       expect(roomNameOf(liveRouteObserver.topPage.value), isNull);
-      expect(nativeWindowTitle('纯粹直播', null), '纯粹直播');
+      expect(nativeWindowTitle('棱镜直播', null), '棱镜直播');
       expect(
         roomNameOf(
           RouteSettings(
@@ -379,7 +379,7 @@ void main() {
         expect(find.byType(DesktopTitleBar), findsNothing, reason: 'no drawn minimize, maximize, close');
         expect(tester.getRect(_key('mac-title-bar')), const Rect.fromLTWH(0, 0, 1280, 28));
         expect(tester.getTopLeft(find.text('page')).dy, 28, reason: 'the page starts under the row');
-        final name = tester.getRect(find.text('纯粹直播'));
+        final name = tester.getRect(find.text('棱镜直播'));
         expect(name.center.dx, closeTo(640, 1), reason: 'centred like the system title');
         await tester.drag(_key('mac-title-bar-drag'), const Offset(30, 0));
         await tester.pumpAndSettle();
@@ -400,7 +400,7 @@ void main() {
       }
     });
 
-    testWidgets('quitting while recording: "要退出纯粹直播吗？", the count and what is kept; red "退出应用" (c6)', (tester) async {
+    testWidgets('quitting while recording: "要退出棱镜直播吗？", the count and what is kept; red "退出应用" (c6)', (tester) async {
       final answer = Completer<bool>();
       await tester.pumpWidget(
         MaterialApp(
@@ -417,7 +417,7 @@ void main() {
       );
       await tester.tap(find.text('quit'));
       await tester.pumpAndSettle();
-      expect(find.text('要退出纯粹直播吗？'), findsOneWidget);
+      expect(find.text('要退出棱镜直播吗？'), findsOneWidget);
       expect(find.text('正在录制 2 个直播间\n退出会停止录制，已经录下的部分会保存。'), findsOneWidget);
       await tester.tap(_key('quit-confirm'));
       await tester.pumpAndSettle();
@@ -671,8 +671,8 @@ void main() {
       expect(trayRowLabel(TrayRow.window, visible: true, recording: 0), '隐藏窗口');
       expect(trayRowLabel(TrayRow.window, visible: false, recording: 0), '显示窗口');
       expect(trayRowLabel(TrayRow.exit, visible: true, recording: 0), '退出应用');
-      expect(trayTooltip(recording: 0), '纯粹直播');
-      expect(trayTooltip(recording: 2), '纯粹直播 · 正在录制 2 个');
+      expect(trayTooltip(recording: 0), '棱镜直播');
+      expect(trayTooltip(recording: 2), '棱镜直播 · 正在录制 2 个');
     });
 
     test('the Mac\'s menu bar icon: "录制中心…" under the count while recording (A18.2 c7)', () {

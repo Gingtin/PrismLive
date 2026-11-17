@@ -135,7 +135,7 @@ void main() {
     expect(bar.top - text.bottom, closeTo(32, 0.5));
     expect(logo.center.dx, closeTo(393 / 2, 0.5));
     // 3.x had only the welcome; v4's extra app name is gone.
-    expect(find.text('纯粹直播'), findsNothing);
+    expect(find.text('棱镜直播'), findsNothing);
     final scheme = Theme.of(tester.element(find.text('欢迎使用'))).colorScheme;
     final progress = tester.widget<LinearProgressIndicator>(find.byType(LinearProgressIndicator));
     expect(progress.color, scheme.primary);

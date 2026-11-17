@@ -38,7 +38,7 @@ void main() {
 
     await tester.pumpWidget(shown!);
     await tester.pumpAndSettle();
-    expect(find.text('纯粹直播没能启动'), findsOneWidget);
+    expect(find.text('棱镜直播没能启动'), findsOneWidget);
     expect(find.textContaining('/data/user/0/com.mystyle.purelive/files/pure_live.db'), findsOneWidget);
     expect(find.textContaining('No space left on device'), findsOneWidget);
 

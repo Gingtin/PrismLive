@@ -204,7 +204,7 @@ void main() {
 
     guide.opens = (_) => -1;
     await tapSettings(tester, _step('xiaomi_autostart'));
-    expect(h.toasts.last, '没能打开系统设置，请在系统设置 → 应用 → 纯粹直播里手动修改');
+    expect(h.toasts.last, '没能打开系统设置，请在系统设置 → 应用 → 棱镜直播里手动修改');
   });
 
   testWidgets('the battery step asks the system first; refused where the vendor removed it, the list opens', (

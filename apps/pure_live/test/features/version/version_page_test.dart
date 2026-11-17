@@ -711,7 +711,7 @@ void main() {
     expect(size(find.text('版本历史')), 20);
     expect(size(version), 17);
     await _pump(tester, const AboutPage(route: RouteArgs(RoutePath.kAbout)), _FakeFeed());
-    expect(size(find.text('纯粹直播')), 20);
+    expect(size(find.text('棱镜直播')), 20);
 
     // Every size at its largest (Settings.fontSize*).
     const largest = LiveFontSizes(bodySmall: 15, bodyMedium: 17, bodyLarge: 18, titleMedium: 20, titleLarge: 26);
@@ -720,7 +720,7 @@ void main() {
     expect(size(version), closeTo(20 * 17 / 15, 1e-9));
     expect(tester.takeException(), isNull);
     await _pump(tester, const AboutPage(route: RouteArgs(RoutePath.kAbout)), _FakeFeed(), fontSizes: largest);
-    expect(size(find.text('纯粹直播')), 26);
+    expect(size(find.text('棱镜直播')), 26);
   });
 
   testWidgets('the release history shows both panes on a wide window', (tester) async {

@@ -1063,9 +1063,9 @@ void main() {
         expect(_focused, 'tv menu favorites', reason: 'second Back reaches the side menu');
         if (native) await captureQaFrame(tester, 'tv-favorites-back-menu');
         await back(native: native);
-        expect(find.text('退出纯粹直播？'), findsOneWidget, reason: 'the pane must not steal Back from the menu');
+        expect(find.text('退出棱镜直播？'), findsOneWidget, reason: 'the pane must not steal Back from the menu');
         await back(native: native);
-        expect(find.text('退出纯粹直播？'), findsNothing);
+        expect(find.text('退出棱镜直播？'), findsNothing);
         expect(_focused, 'tv menu favorites');
       }
     } finally {
@@ -1181,9 +1181,9 @@ void main() {
         await pageBack(tester);
         expect(_focused, 'tv menu favorites');
         await pageBack(tester);
-        expect(find.text('退出纯粹直播？'), findsOneWidget);
+        expect(find.text('退出棱镜直播？'), findsOneWidget);
         await pageBack(tester);
-        expect(find.text('退出纯粹直播？'), findsNothing);
+        expect(find.text('退出棱镜直播？'), findsNothing);
       } finally {
         await _close(tester, services);
       }
@@ -1399,13 +1399,13 @@ void main() {
     expect(find.descendant(of: find.byKey(const ValueKey('tv-home-menu')), matching: find.text('热门')), findsOneWidget);
     await tester.binding.handlePopRoute();
     await _settle(tester);
-    expect(find.text('退出纯粹直播？'), findsOneWidget);
+    expect(find.text('退出棱镜直播？'), findsOneWidget);
     expect(_focused, isNot(startsWith('tv menu')), reason: 'the main button "退出" has the focus');
     // Back is cancel: the home stays, the focus is back on the menu.
     await tester.binding.handlePopRoute();
     await _settle(tester);
     await tester.pump(const Duration(milliseconds: 400));
-    expect(find.text('退出纯粹直播？'), findsNothing);
+    expect(find.text('退出棱镜直播？'), findsNothing);
     expect(find.byType(TvHomePage), findsOneWidget);
     expect(_focused, 'tv menu popular');
 
@@ -1583,10 +1583,10 @@ void main() {
 
     expect(RoomBackChannel.instance.held, isTrue, reason: 'the home takes Back from Android');
     await nativeBack();
-    expect(find.text('退出纯粹直播？'), findsOneWidget);
+    expect(find.text('退出棱镜直播？'), findsOneWidget);
     // Over the dialog, Back closes it.
     await nativeBack();
-    expect(find.text('退出纯粹直播？'), findsNothing);
+    expect(find.text('退出棱镜直播？'), findsNothing);
     expect(find.byType(TvHomePage), findsOneWidget);
     await _close(tester, services);
   });

@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="docs/Y-发布和运营/Y03-发布说明和README/readme/banner-en.jpg" alt="Pure Live" width="100%">
+  <img src="docs/Y-发布和运营/Y03-发布说明和README/readme/banner-en.jpg" alt="Prism Live" width="100%">
 </p>
 
-<h1 align="center">Pure Live</h1>
+<h1 align="center">Prism Live</h1>
 
 <p align="center"><a href="README.md">简体中文</a> · <b>English</b></p>
 

@@ -66,10 +66,10 @@ void main() {
 
   test('A18.2 c4: the menus in the Mac order, in the app language, with the ⌘ keys of one table (c5)', () {
     final menus = macMenus();
-    expect([for (final menu in menus) menu.label], ['纯粹直播', '文件', '编辑', '显示', '播放', '窗口', '帮助']);
+    expect([for (final menu in menus) menu.label], ['棱镜直播', '文件', '编辑', '显示', '播放', '窗口', '帮助']);
     // The system's own items (services, hide, quit, full screen, the window
     // menu) are only there on a Mac; the app's are everywhere.
-    expect(_items(menus[0]), ['关于纯粹直播', '检查更新…', '设置… ⌘,']);
+    expect(_items(menus[0]), ['关于棱镜直播', '检查更新…', '设置… ⌘,']);
     expect(_items(menus[1]), ['链接解析… ⌘L', '多画面', '关闭窗口 ⌘W']);
     expect(_items(menus[2]), ['撤销 ⌘Z', '重做 ⇧⌘Z', '剪切 ⌘X', '拷贝 ⌘C', '粘贴 ⌘V', '全选 ⌘A', '搜索直播… ⌘F']);
     expect(_items(menus[3]), ['关注 ⌘1', '热门 ⌘2', '分区 ⌘3', '录制中心 ⌘4', '观看记录 ⌘Y', '返回 ⌘[']);
@@ -113,7 +113,7 @@ void main() {
     debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
     try {
       await tester.pumpWidget(const MaterialApp(home: MacMenuBar(child: Text('app'))));
-      expect(sent.last, ['纯粹直播', '文件', '编辑', '显示', '播放', '窗口', '帮助']);
+      expect(sent.last, ['棱镜直播', '文件', '编辑', '显示', '播放', '窗口', '帮助']);
       final before = sent.length;
       RoomCommands.current.value = _FakeRoom();
       await tester.pump();
@@ -169,7 +169,7 @@ void main() {
       );
       await tester.pump();
       final set = calls.firstWhere((call) => call.method == 'set').arguments as Map;
-      expect(set['title'], '纯粹直播');
+      expect(set['title'], '棱镜直播');
       expect(
         [
           for (final command in (set['commands'] as List).cast<Map<Object?, Object?>>())

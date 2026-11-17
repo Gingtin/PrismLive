@@ -123,7 +123,7 @@ void main() {
     unawaited(questions(permissions, resumed: () => back.future).confirm().then((value) => answer = value));
     await tester.pumpAndSettle();
     expect(find.text('通知权限已关闭'), findsOneWidget);
-    expect(find.text('系统设置里关掉了“纯粹直播”的通知，后台播放要用它显示控制条。打开后回到这里再开一次。'), findsOneWidget);
+    expect(find.text('系统设置里关掉了“棱镜直播”的通知，后台播放要用它显示控制条。打开后回到这里再开一次。'), findsOneWidget);
     await tester.tap(find.text('去设置'));
     await tester.pumpAndSettle();
     expect(permissions.calls, ['settings']);

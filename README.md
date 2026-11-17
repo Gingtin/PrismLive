@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="docs/Y-发布和运营/Y03-发布说明和README/readme/banner.jpg" alt="纯粹直播 Pure Live" width="100%">
+  <img src="docs/Y-发布和运营/Y03-发布说明和README/readme/banner.jpg" alt="棱镜直播 Prism Live" width="100%">
 </p>
 
-<h1 align="center">纯粹直播 Pure Live</h1>
+<h1 align="center">棱镜直播 Prism Live</h1>
 
 <p align="center"><b>简体中文</b> · <a href="README.en.md">English</a></p>
 

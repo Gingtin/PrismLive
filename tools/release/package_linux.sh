@@ -21,8 +21,8 @@ cp "$root/apps/pure_live/assets/icons/icon.png" "$stage/purelive.png"
 cat > "$stage/purelive.desktop" <<'DESKTOP'
 [Desktop Entry]
 Type=Application
-Name=纯粹直播
-Name[en]=PureLive
+Name=棱镜直播
+Name[en]=PrismLive
 Comment=多平台直播聚合
 Exec=sh -c '"$(dirname "$(readlink -f "%k")")/pure_live"'
 Icon=purelive
@@ -30,7 +30,7 @@ Terminal=false
 Categories=AudioVideo;Video;Player;
 DESKTOP
 cat > "$stage/README.txt" <<'README'
-纯粹直播 Linux 版（x86_64）
+棱镜直播 Linux 版（x86_64）
 
 运行：解压后执行 ./pure_live 。数据保存在 ~/.local/share/com.mystyle.purelive/ 。
 加到应用菜单：把 purelive.desktop 里的 Exec 改成 pure_live 的完整路径，

@@ -58,7 +58,7 @@ void main() {
         (long.platform, long.roomId, long.title, long.cover, long.link),
       );
       final code = encodeRoomShareCode(_douyu);
-      expect(decodeRoomShareCode('纯粹直播口令：$code 复制后打开纯粹直播')?.nick, '主播');
+      expect(decodeRoomShareCode('棱镜直播口令：$code 复制后打开棱镜直播')?.nick, '主播');
       // 3.x's decoder took the standard alphabet with padding; an integer id.
       final other = base64.encode([
         0x83,
@@ -457,10 +457,10 @@ void main() {
     expect(got, ['https://live.bilibili.com/6'], reason: 'the share that opened the app');
     await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
       channel.name,
-      const StandardMethodCodec().encodeMethodCall(const MethodCall('shared', {'text': '【纯粹直播】口令'})),
+      const StandardMethodCodec().encodeMethodCall(const MethodCall('shared', {'text': '【棱镜直播】口令'})),
       (_) {},
     );
-    expect(got.last, '【纯粹直播】口令');
+    expect(got.last, '【棱镜直播】口令');
     expect(await native.clipboardStamp(), isNull);
     await native.setRecentRooms(const []);
     expect(asked, ['listen'], reason: "the clipboard stamp and the launcher shortcuts are Android's");

@@ -11,21 +11,21 @@
   #define ArtifactVersion AppVersion
 #endif
 
-#define AppName "纯粹直播"
+#define AppName "棱镜直播"
 #define AppExeName "pure_live.exe"
 
 [Setup]
 AppId={{C76CD88E-EB3F-49AD-9191-65691050035A}
 AppName={#AppName}
 AppVersion={#AppVersion}
-AppPublisher=Pure Live
-AppPublisherURL=https://github.com/wzgrx/PureLive
-DefaultDirName={autopf}\PureLive
+AppPublisher=Prism Live
+AppPublisherURL=https://github.com/Gingtin/PureLive
+DefaultDirName={autopf}\PrismLive
 DisableDirPage=no
 UsePreviousAppDir=yes
 DefaultGroupName={#AppName}
 OutputDir={#OutputDir}
-OutputBaseFilename=PureLive-{#ArtifactVersion}-windows-x64-setup
+OutputBaseFilename=PrismLive-{#ArtifactVersion}-windows-x64-setup
 SetupIconFile=..\..\runner\resources\app_icon.ico
 VersionInfoVersion={#AppVersion}
 Compression=lzma2/ultra64
@@ -43,8 +43,8 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "chinesesimp"; MessagesFile: "ChineseSimplified.isl"
 
 [CustomMessages]
-english.UpdateShutdownFailed=Pure Live could not exit safely. Close it and its additional windows, then retry. No application files have been replaced.
-chinesesimp.UpdateShutdownFailed=纯粹直播尚未安全退出。请关闭软件及其附加窗口后重试，本次尚未替换应用文件。
+english.UpdateShutdownFailed=Prism Live could not exit safely. Close it and its additional windows, then retry. No application files have been replaced.
+chinesesimp.UpdateShutdownFailed=棱镜直播尚未安全退出。请关闭软件及其附加窗口后重试，本次尚未替换应用文件。
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
@@ -123,7 +123,7 @@ begin
   ExitCode := -1;
   if not Exec(ApplicationPath, '--shutdown-for-uninstall', ExpandConstant('{app}'),
               SW_HIDE, ewWaitUntilTerminated, ExitCode) or (ExitCode <> 42) then
-    RaiseException('无法关闭正在运行的纯粹直播。请退出软件及其附加窗口后重新卸载；本次尚未删除应用文件。');
+    RaiseException('无法关闭正在运行的棱镜直播。请退出软件及其附加窗口后重新卸载；本次尚未删除应用文件。');
 end;
 
 function PrepareToInstall(var NeedsRestart: Boolean): String;

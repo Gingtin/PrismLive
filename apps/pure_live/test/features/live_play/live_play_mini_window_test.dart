@@ -1917,7 +1917,7 @@ void main() {
       // The room is often in fullscreen: nothing in the middle of the picture.
       expect(find.byType(AppDialog), findsNothing);
       final toast = shown.single;
-      expect(toast.message, '无法打开画中画：系统设置里关掉了“纯粹直播”的画中画');
+      expect(toast.message, '无法打开画中画：系统设置里关掉了“棱镜直播”的画中画');
       expect(toast.actionLabel, '去设置');
       expect(toast.persistent, isTrue, reason: 'one to answer: it waits for "去设置" or ✕');
       toast.onAction!();

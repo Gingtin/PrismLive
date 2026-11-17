@@ -27,7 +27,7 @@ static void my_application_activate(GApplication* application) {
 
   // The app draws its own title bar (window_manager, TitleBarStyle.hidden;
   // X02.1), as on Windows.
-  gtk_window_set_title(window, "纯粹直播");
+  gtk_window_set_title(window, "棱镜直播");
   gtk_window_set_default_size(window, 1280, 720);
 
   g_autoptr(FlDartProject) project = fl_dart_project_new();

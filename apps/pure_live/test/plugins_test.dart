@@ -179,7 +179,7 @@ void main() {
       ),
     );
     expect(find.byType(DesktopTitleBar), findsOneWidget);
-    expect(find.text('纯粹直播'), findsOneWidget);
+    expect(find.text('棱镜直播'), findsOneWidget);
     expect(find.text('page'), findsOneWidget);
 
     await tester.pumpWidget(

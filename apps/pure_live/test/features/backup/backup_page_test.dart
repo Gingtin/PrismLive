@@ -496,7 +496,7 @@ void main() {
       await _remoteKey(tester, LogicalKeyboardKey.select);
       await _settle(tester);
       expect(find.byKey(const ValueKey('backup-preview')), findsNothing);
-      expect(_toasts, ['这不是纯粹直播的备份文件，或文件已损坏']);
+      expect(_toasts, ['这不是棱镜直播的备份文件，或文件已损坏']);
       expect(FocusManager.instance.primaryFocus, same(moreFocus));
       await _remoteKey(tester, LogicalKeyboardKey.contextMenu);
       expect(find.byKey(const ValueKey('backup-menu-delete')), findsOneWidget);
@@ -618,7 +618,7 @@ void main() {
       await tester.tap(find.text('恢复备份'));
       await _settle(tester);
       expect(find.byKey(const ValueKey('backup-preview')), findsNothing);
-      expect(_toasts, ['这不是纯粹直播的备份文件，或文件已损坏']);
+      expect(_toasts, ['这不是棱镜直播的备份文件，或文件已损坏']);
       expect(await tester.runAsync(() => _followIds(services.store)), ['1']);
     });
 

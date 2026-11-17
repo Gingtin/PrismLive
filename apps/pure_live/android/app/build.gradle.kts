@@ -50,7 +50,7 @@ extensions.configure<com.android.build.api.dsl.ApplicationExtension> {
         targetSdk = 37
         versionCode = flutter.versionCode
         versionName = flutter.versionName
-        manifestPlaceholders["appLabel"] = "纯粹直播"
+        manifestPlaceholders["appLabel"] = "棱镜直播"
     }
 
     signingConfigs {
@@ -83,13 +83,13 @@ extensions.configure<com.android.build.api.dsl.ApplicationExtension> {
         // touch it or its data: own id, own name.
         debug {
             applicationIdSuffix = ".v4dev"
-            manifestPlaceholders["appLabel"] = "纯粹直播 v4dev"
+            manifestPlaceholders["appLabel"] = "棱镜直播 v4dev"
             isMinifyEnabled = false
             isShrinkResources = false
         }
         maybeCreate("profile").apply {
             applicationIdSuffix = ".v4dev"
-            manifestPlaceholders["appLabel"] = "纯粹直播 v4dev"
+            manifestPlaceholders["appLabel"] = "棱镜直播 v4dev"
         }
     }
 }

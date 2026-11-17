@@ -19,7 +19,7 @@ constexpr wchar_t kPrimaryInstanceMutex[] =
 // The app renames the window while a room is open ("<streamer> - 纯粹直播",
 // docs/ui/compare/U.13 c11), so the main window is found by a property
 // instead of its title.
-constexpr wchar_t kWindowTitle[] = L"纯粹直播";
+constexpr wchar_t kWindowTitle[] = L"棱镜直播";
 
 constexpr wchar_t kWindowClass[] = L"FLUTTER_RUNNER_WIN32_WINDOW";
 

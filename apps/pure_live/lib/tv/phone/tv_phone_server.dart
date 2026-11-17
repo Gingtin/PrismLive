@@ -99,7 +99,7 @@ final class TvPhoneServer {
       [
         '<!doctype html><html lang="zh"><head><meta charset="utf-8">',
         '<meta name="viewport" content="width=device-width,initial-scale=1">',
-        '<title>纯粹直播</title><style>${style.join()}</style></head><body>$body</body></html>',
+        '<title>棱镜直播</title><style>${style.join()}</style></head><body>$body</body></html>',
       ].join(),
     );
   }
