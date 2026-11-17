@@ -1,24 +1,24 @@
 <p align="center">
-  <img src="docs/Y-发布和运营/Y03-发布说明和README/readme/banner-en.jpg" alt="Prism Live" width="100%">
+  <img src="docs/Y-发布和运营/Y03-发布说明和README/readme/banner-en.jpg" alt="PrismLive" width="100%">
 </p>
 
-<h1 align="center">Prism Live</h1>
+<h1 align="center">PrismLive</h1>
 
 <p align="center"><a href="README.md">简体中文</a> · <b>English</b></p>
 
 <p align="center">
-  34 live-streaming platforms and IPTV in one app.<br>
-  Danmaku (bullet chat), recording, multiview, floating window and background play. No sign-up, no ads, free and open source.
+  A modern, cross-platform live-streaming and IPTV aggregator.<br>
+  Multiview, instant line failover, bullet chat, lossless recording, PiP and intelligent off-air standby. Free, privacy-first and open source.
 </p>
 
 <p align="center">
-  <a href="https://github.com/wzgrx/PureLive/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/wzgrx/PureLive?label=release&color=2e6fe0"></a>
-  <a href="https://github.com/wzgrx/PureLive/releases"><img alt="Downloads" src="https://img.shields.io/github/downloads/wzgrx/PureLive/total?label=downloads&color=2e6fe0"></a>
-  <a href="LICENSE"><img alt="License" src="https://img.shields.io/github/license/wzgrx/PureLive?label=license&color=555"></a>
+  <a href="https://github.com/Gingtin/PureLive/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/Gingtin/PureLive?label=release&color=2e6fe0"></a>
+  <a href="https://github.com/Gingtin/PureLive/releases"><img alt="Downloads" src="https://img.shields.io/github/downloads/Gingtin/PureLive/total?label=downloads&color=2e6fe0"></a>
+  <a href="LICENSE"><img alt="License" src="https://img.shields.io/github/license/Gingtin/PureLive?label=license&color=555"></a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/wzgrx/PureLive/releases/latest"><b>Download 5.6.5</b></a>
+  <a href="https://github.com/Gingtin/PureLive/releases/latest"><b>Download 5.6.5</b></a>
   &nbsp;·&nbsp; <a href="docs/Y-发布和运营/Y03-发布说明和README/releases/5.6.5.md">Release notes (Chinese)</a>
   &nbsp;·&nbsp; <a href="#features">Features</a>
   &nbsp;·&nbsp; <a href="#supported-platforms">Platforms</a>
@@ -32,7 +32,7 @@
 
 Feature requests and maintainer-led development are open again. You can request a feature without providing a PR. Public replay support is maintained using the existing room UI and mini-window system. Bugs and stability remain priorities; requests are evaluated for feasibility and validation. See the [maintenance policy](MAINTENANCE.md) and [contribution guide](CONTRIBUTING.md).
 
-Pure Live (纯粹直播) is a third-party live-stream aggregator. It brings Chinese platforms such as Bilibili, Douyu, Huya, Douyin and Kuaishou together with international ones such as Twitch, YouTube and SOOP, plus the IPTV channels you import yourself. Follows, danmaku, recording and multiview all live in one place, so you don't need a separate app for every platform.
+**PrismLive** is a modern, cross-platform live-stream and media aggregator. It brings Chinese platforms such as Bilibili, Douyu, Huya, Douyin and Kuaishou together with international ones such as Twitch, YouTube and SOOP, alongside natively integrated IPTV playlists and EPG schedules. Follows, bullet chat, lossless recording, multiview and intelligent off-air standby all live in one place, eliminating the need for separate apps per platform.
 
 **5.0 was the first release for every platform.** Since 4.0 the network layer, platform adapters, danmaku, playback, recording, storage and every screen have been rewritten (features are based on 3.x, playback is mpv only). 5.0 ships **Android phones and tablets, Android TV, Windows and Linux** from one codebase and one design. You can install over 3.x and 4.x and keep your follows, settings and history.
 
@@ -106,7 +106,7 @@ Pure Live (纯粹直播) is a third-party live-stream aggregator. It brings Chin
 
 > The app's interface comes in 15 languages: Simplified and Traditional Chinese, English, Japanese, Korean, Spanish, French, German, Portuguese, Russian, Italian, Vietnamese, Thai, Indonesian and Turkish (switch in Settings → Appearance; until you pick one it follows the system). The foreign languages were machine-assisted and not yet reviewed by native speakers; corrections are welcome. Release notes and in-depth docs are written in Chinese.
 
-> Since 5.0.0 the project lives in this standalone repository, [wzgrx/PureLive](https://github.com/wzgrx/PureLive). The old [wzgrx/pure_live](https://github.com/wzgrx/pure_live) (a fork of [liuchuancong/pure_live](https://github.com/liuchuancong/pure_live)) is kept; devices running 3.x or 4.x still get update prompts and download new versions from here.
+> This project is independently maintained on GitHub at [Gingtin/PureLive](https://github.com/Gingtin/PureLive). Settings, follows, and history from previous versions are seamlessly preserved, and devices running legacy versions will continue to receive update notifications.
 
 ## Highlights
 
@@ -393,11 +393,11 @@ Accessing international platforms from mainland China usually needs a proxy, whi
 |---|:---:|:---:|---|:---:|---|
 | IPTV | ✓ | — | Local channels | Playlist groups | — |
 
-Platforms without danmaku either have no public chat API or require sign-in or signatures; Xiaohongshu and Weibo Live can only follow a single broadcast, not a streamer. Platform APIs change often; if something stops working, please report it in [Issues](https://github.com/wzgrx/PureLive/issues).
+Platforms without danmaku either have no public chat API or require sign-in or signatures; Xiaohongshu and Weibo Live can only follow a single broadcast, not a streamer. Platform APIs change often; if something stops working, please report it in [Issues](https://github.com/Gingtin/PureLive/issues).
 
 ## Download and install
 
-Download the package for your platform from [Releases](https://github.com/wzgrx/PureLive/releases/latest).
+Download the package for your platform from [Releases](https://github.com/Gingtin/PureLive/releases/latest).
 
 | Platform | Requirements | Package |
 |---|---|---|
@@ -405,7 +405,7 @@ Download the package for your platform from [Releases](https://github.com/wzgrx/
 | **Android TV and TV boxes** | Android 8.0+ | The same APK as the phone: it starts in the TV interface on a TV (switch in Settings → Appearance → Interface mode) |
 | **Windows** | Windows 10, 11 (64-bit) | `…-windows-x64-setup.exe` (installer) or `…-windows-x64-portable.zip` (portable, data in `UserData` next to the program) |
 | **Linux** | x86_64, GTK 3 desktop | `…-linux-x64.tar.gz`: extract and run `pure_live`; the README.txt inside explains adding it to the app menu |
-| **macOS** | macOS 12+, Intel and Apple silicon | `…-macos-universal.dmg`: open it and drag PureLive into Applications. It is not signed by Apple: if macOS cannot verify the developer the first time, click “Open Anyway” in System Settings → Privacy & Security |
+| **macOS** | macOS 12+, Intel and Apple silicon | `…-macos-universal.dmg`: open it and drag PrismLive into Applications. It is not signed by Apple: if macOS cannot verify the developer the first time, click “Open Anyway” in System Settings → Privacy & Security |
 | **iPhone, iPad** | iOS, iPadOS 15+ | `…-ios-unsigned.ipa` with AltStore or SideStore (signed with your own Apple ID; a free account renews every 7 days); `…-ios-trollstore.ipa` on devices with TrollStore (TrollStore also installs it on iOS 14 and earlier, but it will not open there: Flutter, the framework, needs iOS 15) |
 
 - If Android says “install unknown apps”, allow your browser or file manager in the settings it opens.
@@ -422,7 +422,7 @@ Download the package for your platform from [Releases](https://github.com/wzgrx/
 You need Flutter on Linux or Windows. Toolchain versions are pinned in [`toolchain.env`](toolchain.env) (Flutter 3.47.8, Dart 3.13.7, Gradle 9.8.2, AGP 9.4.1, Kotlin 2.4.21, JDK 27, Android SDK 37.2, build-tools 37.0.0, platform-tools 37.0.1, cmdline-tools 23.0, NDK 30.0.16248370, CMake 4.1.2); upgrade them there only (the Android build reads compileSdk, build-tools, NDK and CMake from it).
 
 ```bash
-git clone https://github.com/wzgrx/PureLive.git
+git clone https://github.com/Gingtin/PureLive.git
 cd PureLive
 
 # 1. Environment: install the toolchain from toolchain.env and source an env script before each build
@@ -447,7 +447,7 @@ flutter build apk --release --split-per-abi
 - **Windows**: with Flutter, Visual Studio (Desktop development with C++) and NuGet on Windows, run `pwsh tools/release/package_windows.ps1` for the portable ZIP and the Inno Setup 6 installer.
 - **Linux**: install `clang cmake ninja-build pkg-config libgtk-3-dev` and run `bash tools/release/package_linux.sh` for `linux-x64.tar.gz`.
 - Signing keys are not in the repository: without `apps/pure_live/android/key.properties`, release builds are signed with the debug key.
-- Debug and profile builds use the package name suffix `.v4dev` and the name “纯粹直播 v4dev”, so they install alongside the release.
+- Debug and profile builds use the package name suffix `.v4dev` and the name “棱镜直播 v4dev”, so they install alongside the release.
 - Run the gate before committing: `bash tools/gate/gate.sh --all` checks formatting, package dependency direction, `dart analyze` and all tests, and must print `gate: passed`. While working on one package, `bash tools/gate/gate.sh` is enough.
 
 ## Project structure
@@ -489,9 +489,9 @@ Feature requests and development are open under [D-092 / maintenance policy](MAI
 
 ## Feedback and contributing
 
-- Report in-scope bugs through one of the [issue forms](https://github.com/wzgrx/PureLive/issues/new/choose): bug report, platform broken, or translation (English is fine). Version, device and steps to reproduce are required; for playback, crash and platform problems attach the log exported from Settings → Log Management (set the level to Debug first).
+- Report in-scope bugs through one of the [issue forms](https://github.com/Gingtin/PureLive/issues/new/choose): bug report, platform broken, or translation (English is fine). Version, device and steps to reproduce are required; for playback, crash and platform problems attach the log exported from Settings → Log Management (set the level to Debug first).
 - What happens after you submit (labels, response times, bug scope and the feature freeze) is in [CONTRIBUTING.md](CONTRIBUTING.md) (Chinese).
-- Security issues (e.g. anything that could leak accounts or cookies): please don't open a public issue; see [SECURITY.md](SECURITY.md) and report privately via a GitHub [Security Advisory](https://github.com/wzgrx/PureLive/security/advisories/new), visible only to maintainers until fixed.
+- Security issues (e.g. anything that could leak accounts or cookies): please don't open a public issue; see [SECURITY.md](SECURITY.md) and report privately via a GitHub [Security Advisory](https://github.com/Gingtin/PureLive/security/advisories/new), visible only to maintainers until fixed.
 - Pull requests are welcome; see section 6 of [CONTRIBUTING.md](CONTRIBUTING.md). Please make the gate pass first; code style is very_good_analysis, 120-character lines, and doc comments on public APIs.
 
 ## License
@@ -500,11 +500,11 @@ Released under the [GNU Affero General Public License v3.0 (AGPL-3.0)](LICENSE).
 
 Third-party components are used under their own licenses, listed on the app's About page.
 
-This project derives from [liuchuancong/pure_live](https://github.com/liuchuancong/pure_live) (also AGPL-3.0); thanks to the original author and all contributors. Since 5.0.0 development continues in this standalone repository, with history starting at that version; earlier history is kept in [wzgrx/pure_live](https://github.com/wzgrx/pure_live).
+This project derives from [liuchuancong/pure_live](https://github.com/liuchuancong/pure_live) and [wzgrx/PureLive](https://github.com/wzgrx/PureLive) (both AGPL-3.0); thanks to the original authors and all contributors. Development continues independently in this repository.
 
 ## Disclaimer
 
-- Pure Live is only a player. It provides no live content and stores or relays none on any server. Video, danmaku, covers and other content belong to the platforms and streamers.
+- PrismLive is only a player. It provides no live content and stores or relays none on any server. Video, danmaku, covers and other content belong to the platforms and streamers.
 - Recordings stay on your own device; please use them for personal viewing only and respect the rights of streamers and platforms.
 - This project is for learning and technical exchange. Follow the laws where you live and each platform's terms of service, and don't use it to infringe on others' rights.
 - Platform names and trademarks belong to their owners; this project is not affiliated with any of them.

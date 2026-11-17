@@ -2,7 +2,7 @@
 
 **当前维护方针（D-092，2026-11-03）：恢复接收功能需求与维护者开发，恢复公开直播回放维护。用户可以提交功能请求，不要求先提供PR；采纳、设计、实现和发布仍按验证结果推进。先读 [维护方针](MAINTENANCE.md)。此前D-088冻结及D-089至D-091的本轮限定限制已由本次直接指令覆盖；历史记录保留。**
 
-纯粹直播（Pure Live）4.x：在 3.x（`v3.2.11`）的代码上重构的第三方直播聚合应用。4.0.0（Android）已发布。
+棱镜直播（PrismLive）：现代化的第三方直播与流媒体聚合应用。架构在 3.x/4.x 代码体系上重构与持续演进，已发布全平台版本。
 
 **文档入口：[docs/README.md](docs/README.md)。** 进度看 [docs/STATUS.md](docs/STATUS.md)，做法看 [docs/PROCESS.md](docs/PROCESS.md)，决定看 [docs/DECISIONS.md](docs/DECISIONS.md)。全部任务登记在 [docs/tasks.toml](docs/tasks.toml)，分成 20 组（字母 A～Z，界面设计 A 排第一）。
 

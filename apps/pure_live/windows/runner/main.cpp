@@ -16,7 +16,7 @@ constexpr wchar_t kPrimaryInstanceMutex[] =
 
 // Native title shown by the taskbar, Alt+Tab and Task Manager (the Chinese app name);
 // the in-app title bar is drawn by Flutter. Escaped to keep the source ASCII.
-// The app renames the window while a room is open ("<streamer> - 纯粹直播",
+// The app renames the window while a room is open ("<streamer> - 棱镜直播",
 // docs/ui/compare/U.13 c11), so the main window is found by a property
 // instead of its title.
 constexpr wchar_t kWindowTitle[] = L"棱镜直播";

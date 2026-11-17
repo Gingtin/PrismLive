@@ -376,7 +376,7 @@ class _RecordingNote extends StatelessWidget {
   }
 }
 
-/// Asks "要退出纯粹直播吗？" while [recording] rooms record (macOS ⌘Q, the
+/// Asks "要退出棱镜直播吗？" while [recording] rooms record (macOS ⌘Q, the
 /// Dock's or the menu bar icon's "退出"; A18.2 c6); true to quit.
 Future<bool> showQuitWhileRecordingDialog(BuildContext context, {required int recording}) => showAppConfirmDialog(
   context: context,

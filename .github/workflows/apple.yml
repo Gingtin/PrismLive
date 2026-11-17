@@ -113,7 +113,7 @@ jobs:
           mkdir -p "$stage"
           ditto "$app" "$stage/PureLive.app"
           ln -s /Applications "$stage/Applications"
-          hdiutil create -volname "纯粹直播" -srcfolder "$stage" -ov -format UDZO "out/$name-macos-universal.dmg"
+          hdiutil create -volname "棱镜直播" -srcfolder "$stage" -ov -format UDZO "out/$name-macos-universal.dmg"
 
       - name: Start macOS app
         if: ${{ inputs.macos }}

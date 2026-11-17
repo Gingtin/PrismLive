@@ -1,7 +1,7 @@
 import UIKit
 import UniformTypeIdentifiers
 
-/// 纯粹直播 in other apps' share sheets (A18.1 c8): takes the shared link or
+/// 棱镜直播 in other apps' share sheets (A18.1 c8): takes the shared link or
 /// text and opens the app with it (`purelive-share://share?text=…`, handled
 /// by `ShareInbox` in `Runner/AppDelegate.swift` like Android's shares:
 /// a room link opens the room, a share code asks to import). Files are not

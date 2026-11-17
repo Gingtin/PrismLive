@@ -123,7 +123,7 @@ import UIKit
   }
 }
 
-/// What other apps share with 纯粹直播 (A18.1 c8). The share extension
+/// What other apps share with 棱镜直播 (A18.1 c8). The share extension
 /// (`ShareExtension/ShareViewController.swift`) cannot hand files or data
 /// to the app without an app group, so it opens
 /// `purelive-share://share?text=<the link or text>`; the text reaches Dart

@@ -76,7 +76,7 @@ List<String> windowsInstallLocations() {
     r'Software\Microsoft\Windows\CurrentVersion\Uninstall',
     r'Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall',
   ];
-  final name = RegExp('纯粹直播|pure[ _-]?live', caseSensitive: false);
+  final name = RegExp('棱镜直播|prism[ _-]?live|纯粹直播|pure[ _-]?live', caseSensitive: false);
   final uninstaller = RegExp(r'^"?([^"]+\\)unins\d*\.exe', caseSensitive: false);
   for (final root in [CURRENT_USER, LOCAL_MACHINE]) {
     for (final path in uninstallPaths) {

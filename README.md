@@ -1,24 +1,24 @@
 <p align="center">
-  <img src="docs/Y-发布和运营/Y03-发布说明和README/readme/banner.jpg" alt="棱镜直播 Prism Live" width="100%">
+  <img src="docs/Y-发布和运营/Y03-发布说明和README/readme/banner.jpg" alt="棱镜直播 PrismLive" width="100%">
 </p>
 
-<h1 align="center">棱镜直播 Prism Live</h1>
+<h1 align="center">棱镜直播 PrismLive</h1>
 
 <p align="center"><b>简体中文</b> · <a href="README.en.md">English</a></p>
 
 <p align="center">
-  一个应用看遍 34 个直播平台和网络电视。<br>
-  弹幕、录制、多画面、小窗和后台播放，不用注册，没有广告，开源免费。
+  聚合全网直播平台与自定义 IPTV 的现代化跨平台流媒体客户端。<br>
+  多画面同屏、秒切线路、弹幕互动、无损录制、后台画中画与智能休台待播，开源纯净无广告。
 </p>
 
 <p align="center">
-  <a href="https://github.com/wzgrx/PureLive/releases/latest"><img alt="最新版本" src="https://img.shields.io/github/v/release/wzgrx/PureLive?label=%E6%9C%80%E6%96%B0%E7%89%88%E6%9C%AC&color=2e6fe0"></a>
-  <a href="https://github.com/wzgrx/PureLive/releases"><img alt="下载次数" src="https://img.shields.io/github/downloads/wzgrx/PureLive/total?label=%E4%B8%8B%E8%BD%BD&color=2e6fe0"></a>
-  <a href="LICENSE"><img alt="许可证" src="https://img.shields.io/github/license/wzgrx/PureLive?label=%E8%AE%B8%E5%8F%AF%E8%AF%81&color=555"></a>
+  <a href="https://github.com/Gingtin/PureLive/releases/latest"><img alt="最新版本" src="https://img.shields.io/github/v/release/Gingtin/PureLive?label=%E6%9C%80%E6%96%B0%E7%89%88%E6%9C%AC&color=2e6fe0"></a>
+  <a href="https://github.com/Gingtin/PureLive/releases"><img alt="下载次数" src="https://img.shields.io/github/downloads/Gingtin/PureLive/total?label=%E4%B8%8B%E8%BD%BD&color=2e6fe0"></a>
+  <a href="LICENSE"><img alt="许可证" src="https://img.shields.io/github/license/Gingtin/PureLive?label=%E8%AE%B8%E5%8F%AF%E8%AF%81&color=555"></a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/wzgrx/PureLive/releases/latest"><b>下载 5.6.5</b></a>
+  <a href="https://github.com/Gingtin/PureLive/releases/latest"><b>下载 5.6.5</b></a>
   &nbsp;·&nbsp; <a href="docs/Y-发布和运营/Y03-发布说明和README/releases/5.6.5.md">更新说明</a>
   &nbsp;·&nbsp; <a href="#功能详解">功能</a>
   &nbsp;·&nbsp; <a href="#支持的平台">支持的平台</a>
@@ -32,7 +32,7 @@
 
 欢迎提交新功能需求和改进建议，不要求先提供PR。直播回放继续维护，基于原直播间横竖屏界面和小窗体系优化；bug和稳定性继续优先。需求将按可行性与验证结果推进，详见 [维护方针](MAINTENANCE.md) 和 [贡献规范](CONTRIBUTING.md)。
 
-纯粹直播是一个第三方直播聚合应用：把哔哩哔哩、斗鱼、虎牙、抖音、快手等国内平台，和 Twitch、YouTube、SOOP 等海外平台的直播放进同一个应用里看，再加上你自己导入的网络电视（IPTV）频道。关注、弹幕、录制、多画面都在一处完成，不需要为每个平台各装一个 App。
+**棱镜直播 (PrismLive)** 是一个现代化的第三方直播与流媒体聚合应用：把哔哩哔哩、斗鱼、虎牙、抖音、快手等国内平台，和 Twitch、YouTube、SOOP 等海外平台的直播放进同一个应用里看，并原生深度集成自定义网络电视（IPTV）与电子节目单（EPG）。多路同屏、线路秒切、弹幕互动、无损录制、后台画中画与智能休台待播都在一处完成，无需为每个平台单独安装客户端。
 
 **5.0 是第一个全平台版本。** 从 4.0 起，网络层、平台适配、弹幕、播放、录制、存储和每一个界面都重新写过（功能以 3.x 为基础，播放内核统一为 mpv）；5.0 同时发布 **Android 手机和平板、Android 电视、Windows、Linux**，四个平台用同一套代码和界面设计。可以直接覆盖安装 3.x 和 4.x，原来的关注、设置和历史都会保留。
 
@@ -104,7 +104,7 @@
 
 5.6.5 批量刷新已知 B 站关注，Windows 更新保留同目标桌面快捷方式。宽屏底栏可关闭，多屏联动记住所选显示器，全屏醒目留言入口随控制栏显示。
 
-> 从 5.0.0 起项目搬到这个独立仓库 [wzgrx/PureLive](https://github.com/wzgrx/PureLive)。原来的 [wzgrx/pure_live](https://github.com/wzgrx/pure_live)（[liuchuancong/pure_live](https://github.com/liuchuancong/pure_live) 的分支）保留不删，装着 3.x、4.x 的设备会照常收到更新提示并下载到这里的新版本。
+> 本项目在 GitHub 独立维护 [Gingtin/PureLive](https://github.com/Gingtin/PureLive)。全面继承前代关注、设置与历史数据，装着 3.x、4.x 的设备会照常收到更新提示并平滑升级到新版本。
 
 ## 亮点
 
@@ -252,7 +252,7 @@
 ### 搜索和分区
 
 - 一次搜索所有平台，也可以只搜一个；可以选择包含未开播、按四种方式排序，按直播间或主播搜。
-- 在搜索框粘贴直播间链接可以直接进入；复制了别人分享的直播间口令，回到应用时会提示打开（可以在设置里关掉）。从其他应用分享直播间链接给纯粹直播，也会直接打开。
+- 在搜索框粘贴直播间链接可以直接进入；复制了别人分享的直播间口令，回到应用时会提示打开（可以在设置里关掉）。从其他应用分享直播间链接给棱镜直播，也会直接打开。
 - 搜索范围可以调整（例如只搜国内平台）；部分平台失败时温和提示，可以重试或继续用网页搜索——在应用内浏览器里打开平台页面，认出直播间后询问是否进入。
 - 分区页按平台、大类浏览，分区可以关注，关注的分区有单独的列表。
 
@@ -262,10 +262,10 @@
 
 ### 网络电视（IPTV）
 
-- 从网络地址或本地文件导入 M3U、TXT 播放列表，导入 XML、GZ、JSON 节目单；可以按间隔自动同步，也能手动同步。
+- 从网络地址或本地文件导入 M3U、TXT、JSON 播放列表，导入 XML、GZ、JSON 节目单；可以按间隔自动同步，也能手动同步。
 - 支持自定义 User-Agent 和频道请求头。
-- 直播间里看节目单，可回看的节目点一下就回看，随时返回直播。
-- 在别的应用里分享 M3U 文件，或用“打开方式”选纯粹直播，也能直接导入。
+- 直播间里看节目单，支持深夜休台与未开播智能待播，可回看的节目点一下就回看，随时返回直播。
+- 在别的应用里分享 M3U/JSON 文件，或用“打开方式”选棱镜直播，也能直接导入。
 
 ### 电视界面
 
@@ -391,11 +391,11 @@
 |---|:---:|:---:|---|:---:|---|
 | 网络电视（IPTV） | 支持 | — | 本机频道 | 按播放列表分组 | — |
 
-说明：没有弹幕的几个平台，是平台不提供公开的聊天接口，或者需要登录、签名才能接入；小红书和微博直播只能关注某一场直播，不能按主播关注。平台接口时常变化，遇到打不开的请到 [Issues](https://github.com/wzgrx/PureLive/issues) 反馈。
+说明：没有弹幕的几个平台，是平台不提供公开的聊天接口，或者需要登录、签名才能接入；小红书和微博直播只能关注某一场直播，不能按主播关注。平台接口时常变化，遇到打不开的请到 [Issues](https://github.com/Gingtin/PureLive/issues) 反馈。
 
 ## 下载和安装
 
-到 [Releases](https://github.com/wzgrx/PureLive/releases/latest) 下载对应平台的安装包。
+到 [Releases](https://github.com/Gingtin/PureLive/releases/latest) 下载对应平台的安装包。
 
 | 平台 | 系统要求 | 安装包 |
 |---|---|---|
@@ -403,7 +403,7 @@
 | **Android 电视、电视盒子** | Android 8.0 及以上 | 和手机是同一个 APK：在电视上自动进入遥控器操作的电视界面（也可以在 设置 → 外观 → 界面模式 里切换） |
 | **Windows** | Windows 10、11（64 位） | `…-windows-x64-setup.exe`（安装版）或 `…-windows-x64-portable.zip`（便携版，解压即用，数据保存在程序旁边的 UserData） |
 | **Linux** | x86_64，GTK 3 桌面 | `…-linux-x64.tar.gz`：解压后运行 `pure_live`，压缩包里的 README.txt 写了怎么加到应用菜单 |
-| **macOS** | macOS 12 及以上，Intel 和 Apple 芯片 | `…-macos-universal.dmg`：打开后把“纯粹直播”拖进“应用程序”。没有苹果签名，第一次打开如果提示无法验证开发者，到 系统设置 → 隐私与安全性 点“仍要打开” |
+| **macOS** | macOS 12 及以上，Intel 和 Apple 芯片 | `…-macos-universal.dmg`：打开后把“棱镜直播”拖进“应用程序”。没有苹果签名，第一次打开如果提示无法验证开发者，到 系统设置 → 隐私与安全性 点“仍要打开” |
 | **iPhone、iPad** | iOS、iPadOS 15 及以上 | `…-ios-unsigned.ipa` 用 AltStore 或 SideStore 安装（自己的 Apple ID 签名，免费账号每 7 天续签）；装了 TrollStore 的设备用 `…-ios-trollstore.ipa`（iOS 14 及更早的设备 TrollStore 也能装上，但打不开：开发框架 Flutter 最低要 iOS 15） |
 
 - Android 安装时如果提示“安装未知应用”，在弹出的设置里允许当前的浏览器或文件管理器即可。
@@ -420,7 +420,7 @@
 需要 Linux 或 Windows 上的 Flutter 环境。工具链的版本统一写在 [`toolchain.env`](toolchain.env)（Flutter 3.47.8、Dart 3.13.7、Gradle 9.8.2、AGP 9.4.1、Kotlin 2.4.21、JDK 27、Android SDK 37.2、build-tools 37.0.0、platform-tools 37.0.1、cmdline-tools 23.0、NDK 30.0.16248370、CMake 4.1.2），升级时只改这一处（Android 构建直接读取其中的 compileSdk、build-tools、NDK、CMake；Gradle、AGP 另见 Z01）。
 
 ```bash
-git clone https://github.com/wzgrx/PureLive.git
+git clone https://github.com/Gingtin/PureLive.git
 cd PureLive
 
 # 1. 环境：按 toolchain.env 装好工具链，写一个环境脚本，每次构建前 source 一下
@@ -445,7 +445,7 @@ flutter build apk --release --split-per-abi
 - **Windows**：在 Windows 上装好 Flutter、Visual Studio（C++ 桌面开发）和 NuGet，运行 `pwsh tools/release/package_windows.ps1`，得到便携 ZIP 和 Inno Setup 6 安装包。
 - **Linux**：装好 `clang cmake ninja-build pkg-config libgtk-3-dev`，运行 `bash tools/release/package_linux.sh`，得到 `linux-x64.tar.gz`。
 - 签名密钥不在仓库里：没有 `apps/pure_live/android/key.properties` 时，release 包用调试密钥签名。
-- debug 和 profile 包的包名带 `.v4dev`、应用名是“纯粹直播 v4dev”，和正式版互不影响，适合开发调试。
+- debug 和 profile 包的包名带 `.v4dev`、应用名是“棱镜直播 v4dev”，和正式版互不影响，适合开发调试。
 - 提交前跑门禁：`bash tools/gate/gate.sh --all`，依次检查格式、包之间的依赖方向、`dart analyze` 和全部测试，输出 `gate: passed` 才算通过。开发中改了哪个包，只跑 `bash tools/gate/gate.sh` 即可。
 
 ## 项目结构
@@ -487,9 +487,9 @@ docs/                   开发计划、模块记录、界面设计和功能清�
 
 ## 反馈和参与
 
-- 维护范围内遇到bug，请到 [Issues](https://github.com/wzgrx/PureLive/issues/new/choose) 选一个表单提交：[问题反馈](https://github.com/wzgrx/PureLive/issues/new?template=1-bug.yml)、[直播平台失效](https://github.com/wzgrx/PureLive/issues/new?template=2-platform.yml)、[翻译和文字](https://github.com/wzgrx/PureLive/issues/new?template=4-translation.yml)。版本、设备、复现步骤是必填的；播放、闪退和平台问题请附“设置 → 日志管理”里导出的日志（先把记录等级调到“调试”）。
+- 维护范围内遇到bug，请到 [Issues](https://github.com/Gingtin/PureLive/issues/new/choose) 选一个表单提交：[问题反馈](https://github.com/Gingtin/PureLive/issues/new?template=1-bug.yml)、[直播平台失效](https://github.com/Gingtin/PureLive/issues/new?template=2-platform.yml)、[翻译和文字](https://github.com/Gingtin/PureLive/issues/new?template=4-translation.yml)。版本、设备、复现步骤是必填的；播放、闪退和平台问题请附“设置 → 日志管理”里导出的日志（先把记录等级调到“调试”）。
 - 提交以后会经过哪些步骤（待分类、需要补充信息、已复现、已计划、已修复待发布）、多久有回复、哪些不受理、功能冻结与PR要求，见 [CONTRIBUTING.md](CONTRIBUTING.md)。
-- 安全问题（例如可能泄露账号或 Cookie 的漏洞）请不要公开提 Issue，见 [SECURITY.md](SECURITY.md)，用 GitHub 的 [Security Advisory](https://github.com/wzgrx/PureLive/security/advisories/new) 私密提交，修好之前只有维护者能看到。
+- 安全问题（例如可能泄露账号或 Cookie 的漏洞）请不要公开提 Issue，见 [SECURITY.md](SECURITY.md)，用 GitHub 的 [Security Advisory](https://github.com/Gingtin/PureLive/security/advisories/new) 私密提交，修好之前只有维护者能看到。
 - 欢迎提交 Pull Request，要求见 [CONTRIBUTING.md](CONTRIBUTING.md) 第 6 节。改动请先跑通门禁；代码规范是 very_good_analysis、行宽 120，公开接口写文档注释。
 
 ## 开源许可
@@ -498,11 +498,11 @@ docs/                   开发计划、模块记录、界面设计和功能清�
 
 应用用到的第三方组件按各自的许可证使用，可以在应用的“关于”页查看。
 
-本项目源自 [liuchuancong/pure_live](https://github.com/liuchuancong/pure_live)（同为 AGPL-3.0），感谢原作者和所有贡献者。5.0.0 起在这个独立仓库继续开发，代码历史从这一版开始；之前的历史保留在 [wzgrx/pure_live](https://github.com/wzgrx/pure_live)。
+本项目源自 [liuchuancong/pure_live](https://github.com/liuchuancong/pure_live) 与 [wzgrx/PureLive](https://github.com/wzgrx/PureLive)（同为 AGPL-3.0），感谢原作者和所有贡献者。代码在此基础上独立维护与演进。
 
 ## 免责声明
 
-- 纯粹直播只是一个播放工具，本身不提供任何直播内容，也不在任何服务器上存储或转发直播内容。直播画面、弹幕、封面等内容的版权归各直播平台和主播所有。
+- 棱镜直播只是一个播放工具，本身不提供任何直播内容，也不在任何服务器上存储或转发直播内容。直播画面、弹幕、封面等内容的版权归各直播平台和主播所有。
 - 录制下来的内容只保存在你自己的设备上，请仅用于个人观看，尊重主播和平台的版权。
 - 本项目只用于学习和技术交流。请遵守你所在地区的法律法规和各平台的用户协议，不要用于侵犯他人权益的用途。
 - 各平台的名称和商标归其所有者所有，本项目与这些平台没有任何关联。

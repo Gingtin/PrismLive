@@ -2,23 +2,23 @@
 
 **当前按 [维护方针](MAINTENANCE.md) 恢复功能需求与公开回放维护，用户无需先提交PR；bug和稳定性继续优先。**
 
-纯粹直播只有一个维护者。为了让每条反馈都能被复现、修好、回复，这里写清楚怎么提交、提交后会经过哪些步骤、多久有回应。English speakers: feel free to write in English; the forms have English labels.
+棱镜直播只有一个维护者。为了让每条反馈都能被复现、修好、回复，这里写清楚怎么提交、提交后会经过哪些步骤、多久有回应。English speakers: feel free to write in English; the forms have English labels.
 
 ## 1. 选对入口
 
 | 你遇到的 | 用哪个 | 必须提供 |
 |---|---|---|
-| 闪退、打不开、功能不正常、界面错位 | [问题反馈](https://github.com/wzgrx/PureLive/issues/new?template=1-bug.yml) | 版本、端、安装包、设备和系统、现象、复现步骤、期望结果、出现频率 |
-| 某个直播平台打不开、没弹幕、搜不到、登录失败 | [直播平台失效](https://github.com/wzgrx/PureLive/issues/new?template=2-platform.yml) | 平台、直播间链接、应用里的提示原文、官网能不能看、登录状态、网络 |
+| 闪退、打不开、功能不正常、界面错位 | [问题反馈](https://github.com/Gingtin/PureLive/issues/new?template=1-bug.yml) | 版本、端、安装包、设备和系统、现象、复现步骤、期望结果、出现频率 |
+| 某个直播平台打不开、没弹幕、搜不到、登录失败 | [直播平台失效](https://github.com/Gingtin/PureLive/issues/new?template=2-platform.yml) | 平台、直播间链接、应用里的提示原文、官网能不能看、登录状态、网络 |
 | 想要新功能、增加设置、改变操作方式或加新平台 | 提交功能需求表单，或自愿提交PR | 场景、期望操作、平台和参考；PR附设计、截图、回归与验证材料 |
-| 错别字、翻译不准、文字被截断 | [翻译和文字](https://github.com/wzgrx/PureLive/issues/new?template=4-translation.yml) | 语言、页面、现在的文字、建议的文字 |
+| 错别字、翻译不准、文字被截断 | [翻译和文字](https://github.com/Gingtin/PureLive/issues/new?template=4-translation.yml) | 语言、页面、现在的文字、建议的文字 |
 | 安全漏洞（Cookie 泄露、更新被劫持等） | **不要公开提交**，见 [SECURITY.md](SECURITY.md) | — |
 
 仓库不接受空白 issue，所有反馈都要用表单。
 
 ## 2. 提交前
 
-1. **更新到[最新版本](https://github.com/wzgrx/PureLive/releases/latest)**，确认问题还在。
+1. **更新到[最新版本](https://github.com/Gingtin/PureLive/releases/latest)**，确认问题还在。
 2. **搜索已有 issue**（包括已关闭的）。有相同的就在那里补充你的情况，不要再开一个。只写“+1”的评论会被折叠，请点表情。
 3. **一个 issue 只写一件事**。几个问题写在一起的，会请你拆开。
 4. **附日志**（播放、闪退、登录、平台问题）：设置 → 日志管理 →“记录等级”选“调试”→ 重新操作一遍出问题的步骤 → 回到日志管理点“导出/分享”。应用打不开时，启动失败页会显示日志文件的位置。

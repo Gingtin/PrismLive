@@ -20,7 +20,7 @@ String? roomNameOf(RouteSettings? page) {
   return nick.isEmpty ? null : nick;
 }
 
-/// The window's name in the taskbar and Alt+Tab: "晚风 - 纯粹直播" in a room,
+/// The window's name in the taskbar and Alt+Tab: "晚风 - 棱镜直播" in a room,
 /// else the app's name (c11).
 String nativeWindowTitle(String app, String? room) => room == null ? app : '$room - $app';
 

@@ -10,7 +10,7 @@ import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_path.dart';
 
 /// The Mac's menu bar over [child] (docs/A-界面设计/A18-苹果平台界面/A18.2-macOS差异设计 c4,
-/// c5): in the app's language, in the Mac's order — 纯粹直播, 文件, 编辑, 显示,
+/// c5): in the app's language, in the Mac's order — 棱镜直播, 文件, 编辑, 显示,
 /// 播放 (only in a room), 窗口, 帮助 — with the ⌘ keys of [AppCommand].
 /// Elsewhere [child] alone.
 class MacMenuBar extends StatelessWidget {

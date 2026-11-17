@@ -1,10 +1,10 @@
 # 安全问题
 
-纯粹直播在本机保存各平台的登录信息（Cookie、令牌），并从本仓库读取更新。这些地方的漏洞会直接影响用户的账号，**请不要在公开的 issue 里提交**。
+棱镜直播在本机保存各平台的登录信息（Cookie、令牌），并从本仓库读取更新。这些地方的漏洞会直接影响用户的账号，**请不要在公开的 issue 里提交**。
 
 ## 怎么报告
 
-在仓库的 [Security → Report a vulnerability](https://github.com/wzgrx/PureLive/security/advisories/new) 私下提交（只有维护者能看到）。请写：
+在仓库的 [Security → Report a vulnerability](https://github.com/Gingtin/PureLive/security/advisories/new) 私下提交（只有维护者能看到）。请写：
 
 - 影响的版本和端（Android、电视、Windows、Linux、macOS、iOS）。
 - 问题是什么、怎么复现（步骤或概念验证），会造成什么后果。

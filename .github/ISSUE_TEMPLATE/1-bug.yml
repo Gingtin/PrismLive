@@ -6,11 +6,11 @@ body:
   - type: markdown
     attributes:
       value: |
-        欢迎反馈已有功能与公开回放的bug。新功能请使用功能需求表单，无需先提交PR；详见[维护方针](https://github.com/wzgrx/PureLive/blob/master/MAINTENANCE.md)。
+        欢迎反馈已有功能与公开回放的bug。新功能请使用功能需求表单，无需先提交PR；详见[维护方针](https://github.com/Gingtin/PureLive/blob/master/MAINTENANCE.md)。
   - type: markdown
     attributes:
       value: |
-        感谢反馈。为了能复现和修好，下面带红色星号的都必须填写；信息不全的 issue 会标“需要补充信息”，14 天没有补充会关闭（补充后可以重开）。流程见 [CONTRIBUTING.md](https://github.com/wzgrx/PureLive/blob/master/CONTRIBUTING.md)。
+        感谢反馈。为了能复现和修好，下面带红色星号的都必须填写；信息不全的 issue 会标“需要补充信息”，14 天没有补充会关闭（补充后可以重开）。流程见 [CONTRIBUTING.md](https://github.com/Gingtin/PureLive/blob/master/CONTRIBUTING.md)。
 
         - 一个 issue 只写一个问题，多个问题请分开提交。
         - 某个**直播平台**打不开、没弹幕、搜不到、登录失败，请改用“直播平台失效”模板。
@@ -20,9 +20,9 @@ body:
     attributes:
       label: 提交前确认
       options:
-        - label: 我已经在 [Issues](https://github.com/wzgrx/PureLive/issues?q=is%3Aissue) 里搜索过（包括已关闭的），没有相同的问题
+        - label: 我已经在 [Issues](https://github.com/Gingtin/PureLive/issues?q=is%3Aissue) 里搜索过（包括已关闭的），没有相同的问题
           required: true
-        - label: 我用的是[最新版本](https://github.com/wzgrx/PureLive/releases/latest)，问题仍然存在
+        - label: 我用的是[最新版本](https://github.com/Gingtin/PureLive/releases/latest)，问题仍然存在
           required: true
         - label: 这个 issue 只写了一个问题
           required: true
