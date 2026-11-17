@@ -15,8 +15,6 @@ Future<void> showIptvSpeedTestDialog(
   required LiveHttp http,
 }) => showAppDialog<void>(
   context: context,
-  wide: true,
-  autofocus: false,
   builder: (_) => IptvSpeedTestDialog(
     playlist: playlist,
     library: library,

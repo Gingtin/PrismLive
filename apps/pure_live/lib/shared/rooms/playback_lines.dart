@@ -29,7 +29,8 @@ String playbackLineName(int index, {LivePlayLine? line, String? detectedCodec}) 
   final raw = line?.lineId?.startsWith('raw|') ?? false;
   final codec = playbackCodecName(detectedCodec) ?? (raw ? null : playbackCodecName(line?.codec));
   final tags = [?codec, if (raw) 'raw'];
-  if (line?.url case final url when url.isNotEmpty) {
+  final url = line?.url;
+  if (url != null && url.isNotEmpty) {
     final cached = StreamProbe.getCached(url);
     if (cached != null) {
       if (cached.health == StreamHealth.live && cached.latency != null) {
