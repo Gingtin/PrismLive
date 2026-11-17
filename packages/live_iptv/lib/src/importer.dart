@@ -358,10 +358,13 @@ final class IptvImporter {
     bool force = false,
     IptvReplaceConfirm? confirmReplace,
   }) async {
-    final format = text.trim().startsWith('#EXTM3U')
+    final trimmed = text.trim();
+    final format = trimmed.startsWith('#EXTM3U')
         ? IptvPlaylistFormat.m3u
-        : name.toLowerCase().endsWith('.txt') || text.contains(',#genre#')
+        : name.toLowerCase().endsWith('.txt') || trimmed.contains(',#genre#')
         ? IptvPlaylistFormat.txt
+        : trimmed.startsWith('{') || trimmed.startsWith('[') || name.toLowerCase().endsWith('.json')
+        ? IptvPlaylistFormat.json
         : IptvPlaylistFormat.m3u;
     return await importPlaylist(
       bytes: utf8.encode(text),
@@ -418,7 +421,11 @@ final class IptvImporter {
       } on FormatException catch (e) {
         return IptvImportResult(IptvImportStatus.invalid, error: e);
       }
-      final valid = playlist.format == IptvPlaylistFormat.txt ? text.contains(',') : text.startsWith('#EXTM3U');
+      final valid = switch (playlist.format) {
+        IptvPlaylistFormat.txt => text.contains(','),
+        IptvPlaylistFormat.json => text.startsWith('{') || text.startsWith('['),
+        IptvPlaylistFormat.m3u => text.startsWith('#EXTM3U'),
+      };
       if (text.isEmpty || !valid) return IptvImportResult(IptvImportStatus.unsupportedFormat);
     } else {
       try {
@@ -525,6 +532,15 @@ final class IptvImporter {
               iconUrl: channel.iconUrl,
             ),
         };
+        for (final programme in parsed.programmes) {
+          if (programme.channelId.isNotEmpty && !channels.containsKey(programme.channelId)) {
+            channels[programme.channelId] = EpgChannel(
+              sourceId: id,
+              channelId: programme.channelId,
+              displayName: programme.channelId,
+            );
+          }
+        }
         final programmes = [
           for (final programme in parsed.programmes)
             if (programme.channelId.isNotEmpty && programme.title.isNotEmpty) programme.inSource(id),
@@ -667,7 +683,7 @@ final class IptvImporter {
     return uri != null && uri.scheme == 'file' ? File.fromUri(uri) : File(source);
   }
 
-  static final RegExp _ownedCopy = RegExp(r'^playlist_[0-9a-f-]{36}\.(m3u8?|txt)$', caseSensitive: false);
+  static final RegExp _ownedCopy = RegExp(r'^playlist_[0-9a-f-]{36}\.(m3u8?|txt|json)$', caseSensitive: false);
   static final RegExp _legacyId = RegExp(r'^[0-9a-f-]+$', caseSensitive: false);
 
   /// Deletes the copy of [playlist] kept in [playlistDirectory] when no
@@ -679,7 +695,8 @@ final class IptvImporter {
     if (!p.equals(p.dirname(p.absolute(candidate)), p.absolute(playlistDirectory.path))) return;
     final name = p.basename(candidate);
     final legacy =
-        _legacyId.hasMatch(playlist.id) && const ['.m3u', '.m3u8', '.txt'].any((ext) => name == '${playlist.id}$ext');
+        _legacyId.hasMatch(playlist.id) &&
+        const ['.m3u', '.m3u8', '.txt', '.json'].any((ext) => name == '${playlist.id}$ext');
     if (!_ownedCopy.hasMatch(name) && !legacy) return;
     for (final other in await library.playlists()) {
       if (!other.isRemote && p.equals(p.absolute(_localFile(other.source).path), p.absolute(candidate))) return;

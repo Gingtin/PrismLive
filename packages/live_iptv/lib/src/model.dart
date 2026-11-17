@@ -162,14 +162,18 @@ enum IptvPlaylistFormat {
   m3u,
 
   /// `name,url` lists with `group,#genre#` lines.
-  txt;
+  txt,
 
-  /// The format of a stored 3.x type (`m3u`, `.m3u8`, `txt`), or null.
+  /// JSON format playlists (TVBox lives, flat array, group dict, etc.).
+  json;
+
+  /// The format of a stored 3.x type (`m3u`, `.m3u8`, `txt`, `json`), or null.
   static IptvPlaylistFormat? fromType(String? type) {
     final value = type?.trim().toLowerCase().replaceFirst('.', '');
     return switch (value) {
       'm3u' || 'm3u8' => m3u,
       'txt' => txt,
+      'json' => json,
       _ => null,
     };
   }
@@ -179,11 +183,16 @@ enum IptvPlaylistFormat {
     final lower = path.toLowerCase();
     if (lower.endsWith('.txt')) return txt;
     if (lower.endsWith('.m3u') || lower.endsWith('.m3u8')) return m3u;
+    if (lower.endsWith('.json')) return json;
     return null;
   }
 
   /// The file extension, with the dot.
-  String get extension => this == txt ? '.txt' : '.m3u';
+  String get extension => switch (this) {
+    txt => '.txt',
+    json => '.json',
+    m3u => '.m3u',
+  };
 }
 
 /// A saved playlist (3.x's `Providers` row).

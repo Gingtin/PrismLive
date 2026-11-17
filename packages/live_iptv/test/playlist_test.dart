@@ -182,8 +182,87 @@ P2P,p2p://f/p2p
       expect(detectPlaylistFormat('a,#genre#\n', path: '/a'), IptvPlaylistFormat.txt);
       expect(detectPlaylistFormat('x', path: '/a.TXT'), IptvPlaylistFormat.txt);
       expect(detectPlaylistFormat('x', path: '/a.m3u8'), IptvPlaylistFormat.m3u);
+      expect(detectPlaylistFormat('{"lives":[]}', path: '/a'), IptvPlaylistFormat.json);
+      expect(detectPlaylistFormat('[{"name":"c"}]', path: '/a'), IptvPlaylistFormat.json);
+      expect(detectPlaylistFormat('x', path: '/a.json'), IptvPlaylistFormat.json);
       expect(detectPlaylistFormat('<html>', path: '/a'), isNull);
     });
+
+    test('IptvPlaylistFormat extensions and parsing', () {
+      expect(IptvPlaylistFormat.fromType('json'), IptvPlaylistFormat.json);
+      expect(IptvPlaylistFormat.fromPath('/sub/live.json'), IptvPlaylistFormat.json);
+      expect(IptvPlaylistFormat.json.extension, '.json');
+    });
+  });
+
+  group('JSON playlist', () {
+    test('TVBox lives format with groups, multi-source lines, notes and pipe options', () {
+      final jsonStr = jsonEncode({
+        'lives': [
+          {
+            'group': '央视频道',
+            'channels': [
+              {
+                'name': 'CCTV-1 综合',
+                'logo': 'http://f/cctv1.png',
+                'tvg-id': 'cctv1',
+                'urls': [
+                  'http://f/cctv1_1.m3u8',
+                  'http://f/cctv1_2.m3u8|user-agent=PrismLive&referer=http://f/',
+                ],
+              },
+              {
+                'name': 'CCTV-2',
+                'url': 'http://f/cctv2_a.m3u8#rtmp://f/cctv2_b#bad_url',
+              },
+              {
+                'name': '提示：请勿传播',
+                'url': 'http://f/ignore.m3u8',
+              },
+              {
+                'name': '[公告]',
+                'url': 'http://f/ignore2.m3u8',
+              },
+            ],
+          },
+        ],
+      });
+      final result = const JsonPlaylistParser().parse(jsonStr);
+      expect(result.issues, isEmpty);
+      expect(result.entries.map((e) => (e.name, e.streamUrl, e.groupTitle, e.tvgLogo, e.tvgId)), [
+        ('CCTV-1 综合 (线路1)', 'http://f/cctv1_1.m3u8', '央视频道', 'http://f/cctv1.png', 'cctv1'),
+        ('CCTV-1 综合 (线路2)', 'http://f/cctv1_2.m3u8', '央视频道', 'http://f/cctv1.png', 'cctv1'),
+        ('CCTV-2 (线路1)', 'http://f/cctv2_a.m3u8', '央视频道', null, null),
+        ('CCTV-2 (线路2)', 'rtmp://f/cctv2_b', '央视频道', null, null),
+      ]);
+      expect(result.entries[1].httpHeaders, {
+        'referer': 'http://f/',
+        'user-agent': 'PrismLive',
+      });
+    });
+
+    test('flat array and group dictionary formats', () {
+      final flat = jsonEncode([
+        {'name': '北京卫视', 'url': 'http://f/bjws.m3u8', 'group': '卫视'},
+        {'name': '湖南卫视', 'url': 'http://f/hnws.m3u8', 'group': '卫视'},
+      ]);
+      final flatResult = const JsonPlaylistParser().parse(flat);
+      expect(flatResult.entries.map((e) => (e.name, e.streamUrl, e.groupTitle)), [
+        ('北京卫视', 'http://f/bjws.m3u8', '卫视'),
+        ('湖南卫视', 'http://f/hnws.m3u8', '卫视'),
+      ]);
+
+      final dict = jsonEncode({
+        '地方频道': [
+          {'name': '杭州综合', 'url': 'http://f/hzzh.m3u8'},
+        ],
+      });
+      final dictResult = const JsonPlaylistParser().parse(dict);
+      expect(dictResult.entries.map((e) => (e.name, e.streamUrl, e.groupTitle)), [
+        ('杭州综合', 'http://f/hzzh.m3u8', '地方频道'),
+      ]);
+    });
+  });
 
     test('UTF-8 with BOM, and non-UTF-8 only through the legacy decoder', () async {
       final bom = Uint8List.fromList([0xef, 0xbb, 0xbf, ...utf8.encode('#EXTM3U')]);

@@ -42,7 +42,7 @@ final Provider<IptvFilePicker> iptvFilePickerProvider = Provider<IptvFilePicker>
 
 /// The file extensions of [kind] (3.x picker filters).
 List<String> importExtensions(IptvImportKind kind) =>
-    kind == IptvImportKind.playlist ? const ['m3u', 'm3u8', 'txt'] : const ['xml', 'gz', 'json'];
+    kind == IptvImportKind.playlist ? const ['m3u', 'm3u8', 'txt', 'json'] : const ['xml', 'gz', 'json'];
 
 /// The title of the system file picker of [kind] (3.x said "选择备份文件").
 String importPickerTitle(IptvImportKind kind) =>

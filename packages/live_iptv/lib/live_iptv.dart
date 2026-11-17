@@ -10,6 +10,7 @@ export 'src/importer.dart';
 export 'src/iptv_site.dart';
 export 'src/library.dart';
 export 'src/model.dart';
+export 'src/playlist/json_playlist_parser.dart';
 export 'src/playlist/m3u_parser.dart';
 export 'src/playlist/playlist_parse_result.dart';
 export 'src/playlist/playlist_parser.dart';

@@ -197,90 +197,351 @@ final class _Programme {
   }
 }
 
-/// Parses the JSON guide 3.x read (`JsonEpgParser`): an object with
-/// `channels` (`id`/`channelId`/`name`, `displayName`/`name`,
-/// `icon`/`iconUrl`/`logo`) and `programmes`/`epg`/`events`
-/// (`channelId`/`channel`, `title`/`name`/`programme`,
-/// `startTime`/`start`/`starttime`/`time`, `endTime`/`end`/`endtime`/`stop`
-/// or `duration` minutes (30 by default), `description`/`desc`/`summary`,
-/// `subtitle`/`subTitle`, `episodeNum`/`episode`, `category`/`genre`,
-/// `catchupId`/`catchup-id`). Times are ISO 8601 (no zone: local), or Unix
-/// seconds or milliseconds.
+/// Parses JSON guides:
+/// 1. Standard format: `{"channels": [...], "programmes": [...]}`
+/// 2. DIYP format: `{"date": "2026-11-17", "CCTV1": [{"start": "00:00", "end": "00:30", "title": "..."}]}`
+/// 3. Data wrapper: `{"code": 200, "date": "...", "data": {"CCTV1": [...]}}` or `{"data": [...]}`
+/// 4. Single-channel responses: `{"channel_name": "CCTV1", "date": "...", "epg_data": [...]}`
+/// 5. Top-level arrays: `[{"channel": "CCTV1", "title": "...", "start": "..."}]` or `[{"id": "...", "programmes": [...]}]`
 abstract final class JsonGuideParser {
+  static const Set<String> _metadataKeys = {
+    'code',
+    'msg',
+    'message',
+    'status',
+    'date',
+    'time',
+    'datetime',
+    'success',
+    'is_success',
+    'total',
+    'count',
+    'version',
+    'author',
+    'url',
+    'channels',
+    'programmes',
+    'epg',
+    'events',
+    'epg_data',
+    'channel_name',
+    'name',
+    'id',
+  };
+
   /// Parses [text].
   static ParsedGuide parse(String text) {
-    final decoded = jsonDecode(text);
+    var raw = text.trim();
+    if (raw.startsWith('\uFEFF')) {
+      raw = raw.substring(1).trim();
+    }
+    final decoded = jsonDecode(raw);
     final channels = <GuideChannel>[];
     final programmes = <EpgProgramme>[];
+    final channelMap = <String, GuideChannel>{};
+
+    void addChannel(GuideChannel ch) {
+      if (ch.id.isNotEmpty && !channelMap.containsKey(ch.id)) {
+        channelMap[ch.id] = ch;
+        channels.add(ch);
+      }
+    }
+
+    DateTime? baseDate;
     if (decoded is Map<String, Object?>) {
+      baseDate = _parseDate(decoded['date'] ?? decoded['time'] ?? decoded['datetime']);
+      if (baseDate == null && decoded['data'] is Map<String, Object?>) {
+        final dataMap = decoded['data'] as Map<String, Object?>;
+        baseDate = _parseDate(dataMap['date'] ?? dataMap['time'] ?? dataMap['datetime']);
+      }
+    }
+    if (baseDate == null) {
+      final now = DateTime.now();
+      baseDate = DateTime(now.year, now.month, now.day);
+    }
+
+    if (decoded is Map<String, Object?>) {
+      // 1. Explicit channels list
       if (decoded['channels'] case final List<Object?> list) {
         for (final item in list) {
-          if (_channel(item) case final channel?) channels.add(channel);
+          if (_channel(item) case final channel?) {
+            addChannel(channel);
+            if (item is Map<String, Object?>) {
+              final subEpg = item['programmes'] ?? item['epg'] ?? item['events'] ?? item['epg_data'];
+              if (subEpg is List) {
+                _parseProgrammeList(channel.id, subEpg, baseDate, programmes);
+              }
+            }
+          }
         }
       }
+
+      // 2. Explicit programmes list
       if (decoded['programmes'] ?? decoded['epg'] ?? decoded['events'] case final List<Object?> list) {
         for (final item in list) {
-          if (_programme(item) case final programme?) programmes.add(programme);
+          if (_programme(item, baseDate: baseDate) case final programme?) {
+            programmes.add(programme);
+          }
+        }
+      }
+
+      // 3. Single-channel response with epg_data / data
+      final chName = _text(decoded, const ['channel_name', 'channel', 'channelId']);
+      final epgData = decoded['epg_data'] ?? (chName != null ? decoded['data'] : null);
+      if (chName != null && epgData is List) {
+        addChannel(GuideChannel(id: chName, displayNames: [chName]));
+        _parseProgrammeList(chName, epgData, baseDate, programmes);
+      }
+
+      // 4. DIYP channel dictionary: {"CCTV1": [...], "CCTV2": [...]} or wrapped in "data"
+      void parseChannelDictionary(Map<String, Object?> dict) {
+        for (final entry in dict.entries) {
+          final key = entry.key.trim();
+          final val = entry.value;
+          if (key.isNotEmpty && !_metadataKeys.contains(key.toLowerCase()) && val is List) {
+            addChannel(GuideChannel(id: key, displayNames: [key]));
+            _parseProgrammeList(key, val, baseDate!, programmes);
+          }
+        }
+      }
+
+      parseChannelDictionary(decoded);
+      if (decoded['data'] is Map<String, Object?>) {
+        parseChannelDictionary(decoded['data'] as Map<String, Object?>);
+      } else if (decoded['data'] is List<Object?> && chName == null) {
+        final dataList = decoded['data'] as List<Object?>;
+        for (final item in dataList) {
+          if (item is Map<String, Object?>) {
+            if (_programme(item, baseDate: baseDate) case final p?) {
+              programmes.add(p);
+            } else if (_channel(item) case final ch?) {
+              addChannel(ch);
+              final subEpg = item['programmes'] ?? item['epg'] ?? item['events'] ?? item['epg_data'];
+              if (subEpg is List) {
+                _parseProgrammeList(ch.id, subEpg, baseDate, programmes);
+              }
+            }
+          }
+        }
+      }
+    } else if (decoded is List) {
+      for (final item in decoded) {
+        if (item is Map<String, Object?>) {
+          if (_programme(item, baseDate: baseDate) case final p?) {
+            programmes.add(p);
+          } else if (_channel(item) case final ch?) {
+            addChannel(ch);
+            final subEpg = item['programmes'] ?? item['epg'] ?? item['events'] ?? item['epg_data'];
+            if (subEpg is List) {
+              _parseProgrammeList(ch.id, subEpg, baseDate, programmes);
+            }
+          }
         }
       }
     }
+
+    // Ensure every channel referenced in programmes exists in channels
+    for (final prog in programmes) {
+      if (prog.channelId.isNotEmpty && !channelMap.containsKey(prog.channelId)) {
+        addChannel(GuideChannel(id: prog.channelId, displayNames: [prog.channelId]));
+      }
+    }
+
     return ParsedGuide(channels: channels, programmes: programmes);
+  }
+
+  static DateTime? _parseDate(Object? value) {
+    if (value == null) return null;
+    final s = value.toString().trim();
+    if (s.isEmpty) return null;
+    final iso = DateTime.tryParse(s.replaceAll('/', '-'));
+    if (iso != null) return DateTime(iso.year, iso.month, iso.day);
+    final ymd = RegExp(r'^(\d{4})(\d{2})(\d{2})$').firstMatch(s);
+    if (ymd != null) {
+      return DateTime(int.parse(ymd.group(1)!), int.parse(ymd.group(2)!), int.parse(ymd.group(3)!));
+    }
+    return null;
+  }
+
+  static void _parseProgrammeList(
+    String channelId,
+    List<Object?> items,
+    DateTime baseDate,
+    List<EpgProgramme> target,
+  ) {
+    var dayOffset = 0;
+    int? lastStartHour;
+
+    final parsedItems = <({
+      String title,
+      DateTime start,
+      DateTime? stop,
+      String? desc,
+      String? subTitle,
+      String? category,
+      String? episode,
+      String? catchupId,
+    })>[];
+
+    for (final rawItem in items) {
+      if (rawItem is! Map<String, Object?>) continue;
+      final title = _text(rawItem, const ['title', 'name', 'programme', 't']);
+      if (title == null || title.isEmpty) continue;
+
+      final startRaw =
+          rawItem['startTime'] ?? rawItem['start'] ?? rawItem['starttime'] ?? rawItem['time'] ?? rawItem['s'];
+      if (startRaw == null) continue;
+
+      if (startRaw is String) {
+        final match = RegExp(r'^(\d{1,2}):(\d{2})').firstMatch(startRaw.trim());
+        if (match != null) {
+          final hour = int.parse(match.group(1)!);
+          if (lastStartHour != null && hour < lastStartHour! - 12) {
+            dayOffset++;
+          }
+          lastStartHour = hour;
+        }
+      }
+
+      final startTime = _time(startRaw, baseDate: baseDate, dayOffset: dayOffset);
+      if (startTime == null) continue;
+
+      final stopRaw = rawItem['endTime'] ?? rawItem['end'] ?? rawItem['endtime'] ?? rawItem['stop'] ?? rawItem['e'];
+      DateTime? stopTime;
+      if (stopRaw != null) {
+        var stopDayOffset = dayOffset;
+        if (stopRaw is String) {
+          final match = RegExp(r'^(\d{1,2}):(\d{2})').firstMatch(stopRaw.trim());
+          if (match != null) {
+            final stopHour = int.parse(match.group(1)!);
+            if (stopHour < (lastStartHour ?? 0)) {
+              stopDayOffset++;
+            }
+          }
+        }
+        stopTime = _time(stopRaw, baseDate: baseDate, dayOffset: stopDayOffset);
+      }
+
+      parsedItems.add((
+        title: title,
+        start: startTime,
+        stop: stopTime,
+        desc: _text(rawItem, const ['description', 'desc', 'summary', 'd']),
+        subTitle: _text(rawItem, const ['subtitle', 'subTitle']),
+        category: _text(rawItem, const ['category', 'genre']),
+        episode: _text(rawItem, const ['episodeNum', 'episode']),
+        catchupId: _text(rawItem, const ['catchupId', 'catchup-id', 'id']),
+      ));
+    }
+
+    for (var i = 0; i < parsedItems.length; i++) {
+      final item = parsedItems[i];
+      final DateTime stop;
+      if (item.stop != null && item.stop!.isAfter(item.start)) {
+        stop = item.stop!;
+      } else if (i + 1 < parsedItems.length && parsedItems[i + 1].start.isAfter(item.start)) {
+        stop = parsedItems[i + 1].start;
+      } else {
+        stop = item.start.add(const Duration(minutes: 30));
+      }
+
+      target.add(
+        EpgProgramme(
+          channelId: channelId,
+          start: item.start,
+          stop: stop,
+          title: item.title,
+          description: item.desc,
+          subtitle: item.subTitle,
+          category: item.category,
+          episodeNum: item.episode,
+          catchupId: item.catchupId,
+        ),
+      );
+    }
   }
 
   static String? _text(Map<String, Object?> item, List<String> keys) {
     for (final key in keys) {
-      if (item[key] case final value?) return value.toString();
+      if (item[key] case final value?) {
+        final s = value.toString().trim();
+        if (s.isNotEmpty) return s;
+      }
     }
     return null;
   }
 
   static GuideChannel? _channel(Object? item) {
     if (item is! Map<String, Object?>) return null;
-    final id = _text(item, const ['id', 'channelId', 'name']);
+    final id = _text(item, const ['id', 'channelId', 'channel_id', 'channel', 'name']);
     if (id == null || id.isEmpty) return null;
+    final displayName = _text(item, const ['displayName', 'name', 'title', 'channel_name']) ?? id;
+    final displayNames = <String>[displayName];
+    if (displayName != id) displayNames.add(id);
     return GuideChannel(
       id: id,
-      displayNames: [
-        _text(item, const ['displayName', 'name']) ?? id,
-      ],
-      iconUrl: _text(item, const ['icon', 'iconUrl', 'logo']),
+      displayNames: displayNames,
+      iconUrl: _text(item, const ['icon', 'iconUrl', 'logo', 'tvg-logo']),
     );
   }
 
-  static EpgProgramme? _programme(Object? item) {
+  static EpgProgramme? _programme(Object? item, {DateTime? baseDate}) {
     if (item is! Map<String, Object?>) return null;
-    final channel = _text(item, const ['channelId', 'channel']);
-    final title = _text(item, const ['title', 'name', 'programme']);
+    final channel = _text(item, const ['channelId', 'channel', 'channel_name', 'channel_id']);
+    final title = _text(item, const ['title', 'name', 'programme', 't']);
     if (channel == null || channel.isEmpty || title == null || title.isEmpty) return null;
-    final start = _time(item['startTime'] ?? item['start'] ?? item['starttime'] ?? item['time']);
+    final start = _time(
+      item['startTime'] ?? item['start'] ?? item['starttime'] ?? item['time'] ?? item['s'],
+      baseDate: baseDate,
+    );
     if (start == null) return null;
     final duration = item['duration'];
     final stop =
-        _time(item['endTime'] ?? item['end'] ?? item['endtime'] ?? item['stop']) ??
+        _time(
+          item['endTime'] ?? item['end'] ?? item['endtime'] ?? item['stop'] ?? item['e'],
+          baseDate: baseDate,
+        ) ??
         start.add(Duration(minutes: duration is int ? duration : 30));
     return EpgProgramme(
       channelId: channel,
       start: start,
       stop: stop,
       title: title,
-      description: _text(item, const ['description', 'desc', 'summary']),
+      description: _text(item, const ['description', 'desc', 'summary', 'd']),
       subtitle: _text(item, const ['subtitle', 'subTitle']),
       episodeNum: _text(item, const ['episodeNum', 'episode']),
       category: _text(item, const ['category', 'genre']),
-      catchupId: _text(item, const ['catchupId', 'catchup-id']),
+      catchupId: _text(item, const ['catchupId', 'catchup-id', 'id']),
     );
   }
 
-  static DateTime? _time(Object? value) {
+  static DateTime? _time(Object? value, {DateTime? baseDate, int dayOffset = 0}) {
     DateTime epoch(int number) =>
         DateTime.fromMillisecondsSinceEpoch(number < 10000000000 ? number * 1000 : number, isUtc: true);
     return switch (value) {
       final int number => epoch(number),
-      // Unix digits first: DateTime.tryParse reads `1790000000` as year
-      // 179000 (3.x stored such programmes there).
       final String text when RegExp(r'^(\d{10}|\d{13})$').hasMatch(text.trim()) => epoch(int.parse(text.trim())),
-      final String text => DateTime.tryParse(text) ?? (int.tryParse(text) == null ? null : epoch(int.parse(text))),
+      final String text =>
+        _parseTimeString(text.trim(), baseDate: baseDate, dayOffset: dayOffset) ??
+            (int.tryParse(text.trim()) == null ? null : epoch(int.parse(text.trim()))),
       _ => null,
     };
+  }
+
+  static DateTime? _parseTimeString(String text, {DateTime? baseDate, int dayOffset = 0}) {
+    final relMatch = RegExp(r'^(\d{1,2}):(\d{2})(?::(\d{2}))?$').firstMatch(text);
+    if (relMatch != null) {
+      final hour = int.parse(relMatch.group(1)!);
+      final minute = int.parse(relMatch.group(2)!);
+      final second = relMatch.group(3) != null ? int.parse(relMatch.group(3)!) : 0;
+      final date = (baseDate ?? DateTime.now()).add(Duration(days: dayOffset));
+      return DateTime(date.year, date.month, date.day, hour, minute, second);
+    }
+
+    final xmltv = parseXmltvTime(text);
+    if (xmltv != null) return xmltv;
+
+    final normalized = text.replaceAll('/', '-');
+    return DateTime.tryParse(normalized) ?? DateTime.tryParse(normalized.replaceFirst(' ', 'T'));
   }
 }

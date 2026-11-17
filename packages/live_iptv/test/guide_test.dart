@@ -75,6 +75,67 @@ void main() {
     expect(three.stop.difference(three.start), const Duration(minutes: 30));
   });
 
+  test('DIYP JSON guide: channel dictionary, relative HH:mm, date and rollover', () {
+    final guide = parseGuide(
+      jsonEncode({
+        'date': '2026-11-17',
+        'CCTV1': [
+          {'start': '06:00', 'end': '08:30', 'title': '朝闻天下'},
+          {'start': '08:30', 'title': '生活圈'},
+          {'start': '23:30', 'title': '晚间特别报道'},
+          {'start': '00:15', 'title': '深夜影院'},
+        ],
+      }),
+    );
+    expect(guide.channels.map((c) => c.id), ['CCTV1']);
+    expect(guide.programmes, hasLength(4));
+    final [p1, p2, p3, p4] = guide.programmes;
+    expect(p1.title, '朝闻天下');
+    expect(p1.start, DateTime(2026, 11, 17, 6, 0));
+    expect(p1.stop, DateTime(2026, 11, 17, 8, 30));
+
+    expect(p2.title, '生活圈');
+    expect(p2.start, DateTime(2026, 11, 17, 8, 30));
+    expect(p2.stop, DateTime(2026, 11, 17, 23, 30), reason: 'infers stop from next start');
+
+    expect(p3.title, '晚间特别报道');
+    expect(p3.start, DateTime(2026, 11, 17, 23, 30));
+    expect(p3.stop, DateTime(2026, 11, 18, 0, 15), reason: 'infers stop across midnight');
+
+    expect(p4.title, '深夜影院');
+    expect(p4.start, DateTime(2026, 11, 18, 0, 15), reason: 'rollover into next day');
+    expect(p4.stop, DateTime(2026, 11, 18, 0, 45), reason: 'default 30m duration');
+  });
+
+  test('JSON guide wrapped in data or single-channel response', () {
+    final wrapped = parseGuide(
+      jsonEncode({
+        'code': 200,
+        'msg': 'ok',
+        'date': '2026-11-17',
+        'data': {
+          '湖南卫视': [
+            {'start': '19:30', 'end': '20:10', 'title': '快乐大本营'},
+          ],
+        },
+      }),
+    );
+    expect(wrapped.channels.map((c) => c.id), ['湖南卫视']);
+    expect(wrapped.programmes.single.title, '快乐大本营');
+
+    final single = parseGuide(
+      jsonEncode({
+        'channel_name': '浙江卫视',
+        'date': '2026-11-17',
+        'epg_data': [
+          {'start': '20:00', 'end': '21:30', 'title': '奔跑吧'},
+        ],
+      }),
+    );
+    expect(single.channels.map((c) => c.id), ['浙江卫视']);
+    expect(single.programmes.single.title, '奔跑吧');
+  });
+
   group('matching', () {
     EpgChannel guide(String id, String name) => EpgChannel(sourceId: 's', channelId: id, displayName: name);
     IptvChannel channel(String name, {String? tvgId, String id = 'c'}) => IptvChannel(

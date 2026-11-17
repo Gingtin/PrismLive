@@ -77,9 +77,10 @@ final class IptvOverview {
   EpgSource? guide(String id) => guides.map((info) => info.source).where((source) => source.id == id).firstOrNull;
 }
 
-/// The format badge of [playlist] (`M3U`, `M3U8`, `TXT`).
+/// The format badge of [playlist] (`M3U`, `M3U8`, `TXT`, `JSON`).
 String playlistBadge(IptvPlaylist playlist) {
   if (playlist.format == IptvPlaylistFormat.txt) return 'TXT';
+  if (playlist.format == IptvPlaylistFormat.json) return 'JSON';
   final path = (Uri.tryParse(playlist.source)?.path ?? playlist.source).toLowerCase();
   return path.endsWith('.m3u8') ? 'M3U8' : 'M3U';
 }
