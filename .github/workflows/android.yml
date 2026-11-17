@@ -1,0 +1,58 @@
+name: Android Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ master ]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+
+permissions:
+  contents: read
+
+jobs:
+  android:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Read toolchain.env
+        run: |
+          grep -E '^FLUTTER_VERSION=' toolchain.env >> "$GITHUB_ENV"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: Packages and native bundles
+        run: |
+          set -euo pipefail
+          python3 tools/flutter_sdk/prepare.py --apply
+          flutter --version
+          flutter pub get --enforce-lockfile
+          bash tools/ffmpeg_kit/fetch.sh android
+
+      - name: Build Android APK
+        working-directory: apps/pure_live
+        run: |
+          flutter build apk --debug --split-per-abi
+
+      - name: Upload APK artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: PrismLive-Android-APKs
+          path: apps/pure_live/build/app/outputs/flutter-apk/*.apk
