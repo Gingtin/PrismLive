@@ -240,6 +240,7 @@ final class PlaybackSession {
   _StoppingEngine? _stoppingEngine;
   Future<void>? _disposing;
   final Map<Object, Future<void>> _retiringEngines = {};
+  final List<Timer> _retirementTimers = [];
   StreamSubscription<EngineEvent>? _events;
 
   PlaybackState _state = const PlaybackState();
@@ -657,6 +658,10 @@ final class PlaybackSession {
     } on Object {
       // A failed retirement remains owned by its tracker.
     }
+    for (final timer in _retirementTimers) {
+      timer.cancel();
+    }
+    _retirementTimers.clear();
     await _states.close();
   }
 
@@ -698,6 +703,15 @@ final class PlaybackSession {
     }
     final engine = _engine;
     if (engine != null) return engine;
+    if (_retiringEngines.length >= 2) {
+      try {
+        await Future.any(_retiringEngines.values.toList()).timeout(
+          timings.engineRelease,
+          onTimeout: () => null,
+        );
+      } catch (_) {}
+      _checkAlive();
+    }
     if (_retiringEngines.length >= 2) {
       throw const PlayerException(
         message: 'Previous native players have not finished releasing',
@@ -763,13 +777,25 @@ final class PlaybackSession {
   void _trackRetirement(Object owner, Future<void> releasing) {
     _retiringEngines[owner] = releasing;
     unawaited(
-      releasing.then<void>(
-        (_) => _retiringEngines.remove(owner),
-        onError: (Object _, StackTrace _) {
-          // A failed disposal is not proof that native resources were freed.
-          // Keep the allocation guard until a release is actually confirmed.
-        },
-      ),
+      releasing
+          .then<void>(
+            (_) => _retiringEngines.remove(owner),
+            onError: (Object _, StackTrace _) {
+              // A failed disposal cannot prove native resources were freed.
+              // Retain it until the release deadline so waitForResourceRelease
+              // observes the failure, but ensure it does not permanently poison
+              // future sessions if the app stays running.
+              final timer = Timer(timings.engineRelease, () {
+                _retiringEngines.remove(owner);
+              });
+              _retirementTimers.add(timer);
+            },
+          )
+          .timeout(timings.engineRelease * 2, onTimeout: () {
+            // Safety timeout: if releasing hangs indefinitely, ensure owner
+            // is eventually purged from the allocation guard.
+            _retiringEngines.remove(owner);
+          }),
     );
   }
 
