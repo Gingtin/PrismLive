@@ -54,12 +54,28 @@ final class IptvSite extends LiveSite implements LiveSiteRecordRoomResolver {
   /// Clock for the programme on air.
   final DateTime Function() now;
 
-  static final RegExp _lineSuffix = RegExp(r'\s*\(线路\s*\d+\)\s*$', caseSensitive: false);
+  static final RegExp _lineSuffix =
+      RegExp(r'\s*[-_]?\s*[\(\[（【]?(?:线路|Line)\s*\d+[\)\]）】]?\s*$', caseSensitive: false);
 
-  /// Strips line suffix such as `(线路1)`, `(线路2)` to find the common channel base name.
+  /// Strips line suffix such as `(线路1)`, `（线路2）`, `【线路3】`, `(Line 1)` to find the common channel base name.
   static String channelBaseName(String name) => name.replaceAll(_lineSuffix, '').trim();
 
-  static const List<String> _offAirKeywords = ['休台', '停播', '非播出时段', '检修', '维护', '测试卡', '未开播'];
+  static const List<String> _offAirKeywords = [
+    '休台',
+    '停播',
+    '非播出时段',
+    '检修',
+    '维护',
+    '测试卡',
+    '彩条',
+    '未开播',
+    '停止播出',
+    '暂停播出',
+    '无信号',
+    '节目已结束',
+    'off-air',
+    'off air',
+  ];
 
   /// Checks if an EPG programme title indicates that the broadcast is off-air.
   static bool isOffAirProgramme(String? title) {

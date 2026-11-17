@@ -449,6 +449,25 @@ void main() {
     );
     expect(await importer.deleteGuide((await library.guideSources()).single), isTrue);
   });
+
+  test('sibling channel name parsing and off-air programme detection', () {
+    expect(IptvSite.channelBaseName('CCTV-1 (线路1)'), 'CCTV-1');
+    expect(IptvSite.channelBaseName('CCTV-1（线路2）'), 'CCTV-1');
+    expect(IptvSite.channelBaseName('CCTV-1 [线路3]'), 'CCTV-1');
+    expect(IptvSite.channelBaseName('CCTV-1【线路4】'), 'CCTV-1');
+    expect(IptvSite.channelBaseName('CCTV-1 - 线路5'), 'CCTV-1');
+    expect(IptvSite.channelBaseName('CCTV-1 (Line 1)'), 'CCTV-1');
+    expect(IptvSite.channelBaseName('CCTV-1'), 'CCTV-1');
+
+    expect(IptvSite.isOffAirProgramme('休台维护'), isTrue);
+    expect(IptvSite.isOffAirProgramme('非播出时段'), isTrue);
+    expect(IptvSite.isOffAirProgramme('深夜检修测试卡'), isTrue);
+    expect(IptvSite.isOffAirProgramme('彩条信号测试'), isTrue);
+    expect(IptvSite.isOffAirProgramme('频道暂停播出'), isTrue);
+    expect(IptvSite.isOffAirProgramme('Off-Air maintenance'), isTrue);
+    expect(IptvSite.isOffAirProgramme('新闻联播'), isFalse);
+    expect(IptvSite.isOffAirProgramme(null), isFalse);
+  });
 }
 
 String p(String path) => File(path).absolute.path;

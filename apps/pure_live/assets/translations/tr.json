@@ -559,7 +559,7 @@
     "desktop_pause_when_minimized_desc": "默认继续播放；开启后仅实际最小化时暂停，恢复时继续。其他窗口遮挡不暂停。",
     "details": "Ayrıntılar",
     "dialog_import_epg_title": "TV Rehberini İçe Aktar (XML / GZ / JSON)",
-    "dialog_import_playlist_title": "Oynatma Listesini İçe Aktar (M3U / TXT)",
+    "dialog_import_playlist_title": "Oynatma Listesini İçe Aktar (M3U / TXT / JSON)",
     "disabled": "Devre dışı",
     "discard": "Vazgeç",
     "discard_cookie_changes": "Çerez değişikliklerinden vazgeçilsin mi?",

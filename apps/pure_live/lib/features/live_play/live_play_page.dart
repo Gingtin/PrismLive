@@ -1646,6 +1646,7 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> with SingleTickerPr
                 controller,
                 settings,
                 arrangement: ControlsArrangement.inline,
+                pickersInBar: true,
                 // B09 c5 (audit B-19): with the controls, off the picture's
                 // right edge otherwise.
                 edge: _ColumnHandle(
@@ -1670,7 +1671,7 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> with SingleTickerPr
       children: [
         SizedBox(
           height: height,
-          child: _player(controller, settings, arrangement: ControlsArrangement.inline),
+          child: _player(controller, settings, arrangement: ControlsArrangement.inline, pickersInBar: true),
         ),
         Expanded(child: _withDetails(controller, guide)),
       ],

@@ -559,7 +559,7 @@
     "desktop_pause_when_minimized_desc": "默认继续播放；开启后仅实际最小化时暂停，恢复时继续。其他窗口遮挡不暂停。",
     "details": "รายละเอียด",
     "dialog_import_epg_title": "นำเข้าผังรายการทีวี (XML / GZ / JSON)",
-    "dialog_import_playlist_title": "นำเข้าเพลย์ลิสต์ (M3U / TXT)",
+    "dialog_import_playlist_title": "นำเข้าเพลย์ลิสต์ (M3U / TXT / JSON)",
     "disabled": "ปิดใช้งาน",
     "discard": "ละทิ้ง",
     "discard_cookie_changes": "ละทิ้งการเปลี่ยนแปลงคุกกี้หรือไม่",

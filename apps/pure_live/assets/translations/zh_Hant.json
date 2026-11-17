@@ -559,7 +559,7 @@
     "desktop_pause_when_minimized_desc": "默认继续播放；开启后仅实际最小化时暂停，恢复时继续。其他窗口遮挡不暂停。",
     "details": "詳情",
     "dialog_import_epg_title": "匯入電視節目單 (XML / GZ / JSON)",
-    "dialog_import_playlist_title": "匯入播放列表 (M3U / TXT)",
+    "dialog_import_playlist_title": "匯入播放列表 (M3U / TXT / JSON)",
     "disabled": "未開啟",
     "discard": "捨棄",
     "discard_cookie_changes": "捨棄 Cookie 修改？",

@@ -559,7 +559,7 @@
     "desktop_pause_when_minimized_desc": "默认继续播放；开启后仅实际最小化时暂停，恢复时继续。其他窗口遮挡不暂停。",
     "details": "상세",
     "dialog_import_epg_title": "편성표 가져오기(XML / GZ / JSON)",
-    "dialog_import_playlist_title": "재생 목록 가져오기(M3U / TXT)",
+    "dialog_import_playlist_title": "재생 목록 가져오기(M3U / TXT / JSON)",
     "disabled": "사용 안 함",
     "discard": "버리기",
     "discard_cookie_changes": "쿠키 변경 사항을 버릴까요?",
