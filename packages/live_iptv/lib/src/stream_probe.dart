@@ -84,10 +84,10 @@ abstract final class StreamProbe {
       );
       final response = await http.send(request);
       stopwatch.stop();
-      final status = response.statusCode;
+      final status = response.status;
 
       if (status >= 200 && status < 300) {
-        final bodyPrefix = utf8.decode(response.bodyBytes.take(4096).toList(), allowMalformed: true);
+        final bodyPrefix = utf8.decode(response.bytes.take(4096).toList(), allowMalformed: true);
         if (bodyPrefix.contains('#EXTM3U')) {
           if (bodyPrefix.contains('#EXTINF:')) {
             return StreamProbeResult(
