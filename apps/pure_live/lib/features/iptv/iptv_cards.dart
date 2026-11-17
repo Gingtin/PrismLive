@@ -40,6 +40,7 @@ class IptvSourceCard extends StatefulWidget {
     required this.onDelete,
     required this.onAutoUpdate,
     required this.onAction,
+    this.onSpeedTest,
     this.inUse = false,
     super.key,
   });
@@ -90,6 +91,9 @@ class IptvSourceCard extends StatefulWidget {
 
   /// A more-menu action.
   final ValueChanged<IptvCardAction> onAction;
+
+  /// Optional speed test trigger for playlist channels.
+  final VoidCallback? onSpeedTest;
 
   @override
   State<IptvSourceCard> createState() => _IptvSourceCardState();
@@ -177,6 +181,14 @@ class IptvSourceCard extends StatefulWidget {
       destructive: true,
       onPressed: blocked ? null : onDelete,
     );
+    final speedTest = onSpeedTest != null
+        ? _CardButton(
+            key: ValueKey('iptv-speed-test-$id'),
+            icon: AppIcons.settingsHardwareDecoding,
+            label: i18n('iptv_speed_test'),
+            onPressed: blocked ? null : onSpeedTest,
+          )
+        : null;
     final autoSync = _AutoSyncRow(id: id, value: autoUpdate, onChanged: blocked ? null : onAutoUpdate);
     return GestureDetector(
       // A right click opens the same menu at the more button.
@@ -198,16 +210,30 @@ class IptvSourceCard extends StatefulWidget {
               padding: const EdgeInsets.only(top: 12, right: 12),
               child: LayoutBuilder(
                 builder: (context, constraints) {
-                  if (!isRemote) return Row(children: [Expanded(child: delete)]);
+                  if (!isRemote) {
+                    return Row(
+                      children: [
+                        if (speedTest != null) ...[
+                          Expanded(child: speedTest),
+                          const SizedBox(width: 8),
+                        ],
+                        Expanded(child: delete),
+                      ],
+                    );
+                  }
                   if (constraints.maxWidth >= iptvCardOneRowWidth) {
                     return Row(
                       key: ValueKey('iptv-actions-row-$id'),
                       children: [
-                        Expanded(flex: 10, child: sync),
+                        Expanded(flex: 9, child: sync),
+                        if (speedTest != null) ...[
+                          const SizedBox(width: 8),
+                          Expanded(flex: 11, child: speedTest),
+                        ],
                         const SizedBox(width: 8),
                         Expanded(flex: 13, child: autoSync),
                         const SizedBox(width: 8),
-                        Expanded(flex: 10, child: delete),
+                        Expanded(flex: 9, child: delete),
                       ],
                     );
                   }
@@ -217,6 +243,10 @@ class IptvSourceCard extends StatefulWidget {
                       Row(
                         children: [
                           Expanded(child: sync),
+                          if (speedTest != null) ...[
+                            const SizedBox(width: 8),
+                            Expanded(child: speedTest),
+                          ],
                           const SizedBox(width: 8),
                           Expanded(child: delete),
                         ],

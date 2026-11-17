@@ -13,6 +13,7 @@ import 'package:pure_live/features/iptv/iptv_cards.dart';
 import 'package:pure_live/features/iptv/iptv_data.dart';
 import 'package:pure_live/features/iptv/iptv_import.dart';
 import 'package:pure_live/features/iptv/iptv_settings.dart';
+import 'package:pure_live/features/iptv/iptv_speed_test_dialog.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_args.dart';
@@ -776,6 +777,18 @@ class _IptvPageState extends ConsumerState<IptvPage> {
       onDelete: () => unawaited(_delete(playlist, key, name, channels)),
       onAutoUpdate: (value) => unawaited(_setAutoUpdate(playlist, key, value)),
       onAction: (action) => unawaited(_cardAction(action, playlist.source)),
+      onSpeedTest: () => unawaited(_speedTest(playlist)),
+    );
+  }
+
+  Future<void> _speedTest(IptvPlaylist playlist) async {
+    final importer = _importer;
+    if (importer == null) return;
+    await showIptvSpeedTestDialog(
+      context,
+      playlist: playlist,
+      library: importer.library,
+      http: importer.http,
     );
   }
 

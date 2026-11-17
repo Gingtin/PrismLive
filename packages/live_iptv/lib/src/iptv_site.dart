@@ -5,6 +5,7 @@ import 'package:live_iptv/src/library.dart';
 import 'package:live_iptv/src/model.dart';
 import 'package:live_iptv/src/playlist/m3u_parser.dart';
 import 'package:live_iptv/src/playlist/txt_parser.dart';
+import 'package:live_iptv/src/stream_probe.dart';
 
 /// The IPTV platform (3.x `IptvSite`): imported playlists shown like a live
 /// platform.
@@ -259,8 +260,11 @@ final class IptvSite extends LiveSite implements LiveSiteRecordRoomResolver {
         }
       }
     }
+    final sortedUrls = urls.length > 1
+        ? await StreamProbe.sortLinesBySpeed(importer.http, urls, timeout: const Duration(milliseconds: 1000))
+        : urls;
     return [
-      LivePlayQuality(quality: '默认', id: qualityId, sort: 1, data: urls),
+      LivePlayQuality(quality: '默认', id: qualityId, sort: 1, data: sortedUrls),
     ];
   }
 

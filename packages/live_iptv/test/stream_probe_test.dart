@@ -77,5 +77,65 @@ void main() {
       expect(resDns.health, StreamHealth.dead);
       expect(resDns.isPermanentlyDead, isTrue);
     });
+
+    test('cacheResult and getCached maintain probe TTL', () {
+      StreamProbe.clearCache();
+      const url = 'http://example.com/cached.m3u8';
+      expect(StreamProbe.getCached(url), isNull);
+
+      const res = StreamProbeResult(health: StreamHealth.live, latency: Duration(milliseconds: 50));
+      StreamProbe.cacheResult(url, res);
+      expect(StreamProbe.getCached(url), isNotNull);
+      expect(StreamProbe.getCached(url)!.latency!.inMilliseconds, 50);
+
+      StreamProbe.clearCache();
+      expect(StreamProbe.getCached(url), isNull);
+    });
+
+    test('sortChannelsByHealth places live channels first sorted by latency', () {
+      final c1 = IptvChannel(
+        id: '1',
+        playlistId: 'p',
+        entry: const IptvEntry(name: 'Ch1', streamUrl: 'http://example.com/dead.m3u8'),
+      );
+      final c2 = IptvChannel(
+        id: '2',
+        playlistId: 'p',
+        entry: const IptvEntry(name: 'Ch2', streamUrl: 'http://example.com/slow.m3u8'),
+      );
+      final c3 = IptvChannel(
+        id: '3',
+        playlistId: 'p',
+        entry: const IptvEntry(name: 'Ch3', streamUrl: 'http://example.com/fast.m3u8'),
+      );
+
+      final results = {
+        'http://example.com/dead.m3u8': const StreamProbeResult(health: StreamHealth.dead),
+        'http://example.com/slow.m3u8': const StreamProbeResult(health: StreamHealth.live, latency: Duration(milliseconds: 300)),
+        'http://example.com/fast.m3u8': const StreamProbeResult(health: StreamHealth.live, latency: Duration(milliseconds: 60)),
+      };
+
+      final sorted = StreamProbe.sortChannelsByHealth([c1, c2, c3], results);
+      expect(sorted.map((c) => c.id).toList(), ['3', '2', '1']);
+
+      final filtered = StreamProbe.filterDeadChannels([c1, c2, c3], results);
+      expect(filtered.map((c) => c.id).toList(), ['2', '3']);
+    });
+
+    test('sortLinesBySpeed orders URLs by latency', () async {
+      StreamProbe.clearCache();
+      final http = _MockProbeHttp((req) async {
+        final ms = req.url.path.contains('fast') ? 30 : 200;
+        return LiveResponse(
+          status: 200,
+          bytes: utf8.encode('#EXTM3U\n#EXTINF:10,\ns.ts\n'),
+          url: req.url,
+        );
+      });
+
+      final lines = ['http://example.com/slow.m3u8', 'http://example.com/fast.m3u8'];
+      final sorted = await StreamProbe.sortLinesBySpeed(http, lines);
+      expect(sorted, isNotEmpty);
+    });
   });
 }

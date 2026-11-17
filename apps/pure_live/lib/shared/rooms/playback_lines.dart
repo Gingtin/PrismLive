@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_core/live_core.dart';
+import 'package:live_iptv/live_iptv.dart';
 import 'package:live_media/live_media.dart';
 import 'package:live_player/live_player.dart';
 import 'package:live_store/live_store.dart';
@@ -28,6 +29,18 @@ String playbackLineName(int index, {LivePlayLine? line, String? detectedCodec}) 
   final raw = line?.lineId?.startsWith('raw|') ?? false;
   final codec = playbackCodecName(detectedCodec) ?? (raw ? null : playbackCodecName(line?.codec));
   final tags = [?codec, if (raw) 'raw'];
+  if (line?.url case final url when url.isNotEmpty) {
+    final cached = StreamProbe.getCached(url);
+    if (cached != null) {
+      if (cached.health == StreamHealth.live && cached.latency != null) {
+        tags.add('${cached.latency!.inMilliseconds}ms');
+      } else if (cached.health == StreamHealth.dead) {
+        tags.add(i18n('iptv_status_dead'));
+      } else if (cached.health == StreamHealth.offline) {
+        tags.add(i18n('iptv_status_offline'));
+      }
+    }
+  }
   return tags.isEmpty ? base : '$base（${tags.join(', ')}）';
 }
 
