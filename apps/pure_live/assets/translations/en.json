@@ -944,7 +944,7 @@
     "iptv_import_name": "Name (optional)",
     "iptv_import_name_helper": "Empty uses the file name of the address; a list with the same name is replaced only after asking",
     "iptv_import_name_hint": "File name of the address",
-    "iptv_import_playlist_desc": "An M3U / TXT file, an address, or pasted text",
+    "iptv_import_playlist_desc": "An M3U / TXT / JSON file, an address, or pasted text",
     "iptv_import_running": "Downloading and importing. Closing this window does not stop it; the result is shown when it finishes.",
     "iptv_import_text": "List content",
     "iptv_import_text_name": "Name",

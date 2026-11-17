@@ -943,7 +943,7 @@
     "iptv_import_name": "名称（可选）",
     "iptv_import_name_helper": "留空时用地址里的文件名；已有同名的列表会先问你是否替换",
     "iptv_import_name_hint": "使用地址中的文件名",
-    "iptv_import_playlist_desc": "M3U / TXT 文件、订阅地址，或粘贴文本",
+    "iptv_import_playlist_desc": "M3U / TXT / JSON 文件、订阅地址，或粘贴文本",
     "iptv_import_running": "正在下载和导入。关闭窗口不会中止导入，完成后会提示结果。",
     "iptv_import_text": "列表内容",
     "iptv_import_text_name": "名称",
