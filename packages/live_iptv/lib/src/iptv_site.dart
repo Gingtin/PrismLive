@@ -58,7 +58,24 @@ final class IptvSite extends LiveSite implements LiveSiteRecordRoomResolver {
       RegExp(r'\s*[-_]?\s*[\(\[（【]?(?:线路|Line)\s*\d+[\)\]）】]?\s*$', caseSensitive: false);
 
   /// Strips line suffix such as `(线路1)`, `（线路2）`, `【线路3】`, `(Line 1)` to find the common channel base name.
-  static String channelBaseName(String name) => name.replaceAll(_lineSuffix, '').trim();
+  static String channelBaseName(String name) {
+    final stripped = name.replaceAll(_lineSuffix, '').trim();
+    return stripped.isEmpty ? name.trim() : stripped;
+  }
+
+  /// Deduplicates channels that share the same base name within a group and playlist.
+  static List<IptvChannel> _deduplicateChannels(List<IptvChannel> channels) {
+    final seen = <String>{};
+    final result = <IptvChannel>[];
+    for (final channel in channels) {
+      final base = channelBaseName(channel.name);
+      final key = '${channel.playlistId}::${channel.entry.groupTitle ?? ''}::$base';
+      if (seen.add(key)) {
+        result.add(channel);
+      }
+    }
+    return result;
+  }
 
   static const List<String> _offAirKeywords = [
     '休台',
@@ -103,13 +120,13 @@ final class IptvSite extends LiveSite implements LiveSiteRecordRoomResolver {
             id: playlist.id,
             name: playlist.name,
             children: [
-              for (final channel in await library.channels(playlist.id))
+              for (final channel in _deduplicateChannels(await library.channels(playlist.id)))
                 LiveArea(
                   platform: id,
                   areaType: playlist.id,
                   typeName: playlist.name,
                   areaId: channel.id,
-                  areaName: channel.name,
+                  areaName: channelBaseName(channel.name),
                   areaPic: channel.entry.tvgLogo ?? '',
                 ),
             ],
@@ -123,7 +140,14 @@ final class IptvSite extends LiveSite implements LiveSiteRecordRoomResolver {
     final channel = await library.channel(category.areaId);
     if (channel == null) return const [];
     final guide = await _guide(channel);
-    return [_room(channel, nick: channel.entry.groupTitle ?? '', guide: guide)];
+    return [
+      _room(
+        channel,
+        nick: channel.entry.groupTitle ?? '',
+        title: channelBaseName(channel.name),
+        guide: guide,
+      ),
+    ];
   }
 
   @override
@@ -144,18 +168,41 @@ final class IptvSite extends LiveSite implements LiveSiteRecordRoomResolver {
       channels = await library.channels(IptvPlaylist.hotId);
     }
     if (hotRemoved()) return const [];
-    return [for (final channel in channels) _room(channel, nick: '', introduction: channel.name)];
+    return [
+      for (final channel in _deduplicateChannels(channels))
+        _room(
+          channel,
+          nick: channel.entry.groupTitle ?? '',
+          title: channelBaseName(channel.name),
+          introduction: channel.name,
+        ),
+    ];
   }
 
-  Future<List<LiveRoom>> _playlistRooms(String id) async => [
-    for (final channel in await library.channels(id)) _room(channel, nick: '', introduction: channel.name),
-  ];
+  Future<List<LiveRoom>> _playlistRooms(String id) async {
+    final channels = _deduplicateChannels(await library.channels(id));
+    return [
+      for (final channel in channels)
+        _room(
+          channel,
+          nick: channel.entry.groupTitle ?? '',
+          title: channelBaseName(channel.name),
+          introduction: channel.name,
+        ),
+    ];
+  }
 
   @override
   Future<List<LiveRoom>> searchRooms(String keyword, {int page = 1, int pageSize = 30}) async {
     if (page > 1 || keyword.trim().isEmpty) return const [];
+    final matches = _deduplicateChannels(await library.searchChannels(keyword));
     return [
-      for (final channel in await library.searchChannels(keyword)) _room(channel, nick: channel.entry.groupTitle ?? ''),
+      for (final channel in matches)
+        _room(
+          channel,
+          nick: channel.entry.groupTitle ?? '',
+          title: channelBaseName(channel.name),
+        ),
     ];
   }
 
@@ -172,7 +219,12 @@ final class IptvSite extends LiveSite implements LiveSiteRecordRoomResolver {
       return LiveRoom(roomId: roomId, platform: id, link: url, data: url, watching: '', liveStatus: LiveStatus.live);
     }
     final guide = await _guide(channel);
-    return _room(channel, nick: channel.entry.tvgName ?? channel.name, guide: guide);
+    return _room(
+      channel,
+      nick: channel.entry.tvgName ?? channel.name,
+      title: channelBaseName(channel.name),
+      guide: guide,
+    );
   }
 
   /// The stored channel is authoritative, so the recording detail is the
@@ -243,18 +295,22 @@ final class IptvSite extends LiveSite implements LiveSiteRecordRoomResolver {
   LiveRoom _room(
     IptvChannel channel, {
     required String nick,
+    String? title,
     ({String key, EpgProgramme? programme})? guide,
     String? introduction,
   }) {
     final entry = channel.entry;
     final progTitle = guide?.programme?.title;
     final isOffAir = isOffAirProgramme(progTitle);
+    final displayTitle = title ?? entry.name;
+    final logo = entry.tvgLogo ?? '';
     return LiveRoom(
       roomId: channel.id,
       platform: id,
-      title: entry.name,
+      title: displayTitle,
       nick: nick,
-      cover: entry.tvgLogo ?? '',
+      avatar: logo,
+      cover: logo,
       area: entry.groupTitle ?? '',
       watching: '',
       liveStatus: isOffAir ? LiveStatus.offline : LiveStatus.live,

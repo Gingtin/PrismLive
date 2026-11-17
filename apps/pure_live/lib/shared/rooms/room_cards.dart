@@ -86,7 +86,12 @@ final class AudiencePolicy {
   /// made absolute, the room's mark. With [now], a live room's time on air
   /// follows the streamer (UPGRADES "开播时间"; the card has no field for it).
   RoomCardData cardOf(LiveRoom room, {DateTime? now}) {
-    final name = room.displayNick(platformName(room.platform));
+    final isIptv = room.platform == SiteIds.iptv;
+    final name = isIptv
+        ? (room.currentProgramme?.trim().isNotEmpty == true
+            ? room.currentProgramme!.trim()
+            : (room.nick.trim().isNotEmpty ? room.nick.trim() : room.title.trim()))
+        : room.displayNick(platformName(room.platform));
     final duration = now == null ? null : liveDuration(room, now);
     final title = room.title.trim();
     final intro = title.toLowerCase() == room.nick.trim().toLowerCase() ? _firstLine(room.introduction) : null;
@@ -98,7 +103,7 @@ final class AudiencePolicy {
       coverUrl: normalizeImageUrl(room.cover),
       isLive: room.isLiveNow,
       isReplay: room.isRecord,
-      audience: audienceOf(room),
+      audience: isIptv ? null : audienceOf(room),
       restrictionLabel: roomMark(room),
       platformName: platformName(room.platform),
       isOffline: room.isExplicitlyOfflineNow,

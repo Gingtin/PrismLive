@@ -468,6 +468,24 @@ void main() {
     expect(IptvSite.isOffAirProgramme('新闻联播'), isFalse);
     expect(IptvSite.isOffAirProgramme(null), isFalse);
   });
+
+  test('searchRooms and categories deduplicate multi-line channel cards', () async {
+    final harness = _Harness();
+    final importer = harness.importer;
+    final site = harness.site();
+    const m3u = '''#EXTM3U
+#EXTINF:-1 tvg-name="CCTV-1" group-title="央视",CCTV-1 (线路1)
+http://stream.example.com/cctv1-1.m3u8
+#EXTINF:-1 tvg-name="CCTV-1" group-title="央视",CCTV-1 (线路2)
+http://stream.example.com/cctv1-2.m3u8
+#EXTINF:-1 tvg-name="湖南卫视" group-title="卫视",湖南卫视
+http://stream.example.com/hunan.m3u8
+''';
+    await importer.importPlaylist(bytes: utf8.encode(m3u), name: '测试列表', source: '');
+    final searched = await site.searchRooms('CCTV');
+    expect(searched.length, 1);
+    expect(searched.single.title, 'CCTV-1');
+  });
 }
 
 String p(String path) => File(path).absolute.path;

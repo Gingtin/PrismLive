@@ -107,6 +107,20 @@ void main() {
       expect(find.byIcon(AppIcons.networkError), findsNothing);
     });
 
+    testWidgets('IPTV channel hides audience badge and uses channel title for avatar initial', (tester) async {
+      const iptvData = RoomCardData(
+        platformId: 'iptv',
+        title: 'CCTV-1 综合',
+        anchorName: '新闻联播',
+        isLive: true,
+      );
+      await tester.pumpWidget(_host(const LiveRoomCard(data: iptvData)));
+      expect(find.byKey(const ValueKey('cover-audience-metric')), findsNothing);
+      expect(find.text('C'), findsOneWidget);
+      expect(find.text('CCTV-1 综合'), findsOneWidget);
+      expect(find.text('新闻联播'), findsOneWidget);
+    });
+
     testWidgets('c3: colour roles in both themes (white light, container dark); history keeps its delete button', (
       tester,
     ) async {

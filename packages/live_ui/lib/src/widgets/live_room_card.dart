@@ -238,7 +238,11 @@ final class _Parts {
   bool get showPlatform => LiveRoomCard.showsPlatform(appearance, mixedPlatforms: card.mixedPlatforms);
   String get platformText => data.platformName ?? data.platformId.toUpperCase();
   String get pendingText => card.statusPendingLabel ?? words.verifying;
-  bool get showAudience => appearance.showAudience && data.isLive;
+  bool get showAudience =>
+      appearance.showAudience &&
+      data.isLive &&
+      data.platformId != 'iptv' &&
+      (data.audience?.value.isNotEmpty ?? false);
   bool get showReplay => appearance.showReplayBadge && data.isReplay;
   String? get restriction => (data.restrictionLabel?.isEmpty ?? true) ? null : data.restrictionLabel;
 
@@ -332,7 +336,11 @@ final class _Parts {
 
   Widget avatar() => KeyedSubtree(
     key: const ValueKey('room-card-avatar'),
-    child: CommonAvatar(avatarUrl: data.avatarUrl, fallbackName: data.anchorName, dense: dense),
+    child: CommonAvatar(
+      avatarUrl: data.avatarUrl,
+      fallbackName: data.platformId == 'iptv' ? data.title : data.anchorName,
+      dense: dense,
+    ),
   );
 
   Widget title() => Text(
