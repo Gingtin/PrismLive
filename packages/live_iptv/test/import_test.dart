@@ -161,6 +161,54 @@ void main() {
     expect(await iptv.getPlayQualities(detail: LiveRoom(data: '   ')), isEmpty);
   });
 
+  test('multi-line channel siblings are aggregated into play qualities in order', () async {
+    final iptv = site();
+    await importer.importPlaylistText(
+      '央视,#genre#\nCCTV-1,http://f/line1#http://f/line2#http://f/line3\n',
+      'multi_lines.txt',
+    );
+    final playlist = (await library.playlists()).single;
+    final channels = await library.channels(playlist.id);
+    expect(channels, hasLength(3));
+    expect(channels[0].name, 'CCTV-1 (线路1)');
+    expect(channels[1].name, 'CCTV-1 (线路2)');
+    expect(channels[2].name, 'CCTV-1 (线路3)');
+
+    final room1 = await iptv.getRoomDetail(roomId: channels[0].id);
+    final qualities1 = await iptv.getPlayQualities(detail: room1);
+    expect(qualities1.single.data, ['http://f/line1', 'http://f/line2', 'http://f/line3']);
+    final urls1 = await iptv.getPlayUrls(detail: room1, quality: qualities1.single);
+    expect(urls1, ['http://f/line1', 'http://f/line2', 'http://f/line3']);
+
+    // When opening line 2, line 2 is first, followed by sibling lines
+    final room2 = await iptv.getRoomDetail(roomId: channels[1].id);
+    final qualities2 = await iptv.getPlayQualities(detail: room2);
+    expect(qualities2.single.data, ['http://f/line2', 'http://f/line1', 'http://f/line3']);
+  });
+
+  test('EPG off-air programmes mark room as offline and report false in getLiveStatus', () async {
+    final iptv = site();
+    const offAirGuide = '''
+<tv>
+<channel id="cctv1"><display-name>CCTV-1</display-name></channel>
+<programme channel="cctv1" start="20261001110000 +0000" stop="20261001130000 +0000"><title>本台检修休台</title></programme>
+</tv>''';
+    final guide = await importer.importGuide(bytes: utf8.encode(offAirGuide), name: 'g_offair', source: '/tmp/off.xml');
+    selected = guide.id!;
+
+    await importer.importPlaylistText(
+      '#EXTM3U\n#EXTINF:-1 tvg-id="cctv1",CCTV-1\nhttp://f/cctv1.m3u8\n',
+      'cctv.m3u',
+    );
+    final playlist = (await library.playlists()).single;
+    final channel = (await library.channels(playlist.id)).single;
+
+    final room = await iptv.getRoomDetail(roomId: channel.id);
+    expect(room.liveStatus, LiveStatus.offline);
+    expect(room.currentProgramme, '本台检修休台');
+    expect(await iptv.getLiveStatus(roomId: channel.id), isFalse);
+  });
+
   test('local import keeps a copy, asks before replacing, retires the old copy', () async {
     final first = await importer.importPlaylistText('央视,#genre#\nCCTV-1,http://f/1\n', 'list.txt');
     expect(first.status, IptvImportStatus.imported);

@@ -36,6 +36,9 @@ app.*.map.json
 **/android/app/release
 **/windows/flutter/ephemeral/
 
+# Build test artifacts
+build-test/
+
 # Signing material never enters Git (AGENTS.md)
 **/key.properties
 **/*.jks

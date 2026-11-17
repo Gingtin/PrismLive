@@ -54,6 +54,20 @@ final class IptvSite extends LiveSite implements LiveSiteRecordRoomResolver {
   /// Clock for the programme on air.
   final DateTime Function() now;
 
+  static final RegExp _lineSuffix = RegExp(r'\s*\(线路\s*\d+\)\s*$', caseSensitive: false);
+
+  /// Strips line suffix such as `(线路1)`, `(线路2)` to find the common channel base name.
+  static String channelBaseName(String name) => name.replaceAll(_lineSuffix, '').trim();
+
+  static const List<String> _offAirKeywords = ['休台', '停播', '非播出时段', '检修', '维护', '测试卡', '未开播'];
+
+  /// Checks if an EPG programme title indicates that the broadcast is off-air.
+  static bool isOffAirProgramme(String? title) {
+    if (title == null || title.trim().isEmpty) return false;
+    final lower = title.toLowerCase();
+    return _offAirKeywords.any(lower.contains);
+  }
+
   /// The quality id of the single quality.
   static const String qualityId = 'default';
 
@@ -152,10 +166,26 @@ final class IptvSite extends LiveSite implements LiveSiteRecordRoomResolver {
 
   @override
   Future<List<LivePlayQuality>> getPlayQualities({required LiveRoom detail}) async {
-    final url = detail.data?.toString().trim() ?? '';
-    if (url.isEmpty) return const [];
+    final primaryUrl = detail.data?.toString().trim() ?? '';
+    if (primaryUrl.isEmpty) return const [];
+    final urls = <String>[primaryUrl];
+    final channel = await library.channel(detail.roomId);
+    if (channel != null) {
+      final base = channelBaseName(channel.name);
+      if (base.isNotEmpty) {
+        final allChannels = await library.channels(channel.playlistId);
+        for (final other in allChannels) {
+          if (other.id != channel.id && channelBaseName(other.name) == base) {
+            final u = other.entry.streamUrl.trim();
+            if (u.isNotEmpty && !urls.contains(u)) {
+              urls.add(u);
+            }
+          }
+        }
+      }
+    }
     return [
-      LivePlayQuality(quality: '默认', id: qualityId, sort: 1, data: [url]),
+      LivePlayQuality(quality: '默认', id: qualityId, sort: 1, data: urls),
     ];
   }
 
@@ -170,7 +200,14 @@ final class IptvSite extends LiveSite implements LiveSiteRecordRoomResolver {
   }
 
   @override
-  Future<bool> getLiveStatus({required String roomId}) async => true;
+  Future<bool> getLiveStatus({required String roomId}) async {
+    final channel = await library.channel(roomId);
+    if (channel != null) {
+      final guide = await _guide(channel);
+      if (isOffAirProgramme(guide?.programme?.title)) return false;
+    }
+    return true;
+  }
 
   Future<({String key, EpgProgramme? programme})?> _guide(IptvChannel channel) async {
     final sourceId = selectedGuideSourceId();
@@ -194,6 +231,8 @@ final class IptvSite extends LiveSite implements LiveSiteRecordRoomResolver {
     String? introduction,
   }) {
     final entry = channel.entry;
+    final progTitle = guide?.programme?.title;
+    final isOffAir = isOffAirProgramme(progTitle);
     return LiveRoom(
       roomId: channel.id,
       platform: id,
@@ -202,12 +241,12 @@ final class IptvSite extends LiveSite implements LiveSiteRecordRoomResolver {
       cover: entry.tvgLogo ?? '',
       area: entry.groupTitle ?? '',
       watching: '',
-      liveStatus: LiveStatus.live,
+      liveStatus: isOffAir ? LiveStatus.offline : LiveStatus.live,
       introduction: introduction,
       link: entry.streamUrl,
       data: entry.streamUrl,
       epgId: guide?.key,
-      currentProgramme: guide?.programme?.title,
+      currentProgramme: progTitle,
       currentProgrammeDescription: guide?.programme?.description,
       catchUp: CatchUp(
         mode: entry.catchupMode,

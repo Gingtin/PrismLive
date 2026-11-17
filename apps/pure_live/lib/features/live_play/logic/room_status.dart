@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart' show immutable;
 import 'package:live_core/live_core.dart';
+import 'package:live_media/live_media.dart';
 import 'package:live_player/live_player.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/i18n/i18n.dart';
@@ -252,6 +253,18 @@ PictureState pictureStateOf({
   final lines = playback.lineCount;
   final line = lines > 1 ? const [PictureAction.switchLine] : const <PictureAction>[];
   if (playback.status == PlaybackStatus.error) {
+    if (_isOfflinePlayback(playback, room)) {
+      final isIptv = room.platform == SiteIds.iptv;
+      return PictureState(
+        kind: PictureStateKind.offline,
+        title: isIptv ? i18n('iptv_stream_not_live') : i18n('stream_not_live'),
+        reason: _offlinePlaybackReason(playback, room),
+        actions: line.isNotEmpty
+            ? [PictureAction.switchLine, PictureAction.switchRoom]
+            : [PictureAction.retry, PictureAction.switchRoom],
+        dim: PictureDim.cover,
+      );
+    }
     return PictureState(
       kind: PictureStateKind.playbackFailed,
       title: i18n('playback_failure_title'),
@@ -321,12 +334,64 @@ PictureState _offline(LiveRoom room) => switch (room.effectiveLiveStatus) {
   ),
   _ => PictureState(
     kind: PictureStateKind.offline,
-    title: i18n('stream_not_live'),
-    reason: i18n('live_play_offline_hint'),
+    title: room.platform == SiteIds.iptv ? i18n('iptv_stream_not_live') : i18n('stream_not_live'),
+    reason: room.platform == SiteIds.iptv ? _iptvOfflineReason(room) : i18n('live_play_offline_hint'),
     actions: const [PictureAction.switchRoom, PictureAction.refresh],
     dim: PictureDim.cover,
   ),
 };
+
+bool _isOfflinePlayback(PlaybackState playback, LiveRoom room) {
+  if (playback.status != PlaybackStatus.error) return false;
+  final err = playback.error;
+  if (err is StreamUnavailable) return true;
+  if (room.platform == SiteIds.iptv) {
+    if (err is PlayerException) {
+      if (err.type == PlayerErrorType.source || err.type == PlayerErrorType.network) {
+        return true;
+      }
+      final msg = err.message.toLowerCase();
+      if (msg.contains('404') ||
+          msg.contains('502') ||
+          msg.contains('503') ||
+          msg.contains('504') ||
+          msg.contains('connection refused') ||
+          msg.contains('timed out') ||
+          msg.contains('timeout') ||
+          msg.contains('failed to open') ||
+          msg.contains('unable to open') ||
+          msg.contains('error opening') ||
+          msg.contains('could not find codec parameters') ||
+          msg.contains('invalid data found')) {
+        return true;
+      }
+    }
+    final text = err?.toString().toLowerCase() ?? '';
+    if (text.contains('404') ||
+        text.contains('502') ||
+        text.contains('503') ||
+        text.contains('streamunavailable') ||
+        text.contains('connection refused') ||
+        text.contains('timed out')) {
+      return true;
+    }
+  }
+  return false;
+}
+
+String _offlinePlaybackReason(PlaybackState playback, LiveRoom room) {
+  if (room.platform == SiteIds.iptv) {
+    return _iptvOfflineReason(room);
+  }
+  return i18n('live_play_offline_hint');
+}
+
+String _iptvOfflineReason(LiveRoom room) {
+  if (room.currentProgramme case final prog? when prog.trim().isNotEmpty) {
+    return '$prog · ${i18n('iptv_stream_offline_hint')}';
+  }
+  return i18n('iptv_stream_offline_hint');
+}
 
 PictureState _unplayable(LiveRoom room, Object? failure) {
   var restriction = room.isRestricted && room.isLiveNow ? room.effectiveRestriction : LiveRestriction.none;

@@ -296,6 +296,8 @@ class LiveRoomController extends ChangeNotifier {
   int _qualityIndex = 0;
   bool _switching = false;
   bool _switchingLine = false;
+  int _activeLineIndex = 0;
+  bool _lineSwitchedByRecovery = false;
   List<LiveSuperChatMessage> _superChats = const [];
   List<LiveSuperChatMessage> _superChatHistory = const [];
   final Set<LiveSuperChatMessage> _readSuperChats = HashSet.identity();
@@ -638,6 +640,20 @@ class LiveRoomController extends ChangeNotifier {
       debugPrint('playback: $line');
     }
     _loggedRecovery = attempt;
+
+    if (state.lineCount > 1 && !_switchingLine) {
+      if (state.lineIndex != _activeLineIndex) {
+        _activeLineIndex = state.lineIndex;
+        _lineSwitchedByRecovery = true;
+      }
+      if (_lineSwitchedByRecovery && state.status == PlaybackStatus.playing) {
+        _lineSwitchedByRecovery = false;
+        toast?.call(i18n('live_play_switched_line', args: {'line': '${state.lineIndex + 1}'}));
+      }
+    } else if (_switchingLine) {
+      _activeLineIndex = state.lineIndex;
+      _lineSwitchedByRecovery = false;
+    }
   }
 
   /// G03.1: one app log line per timed open (the room's entry), also on
@@ -688,6 +704,8 @@ class LiveRoomController extends ChangeNotifier {
   /// Subscribes to the session's recoveries, danmaku and settings, loads
   /// the room and starts the periodic refresh.
   Future<void> start() async {
+    _activeLineIndex = session.state.lineIndex;
+    _lineSwitchedByRecovery = false;
     _subscriptions
       ..add(session.states.listen(_logRecovery))
       ..add(danmaku.events.listen(_onDanmaku))
@@ -1014,6 +1032,8 @@ class LiveRoomController extends ChangeNotifier {
     // Visitor chat may need its own browser/handshake. Start it alongside
     // the first decoder open, rather than adding that cost after playback.
     if (!userChoice) unawaited(_syncDanmaku(force: true));
+    _activeLineIndex = 0;
+    _lineSwitchedByRecovery = false;
     await session.open(
       PlaybackRequest(
         site: site.id,
@@ -1297,6 +1317,8 @@ class LiveRoomController extends ChangeNotifier {
     _notify();
     await ensureLocalNetworkFor([url], toast: toast);
     if (!_current(epoch)) return 'play_video_failed';
+    _activeLineIndex = 0;
+    _lineSwitchedByRecovery = false;
     await session.open(
       PlaybackRequest(
         site: site.id,
@@ -1343,6 +1365,8 @@ class LiveRoomController extends ChangeNotifier {
   Future<void> selectLine(int index) async {
     if (_switching || _switchingLine) return;
     _switchingLine = true;
+    _lineSwitchedByRecovery = false;
+    _activeLineIndex = index;
     _notify();
     try {
       await session.selectLine(index);

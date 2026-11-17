@@ -16,4 +16,5 @@ export 'src/playlist/playlist_parse_result.dart';
 export 'src/playlist/playlist_parser.dart';
 export 'src/playlist/txt_parser.dart';
 export 'src/reconcile.dart';
+export 'src/stream_probe.dart';
 export 'src/text.dart';
