@@ -79,8 +79,7 @@ class CommonAvatar extends StatelessWidget {
               child: LiveNetworkImage(
                 url: url,
                 memCacheWidth: (size * MediaQuery.devicePixelRatioOf(context)).round().clamp(48, 256),
-                placeholder: (context) =>
-                    ColoredBox(key: const ValueKey('avatar-loading'), color: scheme.surfaceContainer),
+                placeholder: fallback,
                 error: fallback,
               ),
             ),

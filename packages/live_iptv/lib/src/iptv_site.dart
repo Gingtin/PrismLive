@@ -168,19 +168,23 @@ final class IptvSite extends LiveSite implements LiveSiteRecordRoomResolver {
       channels = await library.channels(IptvPlaylist.hotId);
     }
     if (hotRemoved()) return const [];
+    final dedup = _deduplicateChannels(channels);
+    final guides = await _guidesForChannels(dedup);
     return [
-      for (final channel in _deduplicateChannels(channels))
+      for (final channel in dedup)
         _room(
           channel,
           nick: channel.entry.groupTitle ?? '',
           title: channelBaseName(channel.name),
           introduction: channel.name,
+          guide: guides[channel.id],
         ),
     ];
   }
 
   Future<List<LiveRoom>> _playlistRooms(String id) async {
     final channels = _deduplicateChannels(await library.channels(id));
+    final guides = await _guidesForChannels(channels);
     return [
       for (final channel in channels)
         _room(
@@ -188,6 +192,7 @@ final class IptvSite extends LiveSite implements LiveSiteRecordRoomResolver {
           nick: channel.entry.groupTitle ?? '',
           title: channelBaseName(channel.name),
           introduction: channel.name,
+          guide: guides[channel.id],
         ),
     ];
   }
@@ -196,12 +201,14 @@ final class IptvSite extends LiveSite implements LiveSiteRecordRoomResolver {
   Future<List<LiveRoom>> searchRooms(String keyword, {int page = 1, int pageSize = 30}) async {
     if (page > 1 || keyword.trim().isEmpty) return const [];
     final matches = _deduplicateChannels(await library.searchChannels(keyword));
+    final guides = await _guidesForChannels(matches);
     return [
       for (final channel in matches)
         _room(
           channel,
           nick: channel.entry.groupTitle ?? '',
           title: channelBaseName(channel.name),
+          guide: guides[channel.id],
         ),
     ];
   }
@@ -277,20 +284,42 @@ final class IptvSite extends LiveSite implements LiveSiteRecordRoomResolver {
     return true;
   }
 
-  Future<({String key, EpgProgramme? programme})?> _guide(IptvChannel channel) async {
+  Future<Map<String, ({String key, EpgProgramme? programme})>> _guidesForChannels(List<IptvChannel> channels) async {
     final sourceId = selectedGuideSourceId();
-    if (sourceId.isEmpty) return null;
-    final mappings = await library.mappings(channel.playlistId);
-    final key = resolveGuideChannel(
-      channel: channel,
-      sourceId: sourceId,
-      guideChannels: await library.guideChannels(sourceId),
-      mapping: mappings.where((mapping) => mapping.channelId == channel.id).firstOrNull,
-    );
-    if (key == null) return null;
-    final onAir = await library.programmesAt({key}, now());
-    return (key: key, programme: onAir.firstOrNull);
+    if (sourceId.isEmpty || channels.isEmpty) return const {};
+    final guideChannels = await library.guideChannels(sourceId);
+    final playlistIds = {for (final c in channels) c.playlistId};
+    final mappingsByPlaylist = <String, List<EpgMapping>>{};
+    for (final pid in playlistIds) {
+      mappingsByPlaylist[pid] = await library.mappings(pid);
+    }
+    final channelKeys = <String, String>{};
+    for (final channel in channels) {
+      final mappings = mappingsByPlaylist[channel.playlistId] ?? const [];
+      final key = resolveGuideChannel(
+        channel: channel,
+        sourceId: sourceId,
+        guideChannels: guideChannels,
+        mapping: mappings.where((m) => m.channelId == channel.id).firstOrNull,
+      );
+      if (key != null) {
+        channelKeys[channel.id] = key;
+      }
+    }
+    if (channelKeys.isEmpty) return const {};
+    final onAir = await library.programmesAt(channelKeys.values.toSet(), now());
+    final progByKey = <String, EpgProgramme>{};
+    for (final prog in onAir) {
+      progByKey.putIfAbsent(prog.channelKey, () => prog);
+    }
+    return {
+      for (final entry in channelKeys.entries)
+        entry.key: (key: entry.value, programme: progByKey[entry.value]),
+    };
   }
+
+  Future<({String key, EpgProgramme? programme})?> _guide(IptvChannel channel) async =>
+      (await _guidesForChannels([channel]))[channel.id];
 
   LiveRoom _room(
     IptvChannel channel, {

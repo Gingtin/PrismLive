@@ -39,7 +39,11 @@ class _IptvRoomsViewState extends ConsumerState<IptvRoomsView> with WidgetsBindi
           !cannotPlayHere(room, signedIn: false),
       precheck: () => MobileDataNotice.precheck(ref.read(networkProbeProvider)),
     );
-    for (final key in <Setting<Object>>[Settings.iptvPopularPlaylist, Settings.iptvHotRemoved]) {
+    for (final key in <Setting<Object>>[
+      Settings.iptvPopularPlaylist,
+      Settings.iptvHotRemoved,
+      Settings.selectedSourceId,
+    ]) {
       _settings.add(
         ref.read(storeProvider).settings.watch(key).skip(1).listen((_) {
           if (mounted) unawaited(_feed.refresh(count: phonePageSize));

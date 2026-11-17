@@ -64,7 +64,9 @@ final class PopularCatalog {
       for (final feed in _feeds.values) {
         feed.visibilityChanged();
       }
-    } else if (key == Settings.iptvPopularPlaylist.key || key == Settings.iptvHotRemoved.key) {
+    } else if (key == Settings.iptvPopularPlaylist.key ||
+        key == Settings.iptvHotRemoved.key ||
+        key == Settings.selectedSourceId.key) {
       // Another playlist for the IPTV tab (V02.9): shown at once when it is
       // the tab on screen, else when it is shown again.
       final feed = _feeds[SiteIds.iptv]?..markStale();
