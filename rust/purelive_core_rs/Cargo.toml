@@ -1,0 +1,30 @@
+[package]
+name = "purelive_core_rs"
+version = "0.1.0"
+edition = "2021"
+authors = ["PrismLive Authors"]
+description = "PrismLive Core Native Engine: TLS fingerprinting, loopback relay, and Stream Tee remuxing"
+
+[lib]
+name = "purelive_core_rs"
+crate-type = ["cdylib", "staticlib", "rlib"]
+
+[dependencies]
+tokio = { version = "1.40", features = ["rt-multi-thread", "macros", "net", "io-util", "sync", "time"] }
+tokio-util = "0.7"
+futures-util = "0.3"
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "stream", "socks", "json"] }
+bytes = "1.7"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+thiserror = "1.0"
+tracing = "0.1"
+parking_lot = "0.12"
+lazy_static = "1.5"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true

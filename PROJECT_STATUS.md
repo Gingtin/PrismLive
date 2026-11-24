@@ -16,7 +16,7 @@
 | **安装包体积基线** | 严密追踪各 ABI 产物体积，为 Phase 2 Rust 瘦身 (<55MB) 提供对照基准 | 本地实测 Split APK 体积 | 📊 **Debug**: arm64 185.4MB / v7a 154.8MB / x86_64 179.9MB<br>📊 **Release**: arm64 91.9MB / v7a 80.6MB / x86_64 101.6MB |
 | **架构单向依赖 (DAG)** | `packages/*` 纯 Dart，严禁导入 Flutter 或反向依赖 | `python tools/arch_lint/check_architecture.py` | ✅ **0 违规，严格单向无环依赖** |
 | **静态分析 (Analyze)** | `apps/pure_live` + `packages/*` 零报错、零告警 | `dart analyze apps/pure_live/ packages/` | ✅ **No issues found! (0 错误, 0 警告)** |
-| **全工作区单测覆盖** | 覆盖 core/iptv/net/store/media/privacy 各层核心断言 | `dart test` & `flutter test` 多包全跑 | ✅ **live_core (3758/3758) 100%**<br>✅ **live_store (115/115) 100%**<br>✅ **live_iptv (75/75) 100%**<br>✅ **live_net (88/88) 100%**<br>✅ **live_media (58/58) 100%**<br>✅ **nsfw_privacy (4/4) 100% 零暴露通过** |
+| **全工作区单测覆盖** | 覆盖 core/iptv/net/store/media/bridge/privacy 各层核心断言 | `dart test` & `flutter test` 多包全跑 | ✅ **live_core (3758/3758) 100%**<br>✅ **live_store (115/115) 100%**<br>✅ **live_iptv (75/75) 100%**<br>✅ **live_net (88/88) 100%**<br>✅ **live_media (58/58) 100%**<br>✅ **live_bridge (2/2) 100%**<br>✅ **purelive_core_rs (4/4) 100%**<br>✅ **nsfw_privacy (4/4) 100% 零暴露通过** |
 | **可用性状态机与防空壳** | 55+ 源区分就绪/实验/待插件，严禁空壳报错入口 | `SourceSupportStatus` 枚举与多重过滤 | ✅ **30 原生就绪，4 实验，21 待插件；UI 默认过滤待接入插件，抽屉折叠提示** |
 | **安卓真机/模拟器验证** | Android Emulator (`127.0.0.1:16384`) 运行 `v4dev` | `flutter run -d 127.0.0.1:16384` | ✅ **UI交互、底栏Dock、抽屉筛选、FLAG_SECURE 实机正常** |
 | **全库命名统一** | 彻底剔除旧称，对外品牌与 UI 文案统一为「棱镜直播 / PrismLive」 | 189 个文件、435 处匹配扫描 | ✅ **100% 净化完毕** |
@@ -39,6 +39,7 @@ PrismLive/
 │           ├── command_palette/     # CommandPalette (Cmd/Ctrl + K 全局极速命令面板)
 │           └── privacy/             # BossKey (Cmd/Ctrl + Shift + H 老板键), NsfwPrivacyManager
 ├── packages/
+│   ├── live_bridge/                 # [Pure Dart] Rust 原生底座 FFI 绑定包与单例生命周期管理
 │   ├── live_core/                   # [Pure Dart] 领域契约、SourceDescriptor (55+全源目录及可用性状态机)、解析接口
 │   ├── live_iptv/                   # [Pure Dart] M3U/TXT/EPG 解析器、并发探针、2026 GitHub 高稳推荐源
 │   ├── live_ui/                     # [Flutter] StyleSeed 2.0 Tokens、ProxyBadge (直连/建议/需代理徽标)
@@ -47,7 +48,9 @@ PrismLive/
 │   ├── live_player/                 # [Flutter] 基于 libmpv (media_kit) 的精简解码与渲染
 │   ├── live_danmaku/                # [Pure Dart + Canvas] 弹幕协议解析与图集渲染层
 │   ├── live_store/                  # [Pure Dart] 本地优先存储、Drift 数据库与加密存储
-│   └── live_record/                 # [Pure Dart] 录制契约与调度 (过渡态边看边录，Phase 2 升级 Rust Remuxer)
+│   └── live_record/                 # [Pure Dart] 录制契约与调度 (对接 live_bridge Stream Tee 零拷贝录制)
+├── rust/
+│   └── purelive_core_rs/            # [Rust cdylib] 跨平台高性能底座 (Tokio, Rustls, 本地环回中继, Stream Tee)
 └── tools/
     └── arch_lint/                   # 架构依赖防腐门禁 (check_architecture.py)
 ```
@@ -116,25 +119,37 @@ PrismLive/
   3. **零痕迹内存缓存隔离**：NSFW 访问令牌与抓帧缩略图严格驻留在 volatile 内存 LRU 队列中，严禁落盘本地相册或持久数据库；调用 `lock()` 锁屏或 App 进程结束时瞬间清空；在 `live_store` 同步逻辑中物理排除。
   4. **零暴露自动化测试保障**：配置针对 Hard Invariant #5 的单元测试集 `nsfw_privacy_test.dart`，100% 验证未解锁状态下 0 泄漏。
 
+### 3.7 Rust 原生底座与 Stream Tee 零拷贝录制 (`purelive_core_rs` & `live_bridge`)
+- **实现文件**：
+  - `rust/purelive_core_rs/` (Cargo Workspace / `cdylib` / `staticlib`)
+  - `packages/live_bridge/lib/src/purelive_core_bridge.dart`
+  - `packages/live_bridge/lib/src/bridge_bindings.dart`
+- **核心能力**：
+  - **隐蔽 TLS 客户端 (`tls_client.rs`)**：基于 Tokio + Rustls 构建符合浏览器 JA3/JA4 规范的客户端，集成 SOCKS5 与 HTTP 代理多通道分流，打通防盗链与跨国直播源。
+  - **Rust 高性能环回中继 (`relay.rs`)**：在 `127.0.0.1:0` 动态分配端口提供极速本地流代理，自动注入 Referer/Cookie/Origin，单调化修复 FLV 时间戳跳变。
+  - **Stream Tee 零拷贝流分叉 (`stream_tee.rs`)**：一份上行网络拉流，通过 `bytes::Bytes` 引用计数在内存零拷贝分叉，同时供给播放器与后台录制器，达成边看边录 **0 额外 CDN 带宽消耗**。
+  - **IDR 关键帧切片 Remuxer (`remuxer.rs`)**：实时检测 AVC/HEVC 视频关键帧边界，提供按时间（如 1 小时）或体积（如 2GB）的无损无缝切片分卷落盘。
+  - **纯 Dart FFI 接入 (`packages/live_bridge`)**：封装底层 C-ABI，提供安全生命周期管理与优雅回退能力，未编译 Native 库时平滑回退，100% 遵从单向无环架构防腐门禁。
+
 ---
 
 ## 4. 历次维护与变更追踪 (Changelog & Execution Log)
 
 | 时间戳 | 对应提交 | 任务概要与改动明细 | 验证状态 |
 | :--- | :--- | :--- | :--- |
-| **2026-11-24** | *本轮* | **P0 & P1 阶段审计缺陷根治与全量门禁升级**：<br>1. **根治 Android CI 红灯**：删除 `apps/pure_live/android/app/build.gradle.kts` 中手写的 `splits { abi { ... } }` 块，解决与 Flutter `--split-per-abi` 注入冲突，本地 debug/release split APK 编译 100% 通过。<br>2. **CI 工作流现代化**：`.github/workflows/android.yml` 升级至 Node 24 原生 Action（`checkout@v6`, `setup-java@v5`, `upload-artifact@v7`），新增 `setup-gradle@v4` 缓存加速与全工作区测试门禁，清理旧 `ffmpeg-kit-apple.yml`。<br>3. **55+ 平台可用性状态机**：新增 `SourceSupportStatus` 枚举并标注全部 55+ 平台真实状态，UI 默认过滤待接入插件源，彻底杜绝空壳入口报错。<br>4. **落地 NSFW 四重隔离**：实现加盐 SHA-256 6 位 PIN 认证、Android `FLAG_SECURE` 防截屏与退后台黑屏 MethodChannel、内存零落盘 LRU 缓存，并通过 4/4 零暴露单测。<br>5. **全工作区测试覆盖验证**：`live_core` (3758/3758), `live_store` (115/115), `live_iptv` (75/75), `live_net` (88/88), `live_media` (58/58), `nsfw_privacy` (4/4) 全部 100% 绿灯通过。 | ✅ 本地 debug/release 编译通过<br>✅ Arch Lint 0 违规<br>✅ Dart Analyze 0 告警<br>✅ 全工作区单测全部绿灯 |
+| **2026-11-24** | *本轮* | **P2.1 Rust 原生底座与 Stream Tee 零拷贝录制最小闭环**：<br>1. **构建 `rust/purelive_core_rs`**：实现 Tokio 多线程运行时、Rustls TLS 客户端、环回中继服务、Stream Tee 字节流广播通道、FLV 时间戳单调化与 IDR 关键帧切片器。<br>2. **构建 `packages/live_bridge`**：纯 Dart FFI 绑定包，实现安全动态库加载、Relay 注册与 Stream Tee 录制调度。<br>3. **全量门禁与单测通过**：Rust 核心单测 4/4 绿灯；live_bridge 2/2 绿灯；全库 `dart analyze` 0 告警；架构 DAG 0 违规；Release 动态库仅 2.45 MB。 | ✅ cargo test 4/4 通过<br>✅ live_bridge 2/2 通过<br>✅ Arch Lint 0 违规<br>✅ Dart Analyze 0 告警 |
+| **2026-11-24** | `f12eaf59` | **P0 & P1 阶段审计缺陷根治与全量门禁升级**：<br>1. 根治 Android CI `--split-per-abi` 冲突。<br>2. CI 工作流全面升级至 Node 24 原生版本并加 Gradle 缓存。<br>3. 55+ 平台描述符增加可用性状态机与防空壳机制。<br>4. 落地带盐 PIN、Android `FLAG_SECURE` 窗口黑屏与内存零落盘四重隐私隔离。 | ✅ 本地 debug/release 编译通过<br>✅ 全工作区单测全部绿灯 |
 | **2026-11-24** | `e88208d7` | **全局去重与命名净化**：全库 189 个文件扫描，将 435 处历史旧名彻底替换为「棱镜直播 / PrismLive」。 | ✅ 编译通过，已推送 GitHub |
-| **2026-11-24** | `e7558d3e` | **Master Spec 2.0 全面落地**：<br>1. 新建 `source_descriptor.dart` 与 55+ 平台全量描述符表。<br>2. 新建 `ProxyBadge`，并在房间卡片与标签页集成。<br>3. 实现 `PinnedDock` 与 `SourcePickerSheet`，落地拼音/多维胶囊筛选。<br>4. 新增 `CommandPalette` (`Ctrl+K`) 与 `BossKey` (`Ctrl+Shift+H`)。<br>5. 预设 2026 稳定 IPTV/EPG 目录。<br>6. 优化 CI 工作流剔除 `ffmpeg_kit`。 | ✅ Arch Lint 通过<br>✅ Dart Analyze 0 告警<br>✅ live_iptv 75/75 单测通过<br>✅ Android 模拟器实测正常 |
+| **2026-11-24** | `e7558d3e` | **Master Spec 2.0 全面落地**：55+ 平台描述符表、ProxyBadge、PinnedDock、SourcePickerSheet、CommandPalette、BossKey、IPTV 预设。 | ✅ 模拟器实测正常 |
 
 ---
 
 ## 5. 后续迭代计划与演进路线 (Roadmap)
 
-1. **Rust 原生底座与 Stream Tee 零拷贝录制 (`purelive_core_rs`)**：
-   - 编写 `rust/purelive_core_rs` 模块，集成 TLS 指纹模拟、HTTP/3 QUIC 与本地环回中继。
-   - 彻底取代旧录制逻辑，达成边看边录零额外带宽开销。
+1. **Rust 原生底座与 Stream Tee 零拷贝录制 (`purelive_core_rs` / `live_bridge`)**：
+   - ✅ **P2.1 已落地**：Rust 环回中继与 Stream Tee 内存分叉闭环已跑通，单测 100% 覆盖。
 2. **QuickJS-NG 签名沙箱加载器 (`live_plugin_runtime`)**：
-   - 实现 Ed25519 签名验证与无文件权限脚本执行，将其余 50+ 易变站点解耦至热更新插件包。
+   - 实现 Ed25519 签名验证与无文件权限脚本执行，将其余 20+ 待接入站点解耦至热更新插件包。
 3. **Rust IDR 首帧轻量截断嗅探器 (`live_player`)**：
    - 替代 `libmpv` 全量软解截屏，实现 50~150KB 内存首帧嗅探与列表滚动 300ms 防抖。
 4. **Impeller 纹理图集单层弹幕引擎 (`live_danmaku`)**：

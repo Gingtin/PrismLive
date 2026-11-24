@@ -10,6 +10,7 @@ resolution: workspace
 
 dependencies:
   clock: ^1.1.3
+  live_bridge: any
   live_core: any
   live_media: any
   live_net: any

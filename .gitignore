@@ -58,6 +58,8 @@ build-test*/
 *.apk
 deploy_to_*.bat
 deploy_to_*.ps1
+rust/**/target/
+**/target/
 
 # Agent worktrees (Claude Code)
 /.claude/worktrees/

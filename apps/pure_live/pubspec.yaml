@@ -58,6 +58,8 @@ dependencies:
   go_router: ^18.1.1
   # The image cache's download client (IOClient over a proxied HttpClient).
   http: ^1.6.0
+  # Native Rust Core Engine Bridge
+  live_bridge: any
   # DLNA casting from the live room (M10).
   live_cast: any
   live_core: any

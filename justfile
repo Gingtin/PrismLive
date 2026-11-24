@@ -12,6 +12,7 @@ setup:
 # 2. Workspace verification: architecture lint & full-workspace package tests
 test:
     python tools/arch_lint/check_architecture.py
+    dart test packages/live_bridge
     dart test packages/live_iptv
     dart test packages/live_store
     flutter test packages/live_ui
