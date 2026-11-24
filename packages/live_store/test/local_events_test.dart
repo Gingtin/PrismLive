@@ -132,7 +132,10 @@ void main() {
   test('a 4.0.0 database (schema 1, a real file) moves to 2; nothing in it is lost', () async {
     final temp = await Directory.systemTemp.createTemp('live_store_v1_');
     addTearDown(() => temp.delete(recursive: true));
-    await File(p.join('test', 'fixtures', 'store_v1.db')).copy(p.join(temp.path, LiveStore.fileName));
+    final fixtureFile = File(p.join('test', 'fixtures', 'store_v1.db')).existsSync()
+        ? File(p.join('test', 'fixtures', 'store_v1.db'))
+        : File(p.join('packages', 'live_store', 'test', 'fixtures', 'store_v1.db'));
+    await fixtureFile.copy(p.join(temp.path, LiveStore.fileName));
     final store = await LiveStore.open(temp, cipher: const FakeCipher());
     final lines = store.settings.get(Settings.localInteractionHistory);
     expect(lines, ['增加本地体验币 +500', '🌶️ 📺 舰队等级 · 听众 · Pure Live 送出 辣条 ×1', '增加本地体验币 +2000']);

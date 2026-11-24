@@ -91,6 +91,34 @@ enum NetworkMode {
   bool get usesProxy => this != NetworkMode.direct;
 }
 
+/// Availability and support status of the live platform / source.
+enum SourceSupportStatus {
+  /// Native or plugin extractor is ready for full playback.
+  ready('ready', '已就绪'),
+
+  /// Usable but may require proxy or experience intermittent instability.
+  experimental('experimental', '实验性'),
+
+  /// Metadata descriptor registered; waiting for Phase 2 QuickJS-NG plugin.
+  pluginPending('pluginPending', '待接入'),
+
+  /// Platform discontinued, shut down, or temporarily disabled.
+  disabled('disabled', '已下线');
+
+  new(this.code, this.label);
+
+  /// Status code string.
+  final String code;
+
+  /// Chinese display label.
+  final String label;
+
+  /// Whether the source can be selected and played right now.
+  bool get isPlayable =>
+      this == SourceSupportStatus.ready ||
+      this == SourceSupportStatus.experimental;
+}
+
 /// Metadata descriptor for a live platform, IPTV feed, or custom plugin.
 @immutable
 class SourceDescriptor {
@@ -101,6 +129,7 @@ class SourceDescriptor {
     required this.region,
     required this.categories,
     required this.networkMode,
+    this.supportStatus = SourceSupportStatus.ready,
     this.isNsfw = false,
     this.isNative = false,
     this.websiteUrl,
@@ -115,6 +144,7 @@ class SourceDescriptor {
     SourceRegion region = SourceRegion.domestic,
     Set<SourceCategory> categories = const {SourceCategory.entertainment},
     NetworkMode networkMode = NetworkMode.direct,
+    SourceSupportStatus supportStatus = SourceSupportStatus.ready,
     bool isNsfw = false,
   }) {
     return SourceDescriptor(
@@ -123,6 +153,7 @@ class SourceDescriptor {
       region: region,
       categories: categories,
       networkMode: networkMode,
+      supportStatus: supportStatus,
       isNsfw: isNsfw,
     );
   }
@@ -141,6 +172,9 @@ class SourceDescriptor {
 
   /// Network routing & proxy requirement.
   final NetworkMode networkMode;
+
+  /// Availability and implementation support state.
+  final SourceSupportStatus supportStatus;
 
   /// Whether this source is strictly categorized as NSFW (Adult Content).
   /// Under Hard Invariant #5, NSFW sources must be 100% hidden by default.
@@ -178,6 +212,7 @@ class SourceDescriptor {
     SourceRegion? region,
     Set<SourceCategory>? categories,
     NetworkMode? networkMode,
+    SourceSupportStatus? supportStatus,
     bool? isNsfw,
     bool? isNative,
     String? websiteUrl,
@@ -190,6 +225,7 @@ class SourceDescriptor {
       region: region ?? this.region,
       categories: categories ?? this.categories,
       networkMode: networkMode ?? this.networkMode,
+      supportStatus: supportStatus ?? this.supportStatus,
       isNsfw: isNsfw ?? this.isNsfw,
       isNative: isNative ?? this.isNative,
       websiteUrl: websiteUrl ?? this.websiteUrl,
@@ -205,11 +241,13 @@ class SourceDescriptor {
           runtimeType == other.runtimeType &&
           id == other.id &&
           networkMode == other.networkMode &&
+          supportStatus == other.supportStatus &&
           isNsfw == other.isNsfw;
 
   @override
-  int get hashCode => Object.hash(id, networkMode, isNsfw);
+  int get hashCode => Object.hash(id, networkMode, supportStatus, isNsfw);
 
   @override
-  String toString() => 'SourceDescriptor($id, $name, $region, $networkMode, nsfw=$isNsfw)';
+  String toString() =>
+      'SourceDescriptor($id, $name, $region, $networkMode, $supportStatus, nsfw=$isNsfw)';
 }

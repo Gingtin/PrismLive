@@ -53,15 +53,6 @@ extensions.configure<com.android.build.api.dsl.ApplicationExtension> {
         manifestPlaceholders["appLabel"] = "棱镜直播"
     }
 
-    splits {
-        abi {
-            isEnable = providers.gradleProperty("pureLive.splitPerAbi").orNull.toBoolean()
-            reset()
-            include("arm64-v8a", "x86_64", "armeabi-v7a")
-            isUniversalApk = true
-        }
-    }
-
     signingConfigs {
         if (hasReleaseSigning) {
             create("release") {

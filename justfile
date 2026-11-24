@@ -9,11 +9,13 @@ setup:
     python tools/flutter_sdk/prepare.py --apply
     flutter pub get
 
-# 2. Workspace verification: architecture lint & core package tests
+# 2. Workspace verification: architecture lint & full-workspace package tests
 test:
     python tools/arch_lint/check_architecture.py
+    dart test packages/live_iptv
     dart test packages/live_store
     flutter test packages/live_ui
+    flutter test apps/pure_live/test/features/privacy/nsfw_privacy_test.dart
     flutter test packages/live_player/test/decoder_budget_manager_test.dart
 
 # 3. Android build with specified target ABI (default: arm64-v8a)

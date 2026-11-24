@@ -122,7 +122,7 @@ class _SourcePickerSheetState extends ConsumerState<SourcePickerSheet> {
     const allIds = SiteIds.supported;
 
     // Filter available platforms
-    final filtered = allIds.map(SiteIds.descriptorOf).where((desc) {
+    final allMatching = allIds.map(SiteIds.descriptorOf).where((desc) {
       if (desc.isNsfw) return false; // Hard Invariant #5: strictly hidden by default
 
       if (_searchQuery.isNotEmpty && !desc.matchesQuery(_searchQuery)) {
@@ -139,6 +139,9 @@ class _SourcePickerSheetState extends ConsumerState<SourcePickerSheet> {
       }
       return true;
     }).toList();
+
+    final playable = allMatching.where((d) => d.supportStatus.isPlayable).toList();
+    final pending = allMatching.where((d) => d.supportStatus == SourceSupportStatus.pluginPending).toList();
 
     return Column(
       children: [
@@ -250,7 +253,7 @@ class _SourcePickerSheetState extends ConsumerState<SourcePickerSheet> {
 
         // Grid of Platforms
         Expanded(
-          child: filtered.isEmpty
+          child: playable.isEmpty && pending.isEmpty
               ? Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -261,87 +264,188 @@ class _SourcePickerSheetState extends ConsumerState<SourcePickerSheet> {
                     ],
                   ),
                 )
-              : GridView.builder(
+              : ListView(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                    maxCrossAxisExtent: 240,
-                    mainAxisExtent: 68,
-                    crossAxisSpacing: 10,
-                    mainAxisSpacing: 10,
-                  ),
-                  itemCount: filtered.length,
-                  itemBuilder: (context, index) {
-                    final desc = filtered[index];
-                    final isSelected = desc.id == widget.selectedPlatform;
-                    final isPinned = widget.pinnedIds.contains(desc.id);
-
-                    return InkWell(
-                      onTap: () => widget.onSelect(desc.id),
-                      borderRadius: BorderRadius.circular(12),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? theme.colorScheme.primaryContainer.withValues(alpha: 0.35)
-                              : theme.colorScheme.surfaceContainerLow,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: isSelected
-                                ? theme.colorScheme.primary
-                                : theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
-                            width: isSelected ? 1.5 : 1.0,
-                          ),
+                  children: [
+                    if (playable.isNotEmpty)
+                      GridView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                          maxCrossAxisExtent: 240,
+                          mainAxisExtent: 68,
+                          crossAxisSpacing: 10,
+                          mainAxisSpacing: 10,
                         ),
-                        child: Row(
-                          children: [
-                            PlatformLogo(desc.id),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.center,
+                        itemCount: playable.length,
+                        itemBuilder: (context, index) {
+                          final desc = playable[index];
+                          final isSelected = desc.id == widget.selectedPlatform;
+                          final isPinned = widget.pinnedIds.contains(desc.id);
+
+                          return InkWell(
+                            onTap: () => widget.onSelect(desc.id),
+                            borderRadius: BorderRadius.circular(12),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? theme.colorScheme.primaryContainer.withValues(alpha: 0.35)
+                                    : theme.colorScheme.surfaceContainerLow,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: isSelected
+                                      ? theme.colorScheme.primary
+                                      : theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
+                                  width: isSelected ? 1.5 : 1.0,
+                                ),
+                              ),
+                              child: Row(
                                 children: [
-                                  Text(
-                                    desc.name,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                                      fontSize: 13,
-                                      color: isSelected ? theme.colorScheme.primary : null,
+                                  PlatformLogo(desc.id),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          desc.name,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                                            fontSize: 13,
+                                            color: isSelected ? theme.colorScheme.primary : null,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 3),
+                                        Row(
+                                          children: [
+                                            ProxyBadge(
+                                              mode: switch (desc.networkMode) {
+                                                NetworkMode.direct => ProxyBadgeMode.direct,
+                                                NetworkMode.proxyRecommended => ProxyBadgeMode.proxyRecommended,
+                                                NetworkMode.proxyRequired => ProxyBadgeMode.proxyRequired,
+                                              },
+                                              compact: true,
+                                            ),
+                                          ],
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                  const SizedBox(height: 3),
-                                  Row(
-                                    children: [
-                                      ProxyBadge(
-                                        mode: switch (desc.networkMode) {
-                                          NetworkMode.direct => ProxyBadgeMode.direct,
-                                          NetworkMode.proxyRecommended => ProxyBadgeMode.proxyRecommended,
-                                          NetworkMode.proxyRequired => ProxyBadgeMode.proxyRequired,
-                                        },
-                                        compact: true,
+                                  if (widget.onTogglePin != null)
+                                    IconButton(
+                                      icon: Icon(
+                                        isPinned ? Remix.pushpin_fill : Remix.pushpin_line,
+                                        size: 16,
+                                        color: isPinned ? theme.colorScheme.primary : theme.colorScheme.outline,
                                       ),
-                                    ],
-                                  ),
+                                      tooltip: isPinned ? '取消置顶' : '置顶到首屏',
+                                      onPressed: () => widget.onTogglePin!(desc.id),
+                                    ),
                                 ],
                               ),
                             ),
-                            if (widget.onTogglePin != null)
-                              IconButton(
-                                icon: Icon(
-                                  isPinned ? Remix.pushpin_fill : Remix.pushpin_line,
-                                  size: 16,
-                                  color: isPinned ? theme.colorScheme.primary : theme.colorScheme.outline,
-                                ),
-                                tooltip: isPinned ? '取消置顶' : '置顶到首屏',
-                                onPressed: () => widget.onTogglePin!(desc.id),
+                          );
+                        },
+                      ),
+                    if (pending.isNotEmpty) ...[
+                      const SizedBox(height: 16),
+                      Theme(
+                        data: theme.copyWith(dividerColor: Colors.transparent),
+                        child: ExpansionTile(
+                          tilePadding: const EdgeInsets.symmetric(horizontal: 4),
+                          leading: Icon(Remix.puzzle_line, size: 20, color: theme.colorScheme.primary),
+                          title: Text(
+                            '待接入扩展平台 (${pending.length})',
+                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                          ),
+                          subtitle: const Text(
+                            '等待 Phase 2 QuickJS-NG 沙箱热更接入',
+                            style: TextStyle(fontSize: 11, color: Colors.grey),
+                          ),
+                          children: [
+                            GridView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              padding: const EdgeInsets.only(top: 8, bottom: 8),
+                              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                                maxCrossAxisExtent: 240,
+                                mainAxisExtent: 68,
+                                crossAxisSpacing: 10,
+                                mainAxisSpacing: 10,
                               ),
+                              itemCount: pending.length,
+                              itemBuilder: (context, index) {
+                                final desc = pending[index];
+                                return InkWell(
+                                  onTap: () {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('${desc.name} 平台插件接入中，将在 Phase 2 沙箱热更上线'),
+                                        duration: const Duration(seconds: 2),
+                                      ),
+                                    );
+                                  },
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                    decoration: BoxDecoration(
+                                      color: theme.colorScheme.surfaceContainerLow.withValues(alpha: 0.6),
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(
+                                        color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
+                                      ),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Opacity(opacity: 0.6, child: PlatformLogo(desc.id)),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              Text(
+                                                desc.name,
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: const TextStyle(
+                                                  fontSize: 13,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 3),
+                                              Container(
+                                                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                                                decoration: BoxDecoration(
+                                                  color: theme.colorScheme.surfaceContainerHighest,
+                                                  borderRadius: BorderRadius.circular(4),
+                                                ),
+                                                child: Text(
+                                                  '待接入',
+                                                  style: TextStyle(
+                                                    fontSize: 9,
+                                                    color: theme.colorScheme.outline,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
                           ],
                         ),
                       ),
-                    );
-                  },
+                    ],
+                  ],
                 ),
         ),
       ],

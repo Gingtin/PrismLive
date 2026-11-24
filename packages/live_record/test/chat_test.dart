@@ -32,7 +32,15 @@ Future<void> _until(bool Function() done) async {
 void main() {
   late Directory folder;
   setUp(() async => folder = await Directory.systemTemp.createTemp('live_record_chat_'));
-  tearDown(() => folder.delete(recursive: true));
+  tearDown(() {
+    try {
+      if (folder.existsSync()) {
+        folder.deleteSync(recursive: true);
+      }
+    } on Object catch (_) {
+      // Windows file locks may linger until process exit or GC
+    }
+  });
 
   test('the XML file is a complete document after every flush (3.x left it unterminated)', () async {
     final file = File(p.join(folder.path, 'a.xml'));

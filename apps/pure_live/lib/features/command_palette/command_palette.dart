@@ -140,6 +140,8 @@ class _CommandPaletteState extends ConsumerState<CommandPalette> {
     for (final id in allPlatforms) {
       final desc = SiteIds.descriptorOf(id);
       if (desc.isNsfw) continue;
+      // Filter out pending plugins or disabled platforms to avoid dead entries
+      if (!desc.supportStatus.isPlayable) continue;
 
       if (_query.isEmpty || desc.matchesQuery(_query)) {
         final mode = switch (desc.networkMode) {

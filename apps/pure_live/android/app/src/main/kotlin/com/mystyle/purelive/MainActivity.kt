@@ -308,6 +308,29 @@ class MainActivity : AudioServiceActivity() {
                 else -> result.notImplemented()
             }
         }
+        MethodChannel(
+            flutterEngine.dartExecutor.binaryMessenger,
+            "com.mystyle.purelive/privacy_shield",
+        ).setMethodCallHandler { call, result ->
+            when (call.method) {
+                "setSecure" -> {
+                    val enabled = call.argument<Boolean>("enabled") ?: false
+                    runOnUiThread {
+                        if (enabled) {
+                            window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
+                        } else {
+                            window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
+                        }
+                    }
+                    result.success(true)
+                }
+                "isSecure" -> {
+                    val isSecure = (window.attributes.flags and WindowManager.LayoutParams.FLAG_SECURE) != 0
+                    result.success(isSecure)
+                }
+                else -> result.notImplemented()
+            }
+        }
         // Back on the home page sends the app to the background instead of
         // closing it (3.x used the move_to_desktop plugin). The TV interface
         // (M14.1) asks whether this is a television and types text through a

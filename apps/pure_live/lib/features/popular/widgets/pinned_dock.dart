@@ -35,9 +35,11 @@ class PinnedDock extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
 
-    final effectivePinnedIds = (selectedId.isNotEmpty && !pinnedIds.contains(selectedId))
-        ? [selectedId, ...pinnedIds]
-        : pinnedIds;
+    final effectivePinnedIds = ((selectedId.isNotEmpty && !pinnedIds.contains(selectedId))
+            ? [selectedId, ...pinnedIds]
+            : pinnedIds)
+        .where((id) => SiteIds.descriptorOf(id).supportStatus.isPlayable)
+        .toList();
 
     return Container(
       height: 48,

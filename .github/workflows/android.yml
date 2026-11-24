@@ -19,13 +19,18 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
           java-version: '21'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: false
 
       - name: Read toolchain.env
         run: |
@@ -45,13 +50,32 @@ jobs:
           flutter --version
           flutter pub get --enforce-lockfile
 
+      - name: Workspace Tests
+        run: |
+          set -euo pipefail
+          python3 tools/arch_lint/check_architecture.py
+          dart test packages/live_iptv
+          dart test packages/live_store
+          flutter test packages/live_ui
+          flutter test apps/pure_live/test/features/privacy/nsfw_privacy_test.dart
+
       - name: Build Android APK
         working-directory: apps/pure_live
         run: |
           flutter build apk --debug --split-per-abi
 
+      - name: Verify APK size and stats
+        run: |
+          echo "=== Generated APK Files ==="
+          ls -lh apps/pure_live/build/app/outputs/flutter-apk/*.apk
+          ARM64_APK=$(ls apps/pure_live/build/app/outputs/flutter-apk/*arm64*.apk 2>/dev/null | head -n 1 || true)
+          if [ -n "$ARM64_APK" ]; then
+            SIZE_MB=$(du -m "$ARM64_APK" | cut -f1)
+            echo "arm64-v8a APK size: ${SIZE_MB} MB"
+          fi
+
       - name: Upload APK artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: PrismLive-Android-APKs
           path: apps/pure_live/build/app/outputs/flutter-apk/*.apk
