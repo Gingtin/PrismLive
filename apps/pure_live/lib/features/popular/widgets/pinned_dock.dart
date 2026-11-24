@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_ui/live_ui.dart';
+import 'package:pure_live/features/privacy/nsfw_privacy_manager.dart';
 
 /// Top Pinned Dock (常用置顶槽) displaying 5–8 favorite platforms with active indicator,
 /// proxy badges, and a direct entrance to the full SourcePickerSheet.
@@ -32,13 +33,20 @@ class PinnedDock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: NsfwPrivacyManager.instance,
+      builder: (context, _) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
 
     final effectivePinnedIds = ((selectedId.isNotEmpty && !pinnedIds.contains(selectedId))
             ? [selectedId, ...pinnedIds]
             : pinnedIds)
-        .where((id) => SiteIds.descriptorOf(id).supportStatus.isPlayable)
+        .where((id) {
+          final desc = SiteIds.descriptorOf(id);
+          if (desc.isNsfw && !NsfwPrivacyManager.instance.isUnlocked) return false;
+          return desc.supportStatus.isPlayable;
+        })
         .toList();
 
     return Container(
@@ -109,6 +117,10 @@ class PinnedDock extends StatelessWidget {
                           const SizedBox(width: 4),
                           ProxyBadge(mode: proxyBadgeMode, compact: true),
                         ],
+                        if (desc.isNsfw) ...[
+                          const SizedBox(width: 4),
+                          const NsfwBadge(compact: true),
+                        ],
                       ],
                     ),
                   ),
@@ -158,6 +170,8 @@ class PinnedDock extends StatelessWidget {
           ),
         ],
       ),
+    );
+      },
     );
   }
 }

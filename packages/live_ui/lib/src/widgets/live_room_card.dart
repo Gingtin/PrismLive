@@ -10,6 +10,7 @@ import 'package:live_ui/src/theme/text_styles.dart';
 import 'package:live_ui/src/theme/tv_colors.dart';
 import 'package:live_ui/src/widgets/avatar.dart';
 import 'package:live_ui/src/widgets/network_image.dart';
+import 'package:live_ui/src/widgets/nsfw_badge.dart';
 import 'package:live_ui/src/widgets/proxy_badge.dart';
 import 'package:live_ui/src/widgets/realtime_cover_cache.dart';
 import 'package:live_ui/src/widgets/room_card.dart';
@@ -449,6 +450,8 @@ final class _Parts {
                       if (card.followed) followedMark(),
                       if (data.proxyMode != null && data.proxyMode != ProxyBadgeMode.direct)
                         ProxyBadge(mode: data.proxyMode!, compact: true),
+                      if (data.isNsfw)
+                        const NsfwBadge(compact: true),
                     ],
                   ),
                 ),
@@ -512,6 +515,7 @@ final class _Parts {
       if (canShowMetrics) ...[
         if (showPlatform) platformChip(),
         if (card.followed) followedMark(),
+        if (data.isNsfw) const NsfwBadge(compact: true),
         if (restricted != null)
           CoverChip(key: const ValueKey('room-card-restriction'), icon: AppIcons.restrictedBadge, text: restricted),
         if (card.statusPending)

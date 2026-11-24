@@ -122,6 +122,7 @@ final class AudiencePolicy {
         NetworkMode.proxyRecommended => ProxyBadgeMode.proxyRecommended,
         NetworkMode.direct => ProxyBadgeMode.direct,
       },
+      isNsfw: SiteIds.descriptorOf(room.platform).isNsfw || room.effectiveRestriction == LiveRestriction.adult,
       isOffline: room.isExplicitlyOfflineNow,
       // A09.11 (UPGRADES 11-5): a title that is already the streamer's
       // name (Picarto's and CHZZK's channels, Kuaishou's streamers, …)

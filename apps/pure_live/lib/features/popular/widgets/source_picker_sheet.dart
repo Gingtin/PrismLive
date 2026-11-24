@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_ui/live_ui.dart';
+import 'package:pure_live/features/privacy/nsfw_privacy_manager.dart';
 
 /// Modal bottom sheet or side panel for selecting among 55+ platforms and IPTV
 /// sources with multi-dimensional filtering, proxy badges, and instant search.
@@ -118,12 +119,18 @@ class _SourcePickerSheetState extends ConsumerState<SourcePickerSheet> {
 
   @override
   Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: NsfwPrivacyManager.instance,
+      builder: (context, _) {
+    final isUnlocked = NsfwPrivacyManager.instance.isUnlocked;
     final theme = Theme.of(context);
-    const allIds = SiteIds.supported;
+    final allDescriptors = isUnlocked
+        ? SiteIds.descriptors.values
+        : SiteIds.descriptors.values.where((d) => !d.isNsfw);
 
     // Filter available platforms
-    final allMatching = allIds.map(SiteIds.descriptorOf).where((desc) {
-      if (desc.isNsfw) return false; // Hard Invariant #5: strictly hidden by default
+    final allMatching = allDescriptors.where((desc) {
+      if (desc.isNsfw && !isUnlocked) return false;
 
       if (_searchQuery.isNotEmpty && !desc.matchesQuery(_searchQuery)) {
         return false;
@@ -245,6 +252,18 @@ class _SourcePickerSheetState extends ConsumerState<SourcePickerSheet> {
                 selected: _filterNetwork == NetworkMode.proxyRequired,
                 onSelected: (sel) => setState(() => _filterNetwork = sel ? NetworkMode.proxyRequired : null),
               ),
+              if (isUnlocked)
+                FilterChip(
+                  label: const Text('18🈲'),
+                  selected: _filterCategory == SourceCategory.adult,
+                  onSelected: (sel) => setState(() {
+                    _filterCategory = sel ? SourceCategory.adult : null;
+                    if (sel) {
+                      _filterRegion = null;
+                      _filterNetwork = null;
+                    }
+                  }),
+                ),
             ],
           ),
         ),
@@ -330,6 +349,10 @@ class _SourcePickerSheetState extends ConsumerState<SourcePickerSheet> {
                                               },
                                               compact: true,
                                             ),
+                                            if (desc.isNsfw) ...[
+                                              const SizedBox(width: 4),
+                                              const NsfwBadge(compact: true),
+                                            ],
                                           ],
                                         ),
                                       ],
@@ -418,19 +441,27 @@ class _SourcePickerSheetState extends ConsumerState<SourcePickerSheet> {
                                                 ),
                                               ),
                                               const SizedBox(height: 3),
-                                              Container(
-                                                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-                                                decoration: BoxDecoration(
-                                                  color: theme.colorScheme.surfaceContainerHighest,
-                                                  borderRadius: BorderRadius.circular(4),
-                                                ),
-                                                child: Text(
-                                                  '待接入',
-                                                  style: TextStyle(
-                                                    fontSize: 9,
-                                                    color: theme.colorScheme.outline,
+                                              Row(
+                                                children: [
+                                                  Container(
+                                                    padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                                                    decoration: BoxDecoration(
+                                                      color: theme.colorScheme.surfaceContainerHighest,
+                                                      borderRadius: BorderRadius.circular(4),
+                                                    ),
+                                                    child: Text(
+                                                      '待接入',
+                                                      style: TextStyle(
+                                                        fontSize: 9,
+                                                        color: theme.colorScheme.outline,
+                                                      ),
+                                                    ),
                                                   ),
-                                                ),
+                                                  if (desc.isNsfw) ...[
+                                                    const SizedBox(width: 4),
+                                                    const NsfwBadge(compact: true),
+                                                  ],
+                                                ],
                                               ),
                                             ],
                                           ),
@@ -449,6 +480,8 @@ class _SourcePickerSheetState extends ConsumerState<SourcePickerSheet> {
                 ),
         ),
       ],
+    );
+      },
     );
   }
 }

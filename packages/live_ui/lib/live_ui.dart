@@ -50,6 +50,7 @@ export 'src/widgets/listenable_selector.dart';
 export 'src/widgets/live_room_card.dart';
 export 'src/widgets/loading_styles.dart';
 export 'src/widgets/network_image.dart';
+export 'src/widgets/nsfw_badge.dart';
 export 'src/widgets/page_title.dart';
 export 'src/widgets/pip_danmaku_preview.dart';
 export 'src/widgets/proxy_badge.dart';

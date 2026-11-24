@@ -721,6 +721,14 @@ List<SettingsEntry> _build() {
       desc: 'settings_douyu_renew_desc',
       keywords: ['斗鱼', 'douyu', 'Cookie'],
     )
+    ..group = '内容与隐私'
+    ..add(
+      'enable_nsfw',
+      '启用 NSFW 扩展源（18+）',
+      (context, entry) => const NsfwToggleTile(),
+      desc: '开启成人直播与隐私 IPTV 分流源，严格四重沙盒隔离与防窥保护',
+      keywords: ['18+', '成人', 'nsfw', '隐私', '防窥', '密码'],
+    )
     // ---- refresh (U.6d d10–d12) ----
     ..section = SettingsSection.refresh
     ..group = 'settings_group_follow_list'

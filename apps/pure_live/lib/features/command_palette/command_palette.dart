@@ -7,6 +7,7 @@ import 'package:live_core/live_core.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/features/home/home_menu.dart';
 import 'package:pure_live/features/popular/popular_catalog.dart';
+import 'package:pure_live/features/privacy/nsfw_privacy_manager.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_path.dart';
 
@@ -23,6 +24,7 @@ class CommandItem {
     this.platformId,
     this.proxyMode = ProxyBadgeMode.direct,
     this.shortcut,
+    this.isNsfw = false,
   });
 
   /// Unique item identifier.
@@ -51,6 +53,9 @@ class CommandItem {
 
   /// Execution callback.
   final VoidCallback onExecute;
+
+  /// Whether this item represents adult / NSFW content.
+  final bool isNsfw;
 }
 
 /// Desktop Command Palette (`Cmd/Ctrl + K`) for instant source jump,
@@ -136,12 +141,13 @@ class _CommandPaletteState extends ConsumerState<CommandPalette> {
     }
 
     // 2. Platform jumping
-    const allPlatforms = SiteIds.supported;
+    final isUnlocked = NsfwPrivacyManager.instance.isUnlocked;
+    final allPlatforms = isUnlocked ? SiteIds.descriptors.keys : SiteIds.supported;
     for (final id in allPlatforms) {
       final desc = SiteIds.descriptorOf(id);
-      if (desc.isNsfw) continue;
-      // Filter out pending plugins or disabled platforms to avoid dead entries
-      if (!desc.supportStatus.isPlayable) continue;
+      if (desc.isNsfw && !isUnlocked) continue;
+      // Filter out pending plugins or disabled platforms to avoid dead entries, unless adult source unlocked
+      if (!desc.supportStatus.isPlayable && !desc.isNsfw) continue;
 
       if (_query.isEmpty || desc.matchesQuery(_query)) {
         final mode = switch (desc.networkMode) {
@@ -159,6 +165,7 @@ class _CommandPaletteState extends ConsumerState<CommandPalette> {
             category: '直播平台与源',
             platformId: id,
             proxyMode: mode,
+            isNsfw: desc.isNsfw,
             onExecute: () {
               Navigator.of(context).pop();
               AppNavigator.router.go(RoutePath.kInitial);
@@ -472,6 +479,10 @@ class _CommandPaletteState extends ConsumerState<CommandPalette> {
                                               if (item.proxyMode != ProxyBadgeMode.direct) ...[
                                                 const SizedBox(width: 6),
                                                 ProxyBadge(mode: item.proxyMode, compact: true),
+                                              ],
+                                              if (item.isNsfw) ...[
+                                                const SizedBox(width: 6),
+                                                const NsfwBadge(compact: true),
                                               ],
                                             ],
                                           ),

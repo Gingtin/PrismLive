@@ -10,6 +10,7 @@ import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/desktop/desktop_window.dart';
 import 'package:pure_live/app/services.dart';
+import 'package:pure_live/features/privacy/nsfw_privacy_manager.dart';
 import 'package:pure_live/features/settings/settings_dialogs.dart';
 import 'package:pure_live/features/settings/settings_model.dart';
 import 'package:pure_live/features/settings/settings_tiles.dart';
@@ -1089,4 +1090,34 @@ class OverlayPermissionTile extends StatelessWidget {
       onTap: () => unawaited(OverlayWindow.openSettings()),
     ),
   );
+}
+
+/// Tile toggling adult / NSFW extension sources (18+) with age/PIN verification.
+class NsfwToggleTile extends StatelessWidget {
+  /// Creates the tile.
+  const new({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: NsfwPrivacyManager.instance,
+      builder: (context, _) {
+        final isUnlocked = NsfwPrivacyManager.instance.isUnlocked;
+        return SettingsSwitchRow(
+          key: const ValueKey('settings-nsfw-toggle'),
+          title: '启用 NSFW 扩展源（18+）',
+          subtitle: '开启成人直播与隐私 IPTV 分流源，严格四重沙盒隔离与防窥保护',
+          icon: Icons.shield_outlined,
+          value: isUnlocked,
+          onChanged: (enable) async {
+            if (enable) {
+              await NsfwPrivacyManager.instance.requestUnlock(context);
+            } else {
+              NsfwPrivacyManager.instance.lock();
+            }
+          },
+        );
+      },
+    );
+  }
 }

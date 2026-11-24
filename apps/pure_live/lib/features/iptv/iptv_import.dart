@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_iptv/live_iptv.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/features/iptv/iptv_data.dart';
+import 'package:pure_live/features/privacy/nsfw_privacy_manager.dart';
 import 'package:pure_live/i18n/i18n.dart';
 
 /// What is imported.
@@ -33,6 +34,9 @@ enum IptvImportOrigin {
 
   /// Smart extraction & batch import (playlists only).
   batch,
+
+  /// Import privacy M3U / NSFW subscription (playlists only, 18+).
+  privacyM3u,
 
   /// The built-in default guide (guides only).
   defaultGuide,
@@ -160,6 +164,13 @@ Future<IptvImportOrigin?> chooseImportOrigin(BuildContext context, IptvImportKin
                   i18n('iptv_origin_text'),
                   i18n('iptv_origin_text_desc'),
                 ),
+                if (NsfwPrivacyManager.instance.isUnlocked)
+                  option(
+                    IptvImportOrigin.privacyM3u,
+                    Icons.shield_outlined,
+                    '导入隐私 M3U 源 (18+)',
+                    '导入外部成人/私密订阅源，自动继承 18🈲 隔离并接入测速',
+                  ),
               ] else
                 option(
                   IptvImportOrigin.defaultGuide,

@@ -60,6 +60,7 @@ final class RoomCardData {
     this.isOffline = false,
     this.introLine,
     this.proxyMode,
+    this.isNsfw = false,
   });
 
   /// Platform id; the badge shows it in capitals (3.x).
@@ -114,6 +115,9 @@ final class RoomCardData {
   /// Network proxy requirement mode for this room's platform.
   final ProxyBadgeMode? proxyMode;
 
+  /// Whether this room contains adult / NSFW content.
+  final bool isNsfw;
+
   @override
   bool operator ==(Object other) =>
       other is RoomCardData &&
@@ -130,7 +134,8 @@ final class RoomCardData {
       other.restrictionLabel == restrictionLabel &&
       other.platformName == platformName &&
       other.isOffline == isOffline &&
-      other.introLine == introLine;
+      other.introLine == introLine &&
+      other.isNsfw == isNsfw;
 
   @override
   int get hashCode => Object.hash(
@@ -148,5 +153,6 @@ final class RoomCardData {
     platformName,
     isOffline,
     introLine,
+    isNsfw,
   );
 }

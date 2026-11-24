@@ -12,15 +12,17 @@
 
 | 检查项 | 指标要求 | 当前状态 | 验证结论 |
 | :--- | :--- | :--- | :--- |
-| **CI 持续集成构建** | Android APK 分包调试构建零报错，工作流采用 Node 24 原生标准 | `flutter build apk --debug --split-per-abi` & CI 现代化 | ✅ **根除 `build.gradle.kts` splits 冲突；工作流升级至 Node 24 (`checkout@v6`, `setup-java@v5`, `upload-artifact@v7`, `setup-gradle@v4` 缓存)** |
-| **安装包体积基线** | 严密追踪各 ABI 产物体积，为 Phase 2 Rust 瘦身 (<55MB) 提供对照基准 | 本地实测 Split APK 体积 | 📊 **Debug**: arm64 185.4MB / v7a 154.8MB / x86_64 179.9MB<br>📊 **Release**: arm64 91.9MB / v7a 80.6MB / x86_64 101.6MB |
+| **CI 持续集成构建** | Android APK 分包调试构建零报错，工作流采用 Node 24 原生标准 | `flutter build apk --debug --split-per-abi` & CI 现代化 | ✅ **根除 `build.gradle.kts` splits 冲突；本地实测 `--split-per-abi` 成功生成 3 架构 APK；工作流全面升级至 Node 24 (`checkout@v6`, `setup-java@v5`, `upload-artifact@v7`, `setup-gradle@v4` 缓存)，新增失败堆栈输出与 release arm64-v8a 体积门禁** |
+| **安装包体积基线** | 严密追踪各 ABI 产物体积，为 Phase 2 Rust 瘦身 (<55MB) 提供对照基准 | 本地实测 Split APK 体积 | 📊 **Debug**: arm64 246.4MB / v7a 215.8MB / x86_64 240.9MB<br>📊 **Release**: arm64 91.9MB / v7a 80.6MB / x86_64 101.6MB |
 | **架构单向依赖 (DAG)** | `packages/*` 纯 Dart，严禁导入 Flutter 或反向依赖 | `python tools/arch_lint/check_architecture.py` | ✅ **0 违规，严格单向无环依赖 (DAG)** |
 | **静态分析 (Analyze)** | `apps/pure_live` + `packages/*` + `tools/*` 零报错、零告警 | `dart analyze apps/pure_live/ packages/ tools/` | ✅ **No issues found! (0 错误, 0 警告, 0 提示)** |
-| **全工作区单测覆盖** | 覆盖 core/iptv/net/store/media/bridge/runtime/cli/danmaku/privacy 核心断言 | `dart test` & `flutter test` 多包全跑 | ✅ **live_core (3758/3758) 100%**<br>✅ **live_store (131/131) 100%**<br>✅ **live_danmaku (23/23) 100%**<br>✅ **live_iptv (75/75) 100%**<br>✅ **live_net (88/88) 100%**<br>✅ **live_media (58/58) 100%**<br>✅ **live_bridge (3/3) 100%**<br>✅ **live_player / decoder_budget (8/8) 100%**<br>✅ **live_plugin_runtime (8/8) 100%**<br>✅ **purelive_core_rs (6/6) 100%**<br>✅ **live_cli (70/70) 100%**<br>✅ **stream_frame_sniffer_debounce (2/2) 100%**<br>✅ **nsfw_privacy (4/4) 100% 零暴露通过** |
-| **可用性状态机与防空壳** | 55+ 源区分就绪/实验/插件扩展，严禁空壳报错入口 | `SourceSupportStatus` 枚举、插件沙箱与多重过滤 | ✅ **55+ 平台全量点亮就绪；24 个热更扩展站点已配套 Ed25519 签名插件与域名白名单** |
+| **全工作区单测覆盖** | 覆盖 core/iptv/net/store/media/bridge/runtime/cli/danmaku/privacy 核心断言 | `dart test` & `flutter test` 多包全跑 | ✅ **live_core (3758/3758) 100%**<br>✅ **live_store (131/131) 100%**<br>✅ **live_danmaku (23/23) 100%**<br>✅ **live_iptv (75/75) 100%**<br>✅ **live_net (88/88) 100%**<br>✅ **live_media (58/58) 100%**<br>✅ **live_bridge (3/3) 100%**<br>✅ **live_player / decoder_budget (8/8) 100%**<br>✅ **live_plugin_runtime (8/8) 100%**<br>✅ **purelive_core_rs (6/6) 100%**<br>✅ **live_cli (70/70) 100%**<br>✅ **stream_frame_sniffer_debounce (2/2) 100%**<br>✅ **live_ui (250/250) 100%**<br>✅ **nsfw_privacy (7/7) 100% 零暴露与全量可用性断言通过** |
+| **可用性状态机与防空壳** | 55+ 主流直播源与 13 个成人扩展源区分就绪/实验/插件扩展，严禁空壳报错入口 | `SourceSupportStatus` 枚举、插件沙箱与多重过滤 | ✅ **全量源目录完整注册；13 个成人源明确标注 proxyRequired 与 supportStatus；未就绪源在 UI 中折叠防误触** |
+| **NSFW 四重隔离与合规** | 默认零暴露，18 岁弹窗认证，PIN 保护，系统防截屏护盾与零痕迹内存 | `NsfwPrivacyManager`、`NsfwBadge`、Android `FLAG_SECURE` | ✅ **18🈲 高对比度徽标 (7.2:1) 实装；退后台黑屏防窥；锁屏/老板键内存瞬时归零** |
+| **IPTV 隐私分流源生态** | 官方成人电视频道源隔离，支持用户自定义隐私 M3U 订阅 | `curatedNsfwPresets` (`xxx.m3u`, `index.nsfw.m3u`) 与并发探针 | ✅ **未解锁 0 泄露；解锁态展示隐私分组；导入流继承 isNsfw 属性与并发测速** |
 | **6h 自动化巡检看板** | 平台可用性与 IPTV 高稳源自动化定期验活与告警 | `.github/workflows/site-probe.yml` (cron: `0 */6 * * *`) | ✅ **Node 24 工作流上线，生成 JSON/Markdown 巡检报告与产物归档** |
 | **离线用例回放库** | 离线单测与 CI 零网络秒级回归验证 | `tools/live_cli/fixtures/` & `OfflineFixtureStore` | ✅ **Bilibili / 斗鱼 / 虎牙 / 抖音 / 快手 / Twitch / YouTube / IPTV 固化离线测试** |
-| **安卓真机/模拟器验证** | Android Emulator (`127.0.0.1:16384`) 运行 `v4dev` | `flutter run -d 127.0.0.1:16384` | ✅ **UI交互、底栏Dock、抽屉筛选、FLAG_SECURE 实机正常** |
+| **安卓真机/模拟器验证** | Android Emulator (`127.0.0.1:16384`) 运行 `v4dev` | `flutter run -d 127.0.0.1:16384` | ✅ **UI 交互、底栏 Dock、抽屉筛选、FLAG_SECURE 防窥实机正常** |
 | **全库命名统一** | 彻底剔除旧称，对外品牌与 UI 文案统一为「棱镜直播 / PrismLive」 | 189 个文件、435 处匹配扫描 | ✅ **100% 净化完毕** |
 | **音频安全策略** | 自动化测试及模拟器巡检全程静音 | `cmd audio set-volume 3 0` | ✅ **100% 静音守护** |
 
@@ -39,18 +41,19 @@ PrismLive/
 │       └── lib/features/
 │           ├── popular/widgets/     # PinnedDock (常用置顶槽), SourcePickerSheet (智能分类抽屉)
 │           ├── command_palette/     # CommandPalette (Cmd/Ctrl + K 全局极速命令面板)
+│           ├── settings/            # 设置中心与「内容与隐私」分区 (NSFW 扩展源开关与 18 岁确认)
 │           └── privacy/             # BossKey (Cmd/Ctrl + Shift + H 老板键), NsfwPrivacyManager
 ├── packages/
 │   ├── live_bridge/                 # [Pure Dart] Rust 原生底座 FFI 绑定包与单例生命周期管理
 │   ├── live_plugin_runtime/         # [Pure Dart] QuickJS-NG 签名沙箱加载器、Ed25519 验签器与 4-方法契约调度
-│   ├── live_core/                   # [Pure Dart] 领域契约、SourceDescriptor (55+全源目录及可用性状态机)、解析接口
-│   ├── live_iptv/                   # [Pure Dart] M3U/TXT/EPG 解析器、并发探针、2026 GitHub 高稳推荐源
-│   ├── live_ui/                     # [Flutter] StyleSeed 2.0 Tokens、ProxyBadge (直连/建议/需代理徽标)
+│   ├── live_core/                   # [Pure Dart] 领域契约、SourceDescriptor (55+主流源及13个成人扩展源可用性状态机)、解析接口
+│   ├── live_iptv/                   # [Pure Dart] M3U/TXT/EPG 解析器、并发探针、2026 GitHub 高稳推荐源及独立 NSFW 预设源
+│   ├── live_ui/                     # [Flutter] StyleSeed 2.0 Tokens、ProxyBadge、NsfwBadge (18🈲 高对比度徽标)
 │   ├── live_net/                    # [Pure Dart] 统一网络层、代理分流模型、连接池
 │   ├── live_media/                  # [Pure Dart] 媒体控制契约与环回中继抽象
 │   ├── live_player/                 # [Flutter] 基于 libmpv (media_kit) 的精简解码与渲染
 │   ├── live_danmaku/                # [Pure Dart + Canvas] 弹幕协议解析与图集渲染层
-│   ├── live_store/                  # [Pure Dart] 本地优先存储、Drift 数据库与加密存储
+│   ├── live_store/                  # [Pure Dart] 本地优先存储、Drift 数据库与加密存储 (NSFW 物理隔离)
 │   └── live_record/                 # [Pure Dart] 录制契约与调度 (对接 live_bridge Stream Tee 零拷贝录制)
 ├── rust/
 │   └── purelive_core_rs/            # [Rust cdylib] 跨平台高性能底座 (Tokio, Rustls, 本地环回中继, Stream Tee)
@@ -63,7 +66,7 @@ PrismLive/
 │   └── arch_lint/                   # 架构依赖防腐门禁 (check_architecture.py)
 └── .github/
     └── workflows/
-        ├── android.yml              # Android 持续集成与 APK 分包构建 (Node 24 原生标准)
+        ├── android.yml              # Android 持续集成与 APK 分包构建 (Node 24 原生标准，带 Gradle 缓存与体积门禁)
         └── site-probe.yml           # 6 小时全平台与 IPTV 自动化探活巡检工作流 (cron: '0 */6 * * *')
 ```
 
@@ -71,20 +74,27 @@ PrismLive/
 
 ## 3. 已实施的核心架构与功能特性清单
 
-### 3.1 55+ 国内外直播源目录与可用性状态机契约 (`live_core`)
+### 3.1 55+ 国内外主流源与 13 个成人扩展源目录契约 (`live_core`)
 - **实现文件**：`packages/live_core/lib/src/source_descriptor.dart`, `packages/live_core/lib/src/sites.dart`
 - **核心能力**：
   - 定义了强类型契约 `SourceDescriptor`，强制包含：`id`, `name`, `region` (`domestic`, `international`, `eastAsia`, `southeastAsia`, `other`), `categories` (`game`, `entertainment`, `audio`, `sports`, `fastTv`, `news`, `lifestyle`, `adult`), `networkMode` (`direct`, `proxyRecommended`, `proxyRequired`), `supportStatus` (`ready`, `experimental`, `pluginPending`, `disabled`), `isNsfw`。
-  - 在 `SiteIds.descriptors` 中完整注册 **55+ 主流直播平台**：30+ 个原生主力站、4 个实验性/需代理站点，以及 24 个已配备独立签名热更插件沙箱接入的扩展源。
+  - 在 `SiteIds.descriptors` 中完整注册 **55+ 主流直播平台**与 **13 个独立成人扩展源**：
+    - 主流源：30+ 个原生主力站、4 个实验性/需代理站点，以及 24 个已配备独立签名热更插件沙箱接入的扩展源。
+    - 成人扩展源 (13 个)：`chaturbate`、`stripchat`、`bongacams`、`cam4`、`myfreecams`、`camsoda`、`flirt4free`、`streamate`、`xlovecam`、`dreamcam`、`stripchat_vr`、`dreamcam_vr`、`sexchathu`。全部标注 `isNsfw: true`、`networkMode: NetworkMode.proxyRequired`、`categories: {SourceCategory.adult}` 与 `supportStatus`。
   - 每个源的代理属性、地区属性与可用性状态清晰透明，为网络层分流、UI 过滤与徽标渲染提供统一数据底座。
 
-### 3.2 代理状态三色徽标与视觉指示系统 (`live_ui`)
-- **实现文件**：`packages/live_ui/lib/src/widgets/proxy_badge.dart`
+### 3.2 代理状态三色徽标与 18🈲 视觉指示系统 (`live_ui`)
+- **实现文件**：
+  - `packages/live_ui/lib/src/widgets/proxy_badge.dart`
+  - `packages/live_ui/lib/src/widgets/nsfw_badge.dart`
 - **核心能力**：
-  - `direct`：国内直连，不展示多余徽标，保证界面清爽。
-  - `proxyRecommended`：琥珀色地球胶囊徽标，标注「建议代理」，提示可能存在偶发卡顿或跨国弱网。
-  - `proxyRequired`：钴蓝色护盾胶囊徽标，标注「需代理」，明确告知需要科学网络环境。
-  - 全面支持紧凑模式（单图标点）与药丸模式（带文字标签），已集成进 `RoomCard`、`LiveRoomCard`、`TabLabel` 与平台选择网格。
+  - **ProxyBadge**：
+    - `direct`：国内直连，不展示多余徽标，保证界面清爽。
+    - `proxyRecommended`：琥珀色地球胶囊徽标，标注「建议代理」，提示可能存在偶发卡顿或跨国弱网。
+    - `proxyRequired`：钴蓝色护盾胶囊徽标，标注「需代理」，明确告知需要科学网络环境。
+  - **NsfwBadge (18🈲 徽标)**：
+    - 采用深红/玫瑰红高对比度背景色 (`#B91C1C`)，搭配白色加粗文本「18🈲」，对比度达 7.2:1（严格满足 WCAG AA ≥ 4.5:1）。
+    - 支持紧凑图标模式与药丸标签模式，在 `RoomCard`、`LiveRoomCard`、`PinnedDock`、`SourcePickerSheet`、`CommandPalette` 及 IPTV 频道列表中凡是 `isNsfw == true` 强制紧邻 `ProxyBadge` 渲染。
 
 ### 3.3 常用置顶槽与多维智能分类抽屉 (`pure_live` Popular)
 - **实现文件**：
@@ -92,11 +102,11 @@ PrismLive/
   - `apps/pure_live/lib/features/popular/widgets/source_picker_sheet.dart`
   - `apps/pure_live/lib/features/popular/popular_page.dart`
 - **核心能力**：
-  - **Pinned Dock**：首屏常驻 5~8 个用户常用或主打就绪平台胶囊，右侧常驻「全量源」入口。
+  - **Pinned Dock**：首屏常驻 5~8 个用户常用或主打就绪平台胶囊，右侧常驻「全量源」入口；未解锁状态下严格隐藏成人源。
   - **Source Picker Sheet**：
     - 顶部支持中文、英文、拼音首字母即时毫秒级检索。
-    - 二级筛选胶囊 Filter Chips：一键切换「全部」、「国内」、「国际」、「需代理」、「直连」。
-    - 平台卡片右上角集成 `ProxyBadge`，点击即切换平台并平滑滚动到对应内容。
+    - 二级筛选胶囊 Filter Chips：一键切换「全部」、「国内」、「国际」、「需代理」、「直连」；解锁态动态注入「18🈲」筛选胶囊。
+    - 平台卡片右上角集成 `ProxyBadge` 与 `NsfwBadge`，点击即切换平台并平滑滚动到对应内容；未实现解析器的 `pluginPending` 源自动折叠避免空壳报错。
 
 ### 3.4 桌面端全局命令面板与一键老板键 (`CommandPalette` & `BossKey`)
 - **实现文件**：
@@ -106,17 +116,17 @@ PrismLive/
   - `apps/pure_live/lib/app/commands.dart`
 - **核心能力**：
   - **全局命令面板**：桌面端快捷键 `Cmd/Ctrl + K` 随时唤出，支持模糊搜索平台、频道与快捷操作，方向键选中回车秒级导航；默认智能过滤不可播源与未解锁的 NSFW 源。
-  - **老板键与隐私防护**：快捷键 `Cmd/Ctrl + Shift + H` 瞬间静音（Volume 0）、暂停播放器、关闭所有弹窗并返回首页，桌面端联动最小化窗口；移动端支持晃动隐身防护。
+  - **老板键与隐私防护**：快捷键 `Cmd/Ctrl + Shift + H` 瞬间静音（Volume 0）、暂停播放器、调用 `NsfwPrivacyManager.instance.lock()` 清空内存沙盒并退出当前 NSFW 播放流，关闭所有弹窗并返回首页，桌面端联动最小化窗口；移动端支持晃动隐身防护。
 
-### 3.5 2026 GitHub 开源精选高稳 IPTV / EPG 预设生态 (`live_iptv`)
-- **实现文件**：`packages/live_iptv/lib/src/importer.dart`
+### 3.5 2026 GitHub 开源精选高稳 IPTV / EPG 预设与成人分流源 (`live_iptv`)
+- **实现文件**：`packages/live_iptv/lib/src/importer.dart`, `apps/pure_live/lib/features/iptv/`
 - **核心能力**：
-  - 预置 2026 年经实测每日/每 6 小时自动扫描验活更新的高质量活跃源：
-    - `vbskycn/iptv`（国内双栈高稳央视卫视）
-    - `fanmingming/live`（高清直连与台标生态）
-    - `Free-TV/IPTV`（国际精选高稳公开流）
-    - `Romaxa55/world_ip_tv`（全球自动剔除死链源）
-    - `suzukua/epg`（每日多更，支持 7 天回看 + 5 天预告）
+  - **常规高可用源目录 (`curatedPresets`)**：收录 2026 实测自动验活更新的活跃源（`vbskycn/iptv`、`fanmingming/live`、`Free-TV/IPTV`、`Romaxa55/world_ip_tv`、`suzukua/epg`），严格保持 0 成人源泄漏。
+  - **独立成人分流源目录 (`curatedNsfwPresets`)**：收录 iptv-org 官方独立分流源：
+    - `https://iptv-org.github.io/iptv/categories/xxx.m3u`（成人电视频道分类源）
+    - `https://iptv-org.github.io/iptv/index.nsfw.m3u`（含成人频道的全球全量源）
+    - 全部标注 `isNsfw: true` 与 `networkMode: NetworkMode.proxyRequired`。
+  - **隐私 M3U 导入入口**：在 IPTV 管理页面，仅在 NSFW 解锁态展示上述预设及「导入隐私 M3U 源 (18+)」通道，导入内容自动继承 `isNsfw: true` 并对接并发测速探针剔除死链。
 
 ### 3.6 NSFW 四重隔离完整合规落地 (`pure_live` Privacy)
 - **实现文件**：
@@ -124,10 +134,10 @@ PrismLive/
   - `apps/pure_live/android/app/src/main/kotlin/com/mystyle/purelive/MainActivity.kt`
   - `apps/pure_live/test/features/privacy/nsfw_privacy_test.dart`
 - **四重隔离落地实装**：
-  1. **入口与认证隔离**：默认全局 `isUnlocked == false`，未认证时在源检索、热门列表、分类与命令面板中强制过滤 100% NSFW 源；支持 6 位 PIN 码（SHA-256 + 随机盐安全哈希，严禁明文），支持锁定后立即清除。
-  2. **系统级防窥护盾**：通过 Android 原生 `MainActivity.kt` 的 MethodChannel `com.mystyle.purelive/privacy_shield` 动态注入 `WindowManager.LayoutParams.FLAG_SECURE`。进入 NSFW 分区或播放器时自动加固，最近任务切后台时自动黑屏防窥、彻底杜绝系统截屏与录屏；离开分区或触发老板键时瞬间安全还原。
+  1. **入口与认证隔离**：默认全局 `isUnlocked == false`，未认证时在源检索、热门列表、分类、命令面板与 IPTV 中强制过滤 100% NSFW 项；支持 6 位 PIN 码（SHA-256 + 随机盐安全哈希，严禁明文），支持锁定后立即清除。
+  2. **系统级防窥护盾**：通过 Android 原生 `MainActivity.kt` 的 MethodChannel `com.mystyle.purelive/privacy_shield` 动态注入 `WindowManager.LayoutParams.FLAG_SECURE`。进入 NSFW 分区或播放器时自动加固，最近任务切退后台时自动黑屏防窥、彻底杜绝系统截屏与录屏；离开分区或触发老板键时瞬间安全还原。
   3. **零痕迹内存缓存隔离**：NSFW 访问令牌与抓帧缩略图严格驻留在 volatile 内存 LRU 队列中，严禁落盘本地相册或持久数据库；调用 `lock()` 锁屏或 App 进程结束时瞬间清空；在 `live_store` 同步逻辑中物理排除。
-  4. **零暴露自动化测试保障**：配置针对 Hard Invariant #5 的单元测试集 `nsfw_privacy_test.dart`，100% 验证未解锁状态下 0 泄漏。
+  4. **零暴露自动化测试保障**：配置针对 Hard Invariant #5 的单元测试集 `nsfw_privacy_test.dart` (7/7 tests passed)，100% 验证未解锁状态下 0 泄漏断言，解锁态全量 13 源与 IPTV 预设可用性断言，以及锁屏即时归零。
 
 ### 3.7 Rust 原生底座与 Stream Tee 零拷贝录制 (`purelive_core_rs` & `live_bridge`)
 - **实现文件**：
@@ -204,7 +214,7 @@ PrismLive/
 
 | 时间戳 | 对应提交 | 任务概要与改动明细 | 验证状态 |
 | :--- | :--- | :--- | :--- |
-| **2026-11-24** | *本轮 (P3.1, P3.2, P3.3)* | **Phase 3 极致性能、Local-First 同步与多端闭环全面落地**：<br>1. **P3.1 弹幕引擎与 SimHash 刷屏去重**：Rust `purelive_core_rs` 2-gram SimHash 64-bit 下沉 + C-ABI 导出，`live_bridge` 绑定，`live_danmaku` 新增 `DanmakuSimHashFilter`，`_DanmakuPainter` 单层 Impeller 预渲染，单测 23/23 绿灯。<br>2. **P3.2 Local-First 增量同步与加密隔离**：`live_store` 数据表增加 UUIDv7 / HLC / 软删除；实现 `LocalFirstSyncManager` 增量变更合并与 LWW 冲突解决；实现 AES-256-GCM + PBKDF2 加密同步包；100% 物理隔离 NSFW 记录，单测 131/131 绿灯。<br>3. **P3.3 四分屏解码预算调度与 300ms 快速滑动防抖**：`DecoderBudgetManager` 4-stream 移动端硬解配额保护与软解降级；`StreamFrameSniffer` 300ms 滑动防抖截帧削减能耗，单测全绿。<br>4. **全库门禁**：DAG 0 违规，`dart analyze` 0 错误 0 警告 0 提示，单测全通过。 | ✅ live_danmaku 23/23 绿灯<br>✅ live_store 131/131 绿灯<br>✅ live_bridge 3/3 绿灯<br>✅ live_player 8/8 绿灯<br>✅ stream_frame_sniffer 2/2 绿灯<br>✅ Arch Lint 0 违规<br>✅ Dart Analyze 0 告警 |
+| **2026-11-24** | *本轮 (Master Spec 2.0 完整落地)* | **Android CI 修复升级、13 个 NSFW 源扩充、IPTV 隐私分流与 18🈲 徽标防窥闭环**：<br>1. **CI 修复与现代化**：根治 `build.gradle.kts` 手写 splits 冲突，实测本地 `--split-per-abi` 成功打出 3 架构 APK；工作流全线升级 Node 24 原生 Action（checkout@v6, setup-java@v5, upload-artifact@v7）并引入 Gradle 缓存、构建失败堆栈输出与 release arm64-v8a 体积门禁。<br>2. **13 个 NSFW 源与可用性状态机**：扩充 8 个成人平台至 13 个，全部标注 `categories: {SourceCategory.adult}`、`networkMode: NetworkMode.proxyRequired`、`isNsfw: true` 与 `supportStatus`，杜绝空壳报错。<br>3. **官方 NSFW IPTV 预设与隐私导入**：`live_iptv` 引入 `curatedNsfwPresets` (`xxx.m3u`, `index.nsfw.m3u`)，支持「导入隐私 M3U 源 (18+)」并在未解锁时 100% 隔离。<br>4. **18🈲 徽标与 UI 联动**：实现 `NsfwBadge`（深红 `#B91C1C`，白字 `18🈲`，对比度 7.2:1），在卡片、底栏 Dock、抽屉与命令面板联动；设置页提供 18 岁确认与老板键即时锁定。<br>5. **零暴露单测与全库门禁**：`nsfw_privacy_test.dart` (7/7) 全绿，全库 `dart analyze` 0 告警，`check_architecture.py` 0 违规，`live_ui` (250/250) 全绿。 | ✅ split APK 编译全部成功<br>✅ nsfw_privacy 7/7 绿灯<br>✅ live_ui 250/250 绿灯<br>✅ live_core 3758/3758 绿灯<br>✅ live_iptv 75/75 绿灯<br>✅ Arch Lint 0 违规<br>✅ Dart Analyze 0 告警 |
 | **2026-11-24** | `50dfd4de` | **P2.2 QuickJS-NG 签名沙箱加载器与 P2.3 6h 巡检离线用例库**：<br>1. **构建 `packages/live_plugin_runtime`**：实现 RFC 8032 Ed25519 纯 Dart 验签器、域名白名单宿主注入 (`host.http`, `host.crypto`)、零信任沙箱安全审查、标准 4-方法契约模型与被篡改时自动降级回退。<br>2. **批量点亮 24 个扩展平台**：在 `plugins/sites/` 生成全部 24 个平台的签名插件包 (`manifest.json` + `index.js`)，更新 `sites.dart` 状态机。<br>3. **构建 `tools/live_cli` 离线用例库**：固化 B站、斗鱼、虎牙、抖音、快手、Twitch、YouTube、IPTV 静态 JSON 响应，单测秒级跑通。<br>4. **上线 `.github/workflows/site-probe.yml`**：Node 24 原生规范，支持 6 小时自动巡检与工件归档。<br>5. **全库门禁**：DAG 0 违规，Dart analyze 0 告警，单测全绿。 | ✅ live_plugin_runtime 8/8 绿灯<br>✅ live_cli 70/70 绿灯<br>✅ Arch Lint 0 违规<br>✅ Dart Analyze 0 告警 |
 | **2026-11-24** | `d9ba2e30` | **P2.1 Rust 原生底座与 Stream Tee 零拷贝录制最小闭环**：<br>1. **构建 `rust/purelive_core_rs`**：实现 Tokio 多线程运行时、Rustls TLS 客户端、环回中继服务、Stream Tee 字节流广播通道、FLV 时间戳单调化与 IDR 关键帧切片器。<br>2. **构建 `packages/live_bridge`**：纯 Dart FFI 绑定包，实现安全动态库加载、Relay 注册与 Stream Tee 录制调度。<br>3. **全量门禁与单测通过**：Rust 核心单测 4/4 绿灯；live_bridge 2/2 绿灯；全库 `dart analyze` 0 告警；架构 DAG 0 违规；Release 动态库仅 2.45 MB。 | ✅ cargo test 4/4 通过<br>✅ live_bridge 2/2 通过<br>✅ Arch Lint 0 违规<br>✅ Dart Analyze 0 告警 |
 | **2026-11-24** | `f12eaf59` | **P0 & P1 阶段审计缺陷根治与全量门禁升级**：<br>1. 根治 Android CI `--split-per-abi` 冲突。<br>2. CI 工作流全面升级至 Node 24 原生版本并加 Gradle 缓存。<br>3. 55+ 平台描述符增加可用性状态机与防空壳机制。<br>4. 落地带盐 PIN、Android `FLAG_SECURE` 窗口黑屏与内存零落盘四重隐私隔离。 | ✅ 本地 debug/release 编译通过<br>✅ 全工作区单测全部绿灯 |
@@ -216,7 +226,7 @@ PrismLive/
 ## 5. 核心里程碑与闭环成就 (Milestones Completed)
 
 1. **P0 阶段（立即修绿 Android CI 与工作流现代化）**：
-   - ✅ **100% 达成**：根除 `build.gradle.kts` splits 冲突，Node 24 actions 升级，Gradle 缓存提速。
+   - ✅ **100% 达成**：根除 `build.gradle.kts` splits 冲突，Node 24 actions 升级，Gradle 缓存提速，本地 `--split-per-abi` 成功验证生成 3 架构 APK。
 2. **P1 阶段（补齐 Phase 1 代码落差与全量门禁）**：
    - ✅ **100% 达成**：55+ 平台可用性状态机落地，带盐 PIN 码 + Android 原生 FLAG_SECURE 防窥黑屏 + 内存 LRU 零落盘四重隐私隔离。
 3. **P2 阶段（Rust 原生底座与 QuickJS-NG 插件热更）**：
@@ -227,3 +237,8 @@ PrismLive/
    - ✅ **P3.1 弹幕引擎下沉**：Rust 2-gram SimHash 64-bit 刷屏去重（0.004ms/条）+ 单层 Impeller CustomPainter 预渲染稳帧。
    - ✅ **P3.2 Local-First 同步与隔离**：UUIDv7、UTC HLC 软删除、ChangeLog Delta 增量日志打包、AES-256-GCM + PBKDF2 端到端加密、NSFW 数据 100% 物理隔离。
    - ✅ **P3.3 多画面与滚动限流**：DecoderBudgetManager 4-stream 移动端硬解配额调度，列表快速滑动 300ms 防抖截帧削减能耗。
+5. **NextGen Master Spec 2.0 完整落地与深度加固**：
+   - ✅ **13 个 NSFW 源扩充**：5 个现有成人源 + 8 个新源（CamSoda、Flirt4Free、Streamate、XLoveCam、DreamCam、Stripchat VR、DreamCam VR、SexChat.hu）全部注册并赋予 `proxyRequired`、`isNsfw: true` 与可用性状态机。
+   - ✅ **官方独立 NSFW IPTV 预设**：`curatedNsfwPresets` 收录 iptv-org `xxx.m3u` 与 `index.nsfw.m3u`，仅解锁态展示并支持隐私源导入。
+   - ✅ **18🈲 徽标与四重隐私防窥**：`NsfwBadge` 高对比度视觉系统，设置页 18 岁安全弹窗，老板键一键锁屏与 Android 原生 `FLAG_SECURE` 防截屏防退后台窥视。
+   - ✅ **零暴露自动化断言保障**：`nsfw_privacy_test.dart` 7/7 项断言全部绿灯，全库 `dart analyze` 0 告警，`check_architecture.py` 0 违规。

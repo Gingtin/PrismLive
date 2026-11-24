@@ -177,6 +177,47 @@ abstract final class SiteIds {
   /// MyFreeCams (NSFW).
   static const String myfreecams = 'myfreecams';
 
+  /// CamSoda (NSFW).
+  static const String camsoda = 'camsoda';
+
+  /// Flirt4Free (NSFW).
+  static const String flirt4free = 'flirt4free';
+
+  /// Streamate (NSFW).
+  static const String streamate = 'streamate';
+
+  /// XLoveCam (NSFW).
+  static const String xlovecam = 'xlovecam';
+
+  /// DreamCam (NSFW).
+  static const String dreamcam = 'dreamcam';
+
+  /// Stripchat VR (NSFW).
+  static const String stripchatVr = 'stripchat_vr';
+
+  /// DreamCam VR (NSFW).
+  static const String dreamcamVr = 'dreamcam_vr';
+
+  /// SexChat.hu (NSFW).
+  static const String sexchathu = 'sexchathu';
+
+  /// All 13 Adult / NSFW platforms (Spec 2.0).
+  static const List<String> nsfwPlatforms = [
+    chaturbate,
+    stripchat,
+    bongacams,
+    cam4,
+    myfreecams,
+    camsoda,
+    flirt4free,
+    streamate,
+    xlovecam,
+    dreamcam,
+    stripchatVr,
+    dreamcamVr,
+    sexchathu,
+  ];
+
   /// Custom IPTV sources.
   static const String iptv = 'iptv';
 
@@ -782,6 +823,7 @@ abstract final class SiteIds {
       region: SourceRegion.international,
       categories: {SourceCategory.adult},
       networkMode: NetworkMode.proxyRequired,
+      supportStatus: SourceSupportStatus.pluginPending,
       isNsfw: true,
       aliases: ['cb', 'chaturbate'],
     ),
@@ -791,6 +833,7 @@ abstract final class SiteIds {
       region: SourceRegion.international,
       categories: {SourceCategory.adult},
       networkMode: NetworkMode.proxyRequired,
+      supportStatus: SourceSupportStatus.pluginPending,
       isNsfw: true,
       aliases: ['stripchat'],
     ),
@@ -800,6 +843,7 @@ abstract final class SiteIds {
       region: SourceRegion.international,
       categories: {SourceCategory.adult},
       networkMode: NetworkMode.proxyRequired,
+      supportStatus: SourceSupportStatus.pluginPending,
       isNsfw: true,
       aliases: ['bongacams'],
     ),
@@ -809,6 +853,7 @@ abstract final class SiteIds {
       region: SourceRegion.international,
       categories: {SourceCategory.adult},
       networkMode: NetworkMode.proxyRequired,
+      supportStatus: SourceSupportStatus.pluginPending,
       isNsfw: true,
       aliases: ['cam4'],
     ),
@@ -818,8 +863,89 @@ abstract final class SiteIds {
       region: SourceRegion.international,
       categories: {SourceCategory.adult},
       networkMode: NetworkMode.proxyRequired,
+      supportStatus: SourceSupportStatus.pluginPending,
       isNsfw: true,
       aliases: ['mfc', 'myfreecams'],
+    ),
+    camsoda: SourceDescriptor(
+      id: camsoda,
+      name: 'CamSoda',
+      region: SourceRegion.international,
+      categories: {SourceCategory.adult},
+      networkMode: NetworkMode.proxyRequired,
+      supportStatus: SourceSupportStatus.pluginPending,
+      isNsfw: true,
+      aliases: ['cs', 'camsoda'],
+    ),
+    flirt4free: SourceDescriptor(
+      id: flirt4free,
+      name: 'Flirt4Free',
+      region: SourceRegion.international,
+      categories: {SourceCategory.adult},
+      networkMode: NetworkMode.proxyRequired,
+      supportStatus: SourceSupportStatus.pluginPending,
+      isNsfw: true,
+      aliases: ['f4f', 'flirt4free'],
+    ),
+    streamate: SourceDescriptor(
+      id: streamate,
+      name: 'Streamate',
+      region: SourceRegion.international,
+      categories: {SourceCategory.adult},
+      networkMode: NetworkMode.proxyRequired,
+      supportStatus: SourceSupportStatus.pluginPending,
+      isNsfw: true,
+      aliases: ['sm', 'streamate'],
+    ),
+    xlovecam: SourceDescriptor(
+      id: xlovecam,
+      name: 'XLoveCam',
+      region: SourceRegion.international,
+      categories: {SourceCategory.adult},
+      networkMode: NetworkMode.proxyRequired,
+      supportStatus: SourceSupportStatus.pluginPending,
+      isNsfw: true,
+      aliases: ['xlc', 'xlovecam'],
+    ),
+    dreamcam: SourceDescriptor(
+      id: dreamcam,
+      name: 'DreamCam',
+      region: SourceRegion.international,
+      categories: {SourceCategory.adult},
+      networkMode: NetworkMode.proxyRequired,
+      supportStatus: SourceSupportStatus.pluginPending,
+      isNsfw: true,
+      aliases: ['dc', 'dreamcam'],
+    ),
+    stripchatVr: SourceDescriptor(
+      id: stripchatVr,
+      name: 'Stripchat VR',
+      region: SourceRegion.international,
+      categories: {SourceCategory.adult},
+      networkMode: NetworkMode.proxyRequired,
+      supportStatus: SourceSupportStatus.pluginPending,
+      isNsfw: true,
+      aliases: ['scvr', 'stripchat_vr'],
+    ),
+    dreamcamVr: SourceDescriptor(
+      id: dreamcamVr,
+      name: 'DreamCam VR',
+      region: SourceRegion.international,
+      categories: {SourceCategory.adult},
+      networkMode: NetworkMode.proxyRequired,
+      supportStatus: SourceSupportStatus.pluginPending,
+      isNsfw: true,
+      aliases: ['dcvr', 'dreamcam_vr'],
+    ),
+    sexchathu: SourceDescriptor(
+      id: sexchathu,
+      name: 'SexChat.hu',
+      region: SourceRegion.international,
+      categories: {SourceCategory.adult},
+      networkMode: NetworkMode.proxyRequired,
+      supportStatus: SourceSupportStatus.pluginPending,
+      isNsfw: true,
+      aliases: ['schu', 'sexchathu'],
     ),
   };
 

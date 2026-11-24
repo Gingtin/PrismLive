@@ -244,16 +244,25 @@ final class StoreIptvLibrary implements IptvLibrary {
     _flag(playlist.autoUpdate),
   ];
 
-  static IptvPlaylist _playlistFrom(Map<String, Object?> row) => IptvPlaylist(
-    id: row['id']! as String,
-    name: row['name']! as String,
-    format: IptvPlaylistFormat.fromType(row['format'] as String?) ?? IptvPlaylistFormat.m3u,
-    source: row['source']! as String,
-    sortOrder: row['sort_order']! as int,
-    lastRefresh: _readTime(row['last_refresh']),
-    createdAt: _readTime(row['created_at']),
-    autoUpdate: row['auto_update'] == 1,
-  );
+  static IptvPlaylist _playlistFrom(Map<String, Object?> row) {
+    final source = row['source']! as String;
+    final name = row['name']! as String;
+    final isNsfw = (row['is_nsfw'] as int? ?? 0) == 1 ||
+        source.contains('/categories/xxx.m3u') ||
+        source.contains('index.nsfw.m3u') ||
+        IptvImporter.curatedNsfwPresets.any((p) => p.url == source);
+    return IptvPlaylist(
+      id: row['id']! as String,
+      name: name,
+      format: IptvPlaylistFormat.fromType(row['format'] as String?) ?? IptvPlaylistFormat.m3u,
+      source: source,
+      sortOrder: row['sort_order']! as int,
+      lastRefresh: _readTime(row['last_refresh']),
+      createdAt: _readTime(row['created_at']),
+      autoUpdate: row['auto_update'] == 1,
+      isNsfw: isNsfw,
+    );
+  }
 
   static void _insertChannel(Batch batch, String playlistId, int position, IptvChannel channel) {
     final entry = channel.entry;
@@ -304,6 +313,10 @@ final class StoreIptvLibrary implements IptvLibrary {
       catchupDays: (row['catchup_days'] as num?)?.toDouble(),
       catchupCorrectionHours: (row['catchup_correction_hours'] as num?)?.toDouble(),
       httpHeaders: HttpHeaderPolicy.decode(row['http_headers'] as String?),
+      isNsfw: (row['is_nsfw'] as int? ?? 0) == 1 ||
+          (row['group_title'] as String?)?.toLowerCase().contains('xxx') == true ||
+          (row['group_title'] as String?)?.toLowerCase().contains('nsfw') == true ||
+          (row['group_title'] as String?)?.toLowerCase().contains('adult') == true,
     ),
     favorite: row['favorite'] == 1,
     hidden: row['hidden'] == 1,

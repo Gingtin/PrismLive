@@ -39,6 +39,7 @@ final class IptvEntry {
     this.catchupDays,
     this.catchupCorrectionHours,
     Map<String, String> httpHeaders = const {},
+    this.isNsfw = false,
   }) : httpHeaders = HttpHeaderPolicy.normalize(httpHeaders);
 
   /// Display name.
@@ -80,8 +81,44 @@ final class IptvEntry {
   /// Request headers the stream needs, normalized (lower-case names).
   final Map<String, String> httpHeaders;
 
+  /// Whether this entry contains adult / NSFW content.
+  final bool isNsfw;
+
   /// The best display name: `tvg-name`, else [name].
   String get displayName => tvgName ?? name;
+
+  /// A copy with updated fields.
+  IptvEntry copyWith({
+    String? name,
+    String? streamUrl,
+    String? tvgId,
+    String? tvgName,
+    String? tvgLogo,
+    String? groupTitle,
+    int? channelNumber,
+    IptvStreamType? streamType,
+    String? catchupMode,
+    String? catchupSource,
+    double? catchupDays,
+    double? catchupCorrectionHours,
+    Map<String, String>? httpHeaders,
+    bool? isNsfw,
+  }) => IptvEntry(
+    name: name ?? this.name,
+    streamUrl: streamUrl ?? this.streamUrl,
+    tvgId: tvgId ?? this.tvgId,
+    tvgName: tvgName ?? this.tvgName,
+    tvgLogo: tvgLogo ?? this.tvgLogo,
+    groupTitle: groupTitle ?? this.groupTitle,
+    channelNumber: channelNumber ?? this.channelNumber,
+    streamType: streamType ?? this.streamType,
+    catchupMode: catchupMode ?? this.catchupMode,
+    catchupSource: catchupSource ?? this.catchupSource,
+    catchupDays: catchupDays ?? this.catchupDays,
+    catchupCorrectionHours: catchupCorrectionHours ?? this.catchupCorrectionHours,
+    httpHeaders: httpHeaders ?? this.httpHeaders,
+    isNsfw: isNsfw ?? this.isNsfw,
+  );
 
   /// Every field, for de-duplicating identical lines.
   String get contentKey => jsonEncode([
@@ -98,6 +135,7 @@ final class IptvEntry {
     catchupDays,
     catchupCorrectionHours,
     HttpHeaderPolicy.encode(httpHeaders),
+    isNsfw,
   ]);
 }
 
@@ -125,6 +163,9 @@ final class IptvChannel {
 
   /// What the playlist says.
   final IptvEntry entry;
+
+  /// Whether this channel represents adult / NSFW content.
+  bool get isNsfw => entry.isNsfw;
 
   /// 3.x column, kept across syncs (no 3.x screen sets it).
   final bool favorite;
@@ -208,6 +249,7 @@ final class IptvPlaylist {
     this.lastRefresh,
     this.createdAt,
     this.autoUpdate = true,
+    this.isNsfw = false,
   });
 
   /// The built-in "hot" playlist behind the recommendations (3.x
@@ -239,6 +281,9 @@ final class IptvPlaylist {
   /// Whether automatic sync may refresh it.
   final bool autoUpdate;
 
+  /// Whether this playlist contains adult / NSFW channels.
+  final bool isNsfw;
+
   /// Whether [source] is a network URL.
   bool get isRemote => isHttpUrl(source);
 
@@ -252,6 +297,7 @@ final class IptvPlaylist {
     String? source,
     DateTime? lastRefresh,
     bool? autoUpdate,
+    bool? isNsfw,
   }) => IptvPlaylist(
     id: id,
     name: name ?? this.name,
@@ -261,6 +307,7 @@ final class IptvPlaylist {
     lastRefresh: lastRefresh ?? this.lastRefresh,
     createdAt: createdAt,
     autoUpdate: autoUpdate ?? this.autoUpdate,
+    isNsfw: isNsfw ?? this.isNsfw,
   );
 
   @override
@@ -273,10 +320,11 @@ final class IptvPlaylist {
       other.sortOrder == sortOrder &&
       other.lastRefresh == lastRefresh &&
       other.createdAt == createdAt &&
-      other.autoUpdate == autoUpdate;
+      other.autoUpdate == autoUpdate &&
+      other.isNsfw == isNsfw;
 
   @override
-  int get hashCode => Object.hash(id, name, format, source, sortOrder, lastRefresh, createdAt, autoUpdate);
+  int get hashCode => Object.hash(id, name, format, source, sortOrder, lastRefresh, createdAt, autoUpdate, isNsfw);
 }
 
 /// A saved programme guide source (3.x's `EpgSources` row).

@@ -62,17 +62,29 @@ jobs:
       - name: Build Android APK
         working-directory: apps/pure_live
         run: |
-          flutter build apk --debug --split-per-abi
+          flutter build apk --debug --split-per-abi || {
+            echo "::error::Flutter build failed! Retrying with --verbose and gradle stacktrace..."
+            flutter build apk --debug --split-per-abi --verbose
+            exit 1
+          }
 
       - name: Verify APK size and stats
         run: |
           echo "=== Generated APK Files ==="
           ls -lh apps/pure_live/build/app/outputs/flutter-apk/*.apk
-          ARM64_APK=$(ls apps/pure_live/build/app/outputs/flutter-apk/*arm64*.apk 2>/dev/null | head -n 1 || true)
-          if [ -n "$ARM64_APK" ]; then
-            SIZE_MB=$(du -m "$ARM64_APK" | cut -f1)
-            echo "arm64-v8a APK size: ${SIZE_MB} MB"
-          fi
+          for apk in apps/pure_live/build/app/outputs/flutter-apk/*.apk; do
+            [ -f "$apk" ] || continue
+            bytes=$(wc -c < "$apk")
+            mb=$(awk "BEGIN {printf \"%.2f\", $bytes / 1048576}")
+            echo "$apk -> ${mb} MB (${bytes} bytes)"
+            # Check gate for release arm64-v8a: must be < 55 MB
+            if [[ "$apk" == *release* && "$apk" == *arm64-v8a* ]]; then
+              if (( bytes > 55 * 1024 * 1024 )); then
+                echo "::error::Release arm64-v8a APK size exceeds 55 MB: ${mb} MB"
+                exit 1
+              fi
+            fi
+          done
 
       - name: Upload APK artifacts
         uses: actions/upload-artifact@v7

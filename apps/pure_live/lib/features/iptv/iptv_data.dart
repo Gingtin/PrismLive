@@ -4,6 +4,7 @@ import 'package:live_iptv/live_iptv.dart';
 import 'package:pure_live/app/iptv_library.dart';
 import 'package:pure_live/app/iptv_playlists.dart';
 import 'package:pure_live/app/services.dart';
+import 'package:pure_live/features/privacy/nsfw_privacy_manager.dart';
 import 'package:pure_live/i18n/i18n.dart';
 
 /// The importer of the page (tests replace it); null when IPTV is not set
@@ -41,10 +42,12 @@ final class IptvOverview {
   static Future<IptvOverview> load(IptvLibrary library) async {
     int order(({bool remote, String name}) a, ({bool remote, String name}) b) =>
         a.remote != b.remote ? (a.remote ? -1 : 1) : a.name.toLowerCase().compareTo(b.name.toLowerCase());
+    final isUnlocked = NsfwPrivacyManager.instance.isUnlocked;
     final playlists =
         <IptvPlaylistInfo>[
           for (final playlist in await library.playlists())
-            (playlist: playlist, channels: (await library.channels(playlist.id)).length),
+            if (isUnlocked || !playlist.isNsfw)
+              (playlist: playlist, channels: (await library.channels(playlist.id)).length),
         ]..sort((a, b) {
           final hot = (a.playlist.isHot ? 1 : 0).compareTo(b.playlist.isHot ? 1 : 0);
           return hot != 0 ? hot : compareIptvPlaylists(a.playlist, b.playlist);

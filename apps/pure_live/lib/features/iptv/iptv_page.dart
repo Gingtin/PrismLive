@@ -15,6 +15,7 @@ import 'package:pure_live/features/iptv/iptv_data.dart';
 import 'package:pure_live/features/iptv/iptv_import.dart';
 import 'package:pure_live/features/iptv/iptv_settings.dart';
 import 'package:pure_live/features/iptv/iptv_speed_test_dialog.dart';
+import 'package:pure_live/features/privacy/nsfw_privacy_manager.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_args.dart';
@@ -246,7 +247,16 @@ class _IptvPageState extends ConsumerState<IptvPage> {
   }
 
   Future<void> _chooseAndImportPreset() async {
-    final chosen = await showAppDialog<({String name, String url, String desc})>(
+    final isUnlocked = NsfwPrivacyManager.instance.isUnlocked;
+    final allPresets = [
+      for (final preset in IptvImporter.curatedPresets)
+        (name: preset.name, url: preset.url, desc: preset.desc, isNsfw: false),
+      if (isUnlocked)
+        for (final preset in IptvImporter.curatedNsfwPresets)
+          (name: preset.name, url: preset.url, desc: preset.desc, isNsfw: true),
+    ];
+
+    final chosen = await showAppDialog<({String name, String url, String desc, bool isNsfw})>(
       context: context,
       builder: (dialogContext) {
         final scheme = Theme.of(dialogContext).colorScheme;
@@ -258,21 +268,35 @@ class _IptvPageState extends ConsumerState<IptvPage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                for (final preset in IptvImporter.curatedPresets)
+                for (final preset in allPresets)
                   InkWell(
                     onTap: () => Navigator.pop(dialogContext, preset),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                       child: Row(
                         children: [
-                          Icon(AppIcons.playlist, size: 22, color: scheme.primary),
+                          Icon(
+                            AppIcons.playlist,
+                            size: 22,
+                            color: preset.isNsfw ? const Color(0xFFB91C1C) : scheme.primary,
+                          ),
                           const SizedBox(width: 14),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Text(preset.name, style: dialogContext.textStyles.t15.emphasis),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(preset.name, style: dialogContext.textStyles.t15.emphasis),
+                                    ),
+                                    if (preset.isNsfw) ...[
+                                      const SizedBox(width: 6),
+                                      const NsfwBadge(compact: true),
+                                    ],
+                                  ],
+                                ),
                                 const SizedBox(height: 2),
                                 Text(preset.desc, style: dialogContext.textStyles.t12.copyWith(color: scheme.onSurfaceVariant)),
                               ],
@@ -295,6 +319,7 @@ class _IptvPageState extends ConsumerState<IptvPage> {
       () => importer.importPlaylistFromUrl(
         chosen.url,
         name: chosen.name,
+        isNsfw: chosen.isNsfw,
         confirmReplace: _confirmFor(IptvImportKind.playlist),
       ),
     );
@@ -329,6 +354,32 @@ class _IptvPageState extends ConsumerState<IptvPage> {
     if (origin == null || !mounted) return;
     final playlist = kind == IptvImportKind.playlist;
     switch (origin) {
+      case IptvImportOrigin.privacyM3u:
+        var open = true;
+        Future<IptvImportResult> run(String address, String name) async {
+          final result = await _guarded(
+            () => importer.importPlaylistFromUrl(
+              address,
+              name: name,
+              isNsfw: true,
+              confirmReplace: _confirmFor(kind),
+            ),
+          );
+          if (!open) await _announce(kind, result);
+          return result;
+        }
+
+        final result = await showAppDialog<IptvImportResult>(
+          context: context,
+          dismissible: false,
+          builder: (_) => IptvNetworkImportDialog(
+            kind: kind,
+            run: run,
+            onSwitchToBatch: (text) => unawaited(_openBatchImport(initialText: text)),
+          ),
+        );
+        open = false;
+        if (result != null) await _announce(kind, result);
       case IptvImportOrigin.defaultGuide:
         await _loadDefaultGuide();
       case IptvImportOrigin.presets:
@@ -843,7 +894,8 @@ class _IptvPageState extends ConsumerState<IptvPage> {
           ],
         ),
       for (final info in overview.playlists)
-        _playlistCard(
+        if (NsfwPrivacyManager.instance.isUnlocked || !info.playlist.isNsfw)
+          _playlistCard(
           info.playlist,
           info.channels,
           now,
@@ -860,7 +912,7 @@ class _IptvPageState extends ConsumerState<IptvPage> {
       isGuide: false,
       name: name,
       address: playlist.source,
-      badge: playlistBadge(playlist),
+      badge: playlist.isNsfw ? '18🈲' : playlistBadge(playlist),
       isRemote: playlist.isRemote,
       details: sourceDetails(channels: channels, updated: playlist.lastRefresh, remote: playlist.isRemote, now: now),
       autoUpdate: playlist.autoUpdate,

@@ -32,6 +32,13 @@ class NsfwPrivacyManager extends ChangeNotifier {
   /// Strictly defaults to false (locked/invisible).
   bool get isUnlocked => _isUnlocked;
 
+  /// Unlocks NSFW mode for test environments without opening UI dialogs.
+  @visibleForTesting
+  void unlockForTesting() {
+    _isUnlocked = true;
+    notifyListeners();
+  }
+
   /// Hashed 6-digit PIN (SHA-256 with salt) for security lock.
   String? _hashedPin;
   String? _pinSalt;

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:live_core/live_core.dart';
 import 'package:live_iptv/src/guide/guide_parser.dart';
 import 'package:live_iptv/src/guide/matcher.dart';
 import 'package:live_iptv/src/library.dart';
@@ -155,6 +156,24 @@ final class IptvImporter {
     ),
   ];
 
+  /// High-availability curated public adult / NSFW IPTV playlist presets (strictly isolated, proxy required).
+  static const List<({String name, String url, String desc, bool isNsfw, NetworkMode networkMode})> curatedNsfwPresets = [
+    (
+      name: 'iptv-org 成人电视频道分类源 (xxx.m3u)',
+      url: 'https://iptv-org.github.io/iptv/categories/xxx.m3u',
+      desc: 'iptv-org 官方分类独立分流源，收录全球成人广播电视与卫星频道',
+      isNsfw: true,
+      networkMode: NetworkMode.proxyRequired,
+    ),
+    (
+      name: 'iptv-org 全球全量源 (含成人频道 index.nsfw.m3u)',
+      url: 'https://iptv-org.github.io/iptv/index.nsfw.m3u',
+      desc: 'iptv-org 官方完整索引源，含全球公开频道及成人分类频道',
+      isNsfw: true,
+      networkMode: NetworkMode.proxyRequired,
+    ),
+  ];
+
   /// High-availability curated public EPG programme guide presets.
   static const List<({String name, String url, String desc})> curatedEpgPresets = [
     (
@@ -247,6 +266,7 @@ final class IptvImporter {
     String url = '',
     bool isHot = false,
     bool force = false,
+    bool isNsfw = false,
     IptvPlaylist? expected,
     IptvReplaceConfirm? confirmReplace,
   }) => _importPlaylist(
@@ -256,6 +276,7 @@ final class IptvImporter {
     url: url,
     isHot: isHot,
     force: force,
+    isNsfw: isNsfw,
     expected: expected,
     confirmReplace: confirmReplace,
   );
@@ -267,11 +288,17 @@ final class IptvImporter {
     String url = '',
     bool isHot = false,
     bool force = false,
+    bool isNsfw = false,
     IptvPlaylist? expected,
     IptvReplaceConfirm? confirmReplace,
     ({IptvPlaylist? value})? hotSnapshot,
     bool Function()? canCommit,
   }) async {
+    final isNsfwEffective = isNsfw ||
+        expected?.isNsfw == true ||
+        url.contains('/categories/xxx.m3u') ||
+        url.contains('index.nsfw.m3u') ||
+        curatedNsfwPresets.any((p) => p.url == url);
     final cleanName = name.trim();
     if (cleanName.isEmpty) return IptvImportResult(IptvImportStatus.invalid, error: 'Empty playlist name');
     final String text;
@@ -326,14 +353,23 @@ final class IptvImporter {
         }
         final source = url.isEmpty ? staged!.path : url;
         final time = now();
+        final incomingEntries = isNsfwEffective
+            ? [for (final e in parsed.entries) e.copyWith(isNsfw: true)]
+            : parsed.entries;
         final channels = reconcileChannels(
           playlistId: id,
           previous: await library.channels(id),
-          incoming: parsed.entries,
+          incoming: incomingEntries,
           newId: newId,
         );
         final playlist =
-            existing?.copyWith(name: cleanName, format: format, source: source, lastRefresh: time) ??
+            existing?.copyWith(
+              name: cleanName,
+              format: format,
+              source: source,
+              lastRefresh: time,
+              isNsfw: isNsfwEffective,
+            ) ??
             IptvPlaylist(
               id: id,
               name: cleanName,
@@ -342,6 +378,7 @@ final class IptvImporter {
               lastRefresh: time,
               createdAt: time,
               autoUpdate: url.isNotEmpty && autoSyncEnabled(),
+              isNsfw: isNsfwEffective,
             );
         final sourceId = selectedGuideSourceId();
         final mappings = rebuildMappings(
@@ -377,14 +414,23 @@ final class IptvImporter {
     String? name,
     bool isHot = false,
     bool force = false,
+    bool isNsfw = false,
     IptvReplaceConfirm? confirmReplace,
-  }) => _importPlaylistFromUrl(url, name: name, isHot: isHot, force: force, confirmReplace: confirmReplace);
+  }) => _importPlaylistFromUrl(
+    url,
+    name: name,
+    isHot: isHot,
+    force: force,
+    isNsfw: isNsfw,
+    confirmReplace: confirmReplace,
+  );
 
   Future<IptvImportResult> _importPlaylistFromUrl(
     String url, {
     String? name,
     bool isHot = false,
     bool force = false,
+    bool isNsfw = false,
     IptvReplaceConfirm? confirmReplace,
     ({IptvPlaylist? value})? hotSnapshot,
     bool Function()? canCommit,
@@ -412,6 +458,7 @@ final class IptvImporter {
       url: url.trim(),
       isHot: isHot,
       force: force,
+      isNsfw: isNsfw,
       confirmReplace: confirmReplace,
       hotSnapshot: hotSnapshot,
       canCommit: canCommit,
@@ -591,6 +638,7 @@ final class IptvImporter {
       url: playlist.isRemote ? source : '',
       isHot: playlist.isHot,
       force: true,
+      isNsfw: playlist.isNsfw,
       expected: playlist,
     );
   }
