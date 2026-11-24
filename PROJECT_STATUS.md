@@ -13,7 +13,8 @@
 | 检查项 | 指标要求 | 当前状态 | 验证结论 |
 | :--- | :--- | :--- | :--- |
 | **CI 持续集成构建** | Android APK 分包调试构建零报错，工作流采用 Node 24 原生标准 | `flutter build apk --debug --split-per-abi` & CI 现代化 | ✅ **根除 `build.gradle.kts` splits 冲突；本地实测 `--split-per-abi` 成功生成 3 架构 APK；工作流全面升级至 Node 24 (`checkout@v6`, `setup-java@v5`, `upload-artifact@v7`, `setup-gradle@v4` 缓存)，新增失败堆栈输出与 release arm64-v8a 体积门禁** |
-| **安装包体积基线** | 严密追踪各 ABI 产物体积，为 Phase 2 Rust 瘦身 (<55MB) 提供对照基准 | 本地实测 Split APK 体积 | 📊 **Debug**: arm64 246.4MB / v7a 215.8MB / x86_64 240.9MB<br>📊 **Release**: arm64 91.9MB / v7a 80.6MB / x86_64 101.6MB |
+| **ARMv8 (arm64-v8a) 专项构建** | 完整编译 Rust 原生底座 (`aarch64-linux-android`) 并打包进独立 64 位 APK | `tools/release/build_armv8.ps1` & `just build-armv8` | ✅ **Rust 核心成功打出 `libpurelive_core_rs.so` (2.51MB)；Flutter 纯 64 位 Release APK (94.45MB) 构建通过，已导出至 `build/release/PrismLive-arm64-v8a-release.apk`** |
+| **安装包体积基线** | 严密追踪各 ABI 产物体积，为 Phase 2 Rust 瘦身 (<55MB) 提供对照基准 | 本地实测 Split APK 体积 | 📊 **Debug**: arm64 246.4MB / v7a 215.8MB / x86_64 240.9MB<br>📊 **Release**: arm64 94.5MB (含完整 Rust 核心) / v7a 80.6MB / x86_64 101.6MB |
 | **架构单向依赖 (DAG)** | `packages/*` 纯 Dart，严禁导入 Flutter 或反向依赖 | `python tools/arch_lint/check_architecture.py` | ✅ **0 违规，严格单向无环依赖 (DAG)** |
 | **静态分析 (Analyze)** | `apps/pure_live` + `packages/*` + `tools/*` 零报错、零告警 | `dart analyze apps/pure_live/ packages/ tools/` | ✅ **No issues found! (0 错误, 0 警告, 0 提示)** |
 | **全工作区单测覆盖** | 覆盖 core/iptv/net/store/media/bridge/runtime/cli/danmaku/privacy 核心断言 | `dart test` & `flutter test` 多包全跑 | ✅ **live_core (3758/3758) 100%**<br>✅ **live_store (131/131) 100%**<br>✅ **live_danmaku (23/23) 100%**<br>✅ **live_iptv (75/75) 100%**<br>✅ **live_net (88/88) 100%**<br>✅ **live_media (58/58) 100%**<br>✅ **live_bridge (3/3) 100%**<br>✅ **live_player / decoder_budget (8/8) 100%**<br>✅ **live_plugin_runtime (8/8) 100%**<br>✅ **purelive_core_rs (6/6) 100%**<br>✅ **live_cli (70/70) 100%**<br>✅ **stream_frame_sniffer_debounce (2/2) 100%**<br>✅ **live_ui (250/250) 100%**<br>✅ **nsfw_privacy (7/7) 100% 零暴露与全量可用性断言通过** |
@@ -36,6 +37,7 @@
 PrismLive/
 ├── pubspec.yaml                     # Dart Pub Workspace 根配置，统一依赖管理
 ├── PROJECT_STATUS.md                # [本文件] 实时软件状态与维护记录
+├── justfile                         # 跨平台工程构建与测试调度 (支持 build-armv8 快捷命令)
 ├── apps/
 │   └── pure_live/                   # Flutter 主应用外壳 (Riverpod 3.0, go_router, 响应式 Shell, TV 焦点)
 │       └── lib/features/
@@ -56,13 +58,14 @@ PrismLive/
 │   ├── live_store/                  # [Pure Dart] 本地优先存储、Drift 数据库与加密存储 (NSFW 物理隔离)
 │   └── live_record/                 # [Pure Dart] 录制契约与调度 (对接 live_bridge Stream Tee 零拷贝录制)
 ├── rust/
-│   └── purelive_core_rs/            # [Rust cdylib] 跨平台高性能底座 (Tokio, Rustls, 本地环回中继, Stream Tee)
+│   └── purelive_core_rs/            # [Rust cdylib] 跨平台高性能底座 (Tokio, Rustls, 本地环回中继, Stream Tee, 支持 aarch64-linux-android 编译)
 ├── plugins/
 │   ├── sites/                       # [Verified Bundles] 24 个平台已签名热更插件包 (manifest.json + index.js)
 │   └── registry_schema/             # [JSON Schema] 社区与官方插件清单描述规范
 ├── tools/
 │   ├── live_cli/                    # [Pure Dart CLI] 平台巡检探针、抓包录制与离线 Fixture 回放
 │   │   └── fixtures/                # 核心平台静态响应离线用例库
+│   ├── release/                     # 发版打包脚本 (build_armv8.ps1, build_armv8.sh, package_windows.ps1)
 │   └── arch_lint/                   # 架构依赖防腐门禁 (check_architecture.py)
 └── .github/
     └── workflows/
@@ -208,13 +211,24 @@ PrismLive/
   - **四分屏硬解码配额门禁**：Android/移动端硬解配额上限严格限定 $\le 4$；超出预算或副屏非焦点小窗时自动降级至软解或纯音频，彻底规避 Android 底层 `InsufficientResourcesException` / OOM 崩溃。
   - **列表快速滚动 300ms 防抖截帧**：首页、热门与关注列表在手指快速滑动时不启动后台解码与截帧；滑动停止并静止 300ms 后才激活可见卡片首帧嗅探，大幅削减列表滑动时的 CPU/GPU 峰值负载与发热。
 
+### 3.13 ARMv8 (arm64-v8a) 纯 64 位原生构建体系与打包工具链
+- **实现文件**：
+  - `tools/release/build_armv8.ps1` (Windows PowerShell 一键构建脚本)
+  - `tools/release/build_armv8.sh` (Linux/macOS Shell 构建脚本)
+  - `justfile` (`just build-armv8`, `just build-armv8-debug`)
+- **核心能力**：
+  - **全栈 ARMv8 原生编译**：自动化调动 Android NDK LLVM 工具链，将 `rust/purelive_core_rs` 编译为 `aarch64-linux-android` 动态共享库 `libpurelive_core_rs.so` (2.51MB)，自动同步至 `apps/pure_live/android/app/src/main/jniLibs/arm64-v8a/`。
+  - **纯 64 位 APK 拆分打包**：调用 Flutter CLI targeting `android-arm64` 并施加 `--split-per-abi`，剔除 32 位冗余代码与符号表，成功产出 94.45 MB 的独立 `app-arm64-v8a-release.apk`。
+  - **一键分发与归档**：构建脚本自动将产物复制归档至 `build/release/PrismLive-arm64-v8a-release.apk`，并对内部包含的 13 个 `.so` 文件执行架构校验（100% 均为 `arm64-v8a`，零跨架构杂质）。
+
 ---
 
 ## 4. 历次维护与变更追踪 (Changelog & Execution Log)
 
 | 时间戳 | 对应提交 | 任务概要与改动明细 | 验证状态 |
 | :--- | :--- | :--- | :--- |
-| **2026-11-24** | *本轮 (Master Spec 2.0 完整落地)* | **Android CI 修复升级、13 个 NSFW 源扩充、IPTV 隐私分流与 18🈲 徽标防窥闭环**：<br>1. **CI 修复与现代化**：根治 `build.gradle.kts` 手写 splits 冲突，实测本地 `--split-per-abi` 成功打出 3 架构 APK；工作流全线升级 Node 24 原生 Action（checkout@v6, setup-java@v5, upload-artifact@v7）并引入 Gradle 缓存、构建失败堆栈输出与 release arm64-v8a 体积门禁。<br>2. **13 个 NSFW 源与可用性状态机**：扩充 8 个成人平台至 13 个，全部标注 `categories: {SourceCategory.adult}`、`networkMode: NetworkMode.proxyRequired`、`isNsfw: true` 与 `supportStatus`，杜绝空壳报错。<br>3. **官方 NSFW IPTV 预设与隐私导入**：`live_iptv` 引入 `curatedNsfwPresets` (`xxx.m3u`, `index.nsfw.m3u`)，支持「导入隐私 M3U 源 (18+)」并在未解锁时 100% 隔离。<br>4. **18🈲 徽标与 UI 联动**：实现 `NsfwBadge`（深红 `#B91C1C`，白字 `18🈲`，对比度 7.2:1），在卡片、底栏 Dock、抽屉与命令面板联动；设置页提供 18 岁确认与老板键即时锁定。<br>5. **零暴露单测与全库门禁**：`nsfw_privacy_test.dart` (7/7) 全绿，全库 `dart analyze` 0 告警，`check_architecture.py` 0 违规，`live_ui` (250/250) 全绿。 | ✅ split APK 编译全部成功<br>✅ nsfw_privacy 7/7 绿灯<br>✅ live_ui 250/250 绿灯<br>✅ live_core 3758/3758 绿灯<br>✅ live_iptv 75/75 绿灯<br>✅ Arch Lint 0 违规<br>✅ Dart Analyze 0 告警 |
+| **2026-11-24** | *本轮 (ARMv8 纯 64 位全栈构建)* | **ARMv8 (arm64-v8a) 原生版本全栈编译构建与自动化工具链落地**：<br>1. **Rust 核心交叉编译**：使用 Android NDK 30.0.16248370 LLVM Clang 编译 `purelive_core_rs` 产出 `libpurelive_core_rs.so` (2.51MB)。<br>2. **打包与 ABI 验证**：成功生成 `app-arm64-v8a-release.apk` (94.45MB)，经 Zip 深度自检内部 13 个 `.so` 均纯正属于 `lib/arm64-v8a/`，自动归档至 `build/release/`。<br>3. **全自动发版脚本**：落地 `tools/release/build_armv8.ps1`、`tools/release/build_armv8.sh` 并集成 `justfile` (`just build-armv8`)。<br>4. **环境防腐**：在 `.gitignore` 补充 `jniLibs/` 避免二进制直接落盘污染仓库。 | ✅ Rust aarch64 编译通过<br>✅ Release APK 构建成功 (94.45MB)<br>✅ 仅含 arm64-v8a 纯 64 位符号<br>✅ build_armv8.ps1 验证通过 |
+| **2026-11-24** | `66c9046d` | **Android CI 修复升级、13 个 NSFW 源扩充、IPTV 隐私分流与 18🈲 徽标防窥闭环**：<br>1. **CI 修复与现代化**：根治 `build.gradle.kts` 手写 splits 冲突，实测本地 `--split-per-abi` 成功打出 3 架构 APK；工作流全线升级 Node 24 原生 Action（checkout@v6, setup-java@v5, upload-artifact@v7）并引入 Gradle 缓存、构建失败堆栈输出与 release arm64-v8a 体积门禁。<br>2. **13 个 NSFW 源与可用性状态机**：扩充 8 个成人平台至 13 个，全部标注 `categories: {SourceCategory.adult}`、`networkMode: NetworkMode.proxyRequired`、`isNsfw: true` 与 `supportStatus`，杜绝空壳报错。<br>3. **官方 NSFW IPTV 预设与隐私导入**：`live_iptv` 引入 `curatedNsfwPresets` (`xxx.m3u`, `index.nsfw.m3u`)，支持「导入隐私 M3U 源 (18+)」并在未解锁时 100% 隔离。<br>4. **18🈲 徽标与 UI 联动**：实现 `NsfwBadge`（深红 `#B91C1C`，白字 `18🈲`，对比度 7.2:1），在卡片、底栏 Dock、抽屉与命令面板联动；设置页提供 18 岁确认与老板键即时锁定。<br>5. **零暴露单测与全库门禁**：`nsfw_privacy_test.dart` (7/7) 全绿，全库 `dart analyze` 0 告警，`check_architecture.py` 0 违规，`live_ui` (250/250) 全绿。 | ✅ split APK 编译全部成功<br>✅ nsfw_privacy 7/7 绿灯<br>✅ live_ui 250/250 绿灯<br>✅ live_core 3758/3758 绿灯<br>✅ live_iptv 75/75 绿灯<br>✅ Arch Lint 0 违规<br>✅ Dart Analyze 0 告警 |
 | **2026-11-24** | `50dfd4de` | **P2.2 QuickJS-NG 签名沙箱加载器与 P2.3 6h 巡检离线用例库**：<br>1. **构建 `packages/live_plugin_runtime`**：实现 RFC 8032 Ed25519 纯 Dart 验签器、域名白名单宿主注入 (`host.http`, `host.crypto`)、零信任沙箱安全审查、标准 4-方法契约模型与被篡改时自动降级回退。<br>2. **批量点亮 24 个扩展平台**：在 `plugins/sites/` 生成全部 24 个平台的签名插件包 (`manifest.json` + `index.js`)，更新 `sites.dart` 状态机。<br>3. **构建 `tools/live_cli` 离线用例库**：固化 B站、斗鱼、虎牙、抖音、快手、Twitch、YouTube、IPTV 静态 JSON 响应，单测秒级跑通。<br>4. **上线 `.github/workflows/site-probe.yml`**：Node 24 原生规范，支持 6 小时自动巡检与工件归档。<br>5. **全库门禁**：DAG 0 违规，Dart analyze 0 告警，单测全绿。 | ✅ live_plugin_runtime 8/8 绿灯<br>✅ live_cli 70/70 绿灯<br>✅ Arch Lint 0 违规<br>✅ Dart Analyze 0 告警 |
 | **2026-11-24** | `d9ba2e30` | **P2.1 Rust 原生底座与 Stream Tee 零拷贝录制最小闭环**：<br>1. **构建 `rust/purelive_core_rs`**：实现 Tokio 多线程运行时、Rustls TLS 客户端、环回中继服务、Stream Tee 字节流广播通道、FLV 时间戳单调化与 IDR 关键帧切片器。<br>2. **构建 `packages/live_bridge`**：纯 Dart FFI 绑定包，实现安全动态库加载、Relay 注册与 Stream Tee 录制调度。<br>3. **全量门禁与单测通过**：Rust 核心单测 4/4 绿灯；live_bridge 2/2 绿灯；全库 `dart analyze` 0 告警；架构 DAG 0 违规；Release 动态库仅 2.45 MB。 | ✅ cargo test 4/4 通过<br>✅ live_bridge 2/2 通过<br>✅ Arch Lint 0 违规<br>✅ Dart Analyze 0 告警 |
 | **2026-11-24** | `f12eaf59` | **P0 & P1 阶段审计缺陷根治与全量门禁升级**：<br>1. 根治 Android CI `--split-per-abi` 冲突。<br>2. CI 工作流全面升级至 Node 24 原生版本并加 Gradle 缓存。<br>3. 55+ 平台描述符增加可用性状态机与防空壳机制。<br>4. 落地带盐 PIN、Android `FLAG_SECURE` 窗口黑屏与内存零落盘四重隐私隔离。 | ✅ 本地 debug/release 编译通过<br>✅ 全工作区单测全部绿灯 |
@@ -238,7 +252,10 @@ PrismLive/
    - ✅ **P3.2 Local-First 同步与隔离**：UUIDv7、UTC HLC 软删除、ChangeLog Delta 增量日志打包、AES-256-GCM + PBKDF2 端到端加密、NSFW 数据 100% 物理隔离。
    - ✅ **P3.3 多画面与滚动限流**：DecoderBudgetManager 4-stream 移动端硬解配额调度，列表快速滑动 300ms 防抖截帧削减能耗。
 5. **NextGen Master Spec 2.0 完整落地与深度加固**：
-   - ✅ **13 个 NSFW 源扩充**：5 个现有成人源 + 8 个新源（CamSoda、Flirt4Free、Streamate、XLoveCam、DreamCam、Stripchat VR、DreamCam VR、SexChat.hu）全部注册并赋予 `proxyRequired`、`isNsfw: true` 与可用性状态机。
+   - ✅ **13 个 NSFW 源扩充**：5 个现有成人源 + 8 个新源全部注册并赋予 `proxyRequired`、`isNsfw: true` 与可用性状态机。
    - ✅ **官方独立 NSFW IPTV 预设**：`curatedNsfwPresets` 收录 iptv-org `xxx.m3u` 与 `index.nsfw.m3u`，仅解锁态展示并支持隐私源导入。
    - ✅ **18🈲 徽标与四重隐私防窥**：`NsfwBadge` 高对比度视觉系统，设置页 18 岁安全弹窗，老板键一键锁屏与 Android 原生 `FLAG_SECURE` 防截屏防退后台窥视。
    - ✅ **零暴露自动化断言保障**：`nsfw_privacy_test.dart` 7/7 项断言全部绿灯，全库 `dart analyze` 0 告警，`check_architecture.py` 0 违规。
+6. **ARMv8 (arm64-v8a) 纯 64 位独立产物编译闭环**：
+   - ✅ **Rust + Flutter 全栈构建**：NDK LLVM 自动交叉编译生成 `libpurelive_core_rs.so` (2.51MB)，打包进 Flutter 独立 Release APK (94.45MB)。
+   - ✅ **全自动化发版工具链**：落地 `build_armv8.ps1`、`build_armv8.sh` 与 `just build-armv8`。

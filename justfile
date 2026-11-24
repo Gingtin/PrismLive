@@ -21,7 +21,15 @@ test:
 
 # 3. Android build with specified target ABI (default: arm64-v8a)
 build-android abi="arm64-v8a":
-    cd apps/pure_live && flutter build apk --target-platform android-{{abi}}
+    cd apps/pure_live && flutter build apk --target-platform android-{{abi}} --split-per-abi
+
+# Build ARMv8 (arm64-v8a) release APK with Rust native engine bundled
+build-armv8:
+    pwsh -NoProfile -File tools/release/build_armv8.ps1 -Mode Release
+
+# Build ARMv8 (arm64-v8a) debug APK
+build-armv8-debug:
+    pwsh -NoProfile -File tools/release/build_armv8.ps1 -Mode Debug
 
 # 4. Stream probe: inspect live stream media parameters as JSON
 probe url:
