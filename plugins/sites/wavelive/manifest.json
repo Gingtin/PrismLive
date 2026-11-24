@@ -1,0 +1,20 @@
+{
+  "id": "wavelive",
+  "name": "WAVE",
+  "version": "1.0.0",
+  "author": "PrismLive Official",
+  "allowedDomains": [
+    "wave.live",
+    "*.wave.live"
+  ],
+  "signature": "c78d4ddb58bfffa7bfa484fdf90815cbee56f5c6d9428167f7e759beda97edb85964a472dbd5e7a97a7c8d726ebc99f1bf1afd08663aae16da9cbca13746b90e",
+  "publicKey": "5cc7dadd038a3dbcb265d860f5e83d01652dfe2c0ceed234f05a8d2d8f9e6efb",
+  "region": "eastAsia",
+  "categories": [
+    "audio",
+    "entertainment"
+  ],
+  "networkMode": "direct",
+  "isNsfw": false,
+  "entryPoint": "index.js"
+}

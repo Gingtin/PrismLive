@@ -1,0 +1,19 @@
+{
+  "id": "huajiao",
+  "name": "花椒直播",
+  "version": "1.0.0",
+  "author": "PrismLive Official",
+  "allowedDomains": [
+    "api.huajiao.com",
+    "*.api.huajiao.com"
+  ],
+  "signature": "c33adec7545db868c1d76abd5bf0158cd84465e9f4c86aef2631e754018f3bf67842b3efd7ac16df7c014a35b035ed94809eb4fa540746ff8ceb9af343e29b0f",
+  "publicKey": "5cc7dadd038a3dbcb265d860f5e83d01652dfe2c0ceed234f05a8d2d8f9e6efb",
+  "region": "domestic",
+  "categories": [
+    "entertainment"
+  ],
+  "networkMode": "direct",
+  "isNsfw": false,
+  "entryPoint": "index.js"
+}

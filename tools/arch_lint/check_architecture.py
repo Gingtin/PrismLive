@@ -22,6 +22,7 @@ ALLOWED_LAYERING = {
     'packages/live_iptv': {'live_core', 'live_net'},
     'packages/live_media': {'live_core', 'live_net', 'live_bridge'},
     'packages/live_player': {'live_media', 'live_core', 'live_net'},
+    'packages/live_plugin_runtime': {'live_core', 'live_net'},
     'packages/live_record': {'live_media', 'live_core', 'live_net', 'live_bridge'},
     'packages/live_store': {'live_core'},
     'packages/live_cast': set(),
@@ -30,9 +31,9 @@ ALLOWED_LAYERING = {
     'apps/pure_live': {
         'live_ui', 'live_media', 'live_player', 'live_record', 'live_danmaku',
         'live_iptv', 'live_store', 'live_core', 'live_net', 'live_cast', 'live_vod',
-        'live_bridge',
+        'live_bridge', 'live_plugin_runtime',
     },
-    'tools/live_cli': {'live_core', 'live_net', 'live_danmaku'},
+    'tools/live_cli': {'live_core', 'live_net', 'live_danmaku', 'live_plugin_runtime'},
     'tools/check_latest': set(),
 }
 
@@ -44,6 +45,7 @@ PURE_DART_MEMBERS = {
     'packages/live_danmaku',
     'packages/live_iptv',
     'packages/live_media',
+    'packages/live_plugin_runtime',
     'packages/live_record',
     'packages/live_cast',
     'packages/live_store',

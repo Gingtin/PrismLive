@@ -1,0 +1,26 @@
+{
+  "platform": "bilibili",
+  "roomId": "6",
+  "title": "哔哩哔哩官方直播间",
+  "nick": "哔哩哔哩直播",
+  "avatar": "https://i0.hdslb.com/bfs/face/member/noface.jpg",
+  "cover": "https://i0.hdslb.com/bfs/live/user_cover.jpg",
+  "liveStatus": "live",
+  "watching": "128000",
+  "qualities": [
+    {
+      "quality": "原画",
+      "codec": "avc",
+      "urls": [
+        "https://d1--cn-gotcha01.bilivideo.com/live-bvc/1/live_6.m3u8"
+      ]
+    },
+    {
+      "quality": "高清",
+      "codec": "avc",
+      "urls": [
+        "https://d1--cn-gotcha01.bilivideo.com/live-bvc/1/live_6_1080p.m3u8"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "id": "ardzdf",
+  "name": "ARD / ZDF Mediathek",
+  "version": "1.0.0",
+  "author": "PrismLive Official",
+  "allowedDomains": [
+    "ardmediathek.de",
+    "*.ardmediathek.de"
+  ],
+  "signature": "597e1a008b5f76550707ac96283af65a1538bd4a922198fb3809f1bef5f94af6c74751949fb387a2a92f6cdaeefbd9c7a1dee2b2ff9cf8cea0cd1ac08eb51f03",
+  "publicKey": "5cc7dadd038a3dbcb265d860f5e83d01652dfe2c0ceed234f05a8d2d8f9e6efb",
+  "region": "international",
+  "categories": [
+    "news",
+    "fastTv"
+  ],
+  "networkMode": "proxyRequired",
+  "isNsfw": false,
+  "entryPoint": "index.js"
+}

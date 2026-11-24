@@ -1,0 +1,19 @@
+{
+  "id": "bongacams",
+  "name": "BongaCams",
+  "version": "1.0.0",
+  "author": "PrismLive Official",
+  "allowedDomains": [
+    "bongacams.com",
+    "*.bongacams.com"
+  ],
+  "signature": "443a1a94446b205ae03f3d37180cad962c41045b36dac381d8da8b99a06b3b95894486fa20e8792edddb183f468420c8cfb6f1396ba42b79818f6c35de6abb0b",
+  "publicKey": "5cc7dadd038a3dbcb265d860f5e83d01652dfe2c0ceed234f05a8d2d8f9e6efb",
+  "region": "international",
+  "categories": [
+    "adult"
+  ],
+  "networkMode": "proxyRequired",
+  "isNsfw": true,
+  "entryPoint": "index.js"
+}

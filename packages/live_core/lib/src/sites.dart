@@ -462,7 +462,6 @@ abstract final class SiteIds {
       region: SourceRegion.domestic,
       categories: {SourceCategory.entertainment},
       networkMode: NetworkMode.direct,
-      supportStatus: SourceSupportStatus.pluginPending,
       aliases: ['hj', 'huajiao'],
     ),
     inke: SourceDescriptor(
@@ -495,7 +494,6 @@ abstract final class SiteIds {
       region: SourceRegion.domestic,
       categories: {SourceCategory.sports},
       networkMode: NetworkMode.direct,
-      supportStatus: SourceSupportStatus.pluginPending,
       aliases: ['qqsports', 'penguin', 'qie'],
     ),
     cctvLive: SourceDescriptor(
@@ -504,7 +502,6 @@ abstract final class SiteIds {
       region: SourceRegion.domestic,
       categories: {SourceCategory.sports, SourceCategory.news, SourceCategory.fastTv},
       networkMode: NetworkMode.direct,
-      supportStatus: SourceSupportStatus.pluginPending,
       aliases: ['cctv', 'migu', 'yangshipin'],
     ),
     acfun: SourceDescriptor(
@@ -566,7 +563,6 @@ abstract final class SiteIds {
       region: SourceRegion.international,
       categories: {SourceCategory.lifestyle, SourceCategory.news},
       networkMode: NetworkMode.proxyRequired,
-      supportStatus: SourceSupportStatus.pluginPending,
       aliases: ['fb', 'facebook'],
     ),
     rumble: SourceDescriptor(
@@ -575,7 +571,6 @@ abstract final class SiteIds {
       region: SourceRegion.international,
       categories: {SourceCategory.news, SourceCategory.entertainment},
       networkMode: NetworkMode.proxyRequired,
-      supportStatus: SourceSupportStatus.pluginPending,
       aliases: ['rumble'],
     ),
     dlive: SourceDescriptor(
@@ -584,7 +579,6 @@ abstract final class SiteIds {
       region: SourceRegion.international,
       categories: {SourceCategory.game, SourceCategory.entertainment},
       networkMode: NetworkMode.proxyRequired,
-      supportStatus: SourceSupportStatus.pluginPending,
       aliases: ['dlive'],
     ),
     vimeo: SourceDescriptor(
@@ -593,7 +587,6 @@ abstract final class SiteIds {
       region: SourceRegion.international,
       categories: {SourceCategory.entertainment},
       networkMode: NetworkMode.proxyRequired,
-      supportStatus: SourceSupportStatus.pluginPending,
       aliases: ['vimeo'],
     ),
     steamBroadcast: SourceDescriptor(
@@ -610,7 +603,6 @@ abstract final class SiteIds {
       region: SourceRegion.international,
       categories: {SourceCategory.news, SourceCategory.entertainment},
       networkMode: NetworkMode.proxyRequired,
-      supportStatus: SourceSupportStatus.pluginPending,
       aliases: ['dm', 'dailymotion'],
     ),
 
@@ -663,7 +655,6 @@ abstract final class SiteIds {
       region: SourceRegion.eastAsia,
       categories: {SourceCategory.game},
       networkMode: NetworkMode.proxyRequired,
-      supportStatus: SourceSupportStatus.pluginPending,
       aliases: ['openrec'],
     ),
     mirrativ: SourceDescriptor(
@@ -672,7 +663,6 @@ abstract final class SiteIds {
       region: SourceRegion.eastAsia,
       categories: {SourceCategory.game},
       networkMode: NetworkMode.proxyRequired,
-      supportStatus: SourceSupportStatus.pluginPending,
       aliases: ['mirrativ'],
     ),
     fc2Live: SourceDescriptor(
@@ -698,7 +688,6 @@ abstract final class SiteIds {
       region: SourceRegion.southeastAsia,
       categories: {SourceCategory.game, SourceCategory.entertainment},
       networkMode: NetworkMode.proxyRecommended,
-      supportStatus: SourceSupportStatus.pluginPending,
       aliases: ['nimo'],
     ),
     waveLive: SourceDescriptor(
@@ -707,7 +696,6 @@ abstract final class SiteIds {
       region: SourceRegion.eastAsia,
       categories: {SourceCategory.entertainment},
       networkMode: NetworkMode.proxyRecommended,
-      supportStatus: SourceSupportStatus.pluginPending,
       aliases: ['lang', 'wavelive'],
     ),
     seventeenLive: SourceDescriptor(
@@ -726,7 +714,6 @@ abstract final class SiteIds {
       region: SourceRegion.international,
       categories: {SourceCategory.fastTv, SourceCategory.news},
       networkMode: NetworkMode.proxyRequired,
-      supportStatus: SourceSupportStatus.pluginPending,
       aliases: ['pluto', 'plutotv'],
     ),
     mixcloud: SourceDescriptor(
@@ -735,7 +722,6 @@ abstract final class SiteIds {
       region: SourceRegion.international,
       categories: {SourceCategory.audio},
       networkMode: NetworkMode.proxyRecommended,
-      supportStatus: SourceSupportStatus.pluginPending,
       aliases: ['mixcloud'],
     ),
     radiko: SourceDescriptor(
@@ -744,7 +730,6 @@ abstract final class SiteIds {
       region: SourceRegion.eastAsia,
       categories: {SourceCategory.audio},
       networkMode: NetworkMode.proxyRequired,
-      supportStatus: SourceSupportStatus.pluginPending,
       aliases: ['radiko'],
     ),
     ardZdf: SourceDescriptor(
@@ -753,7 +738,6 @@ abstract final class SiteIds {
       region: SourceRegion.international,
       categories: {SourceCategory.fastTv, SourceCategory.news},
       networkMode: NetworkMode.proxyRequired,
-      supportStatus: SourceSupportStatus.pluginPending,
       aliases: ['ard', 'zdf'],
     ),
     nhkWorld: SourceDescriptor(
@@ -762,7 +746,6 @@ abstract final class SiteIds {
       region: SourceRegion.eastAsia,
       categories: {SourceCategory.fastTv, SourceCategory.news},
       networkMode: NetworkMode.proxyRecommended,
-      supportStatus: SourceSupportStatus.pluginPending,
       aliases: ['nhk'],
     ),
     france24: SourceDescriptor(
@@ -771,7 +754,6 @@ abstract final class SiteIds {
       region: SourceRegion.international,
       categories: {SourceCategory.fastTv, SourceCategory.news},
       networkMode: NetworkMode.proxyRecommended,
-      supportStatus: SourceSupportStatus.pluginPending,
       aliases: ['france24'],
     ),
     alJazeera: SourceDescriptor(
@@ -780,7 +762,6 @@ abstract final class SiteIds {
       region: SourceRegion.international,
       categories: {SourceCategory.fastTv, SourceCategory.news},
       networkMode: NetworkMode.proxyRecommended,
-      supportStatus: SourceSupportStatus.pluginPending,
       aliases: ['aljazeera'],
     ),
 
@@ -801,7 +782,6 @@ abstract final class SiteIds {
       region: SourceRegion.international,
       categories: {SourceCategory.adult},
       networkMode: NetworkMode.proxyRequired,
-      supportStatus: SourceSupportStatus.pluginPending,
       isNsfw: true,
       aliases: ['cb', 'chaturbate'],
     ),
@@ -811,7 +791,6 @@ abstract final class SiteIds {
       region: SourceRegion.international,
       categories: {SourceCategory.adult},
       networkMode: NetworkMode.proxyRequired,
-      supportStatus: SourceSupportStatus.pluginPending,
       isNsfw: true,
       aliases: ['stripchat'],
     ),
@@ -821,7 +800,6 @@ abstract final class SiteIds {
       region: SourceRegion.international,
       categories: {SourceCategory.adult},
       networkMode: NetworkMode.proxyRequired,
-      supportStatus: SourceSupportStatus.pluginPending,
       isNsfw: true,
       aliases: ['bongacams'],
     ),
@@ -831,7 +809,6 @@ abstract final class SiteIds {
       region: SourceRegion.international,
       categories: {SourceCategory.adult},
       networkMode: NetworkMode.proxyRequired,
-      supportStatus: SourceSupportStatus.pluginPending,
       isNsfw: true,
       aliases: ['cam4'],
     ),
@@ -841,7 +818,6 @@ abstract final class SiteIds {
       region: SourceRegion.international,
       categories: {SourceCategory.adult},
       networkMode: NetworkMode.proxyRequired,
-      supportStatus: SourceSupportStatus.pluginPending,
       isNsfw: true,
       aliases: ['mfc', 'myfreecams'],
     ),

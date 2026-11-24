@@ -13,6 +13,7 @@ dependencies:
   live_core: any
   live_danmaku: any
   live_net: any
+  live_plugin_runtime: any
   meta: ^1.19.0
 
 dev_dependencies:

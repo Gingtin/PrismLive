@@ -1,0 +1,20 @@
+{
+  "id": "dailymotion",
+  "name": "Dailymotion",
+  "version": "1.0.0",
+  "author": "PrismLive Official",
+  "allowedDomains": [
+    "dailymotion.com",
+    "*.dailymotion.com"
+  ],
+  "signature": "e72b745d62877dd2ba208a406842f1f67e55cbeb960cdb4db8f8eacbd78caec26d948ff99215fc67d308acd0a301a51955713430669bd2cec50eae30abde3102",
+  "publicKey": "5cc7dadd038a3dbcb265d860f5e83d01652dfe2c0ceed234f05a8d2d8f9e6efb",
+  "region": "international",
+  "categories": [
+    "news",
+    "entertainment"
+  ],
+  "networkMode": "proxyRequired",
+  "isNsfw": false,
+  "entryPoint": "index.js"
+}

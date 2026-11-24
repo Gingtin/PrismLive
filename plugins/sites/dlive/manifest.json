@@ -1,0 +1,20 @@
+{
+  "id": "dlive",
+  "name": "DLive",
+  "version": "1.0.0",
+  "author": "PrismLive Official",
+  "allowedDomains": [
+    "dlive.tv",
+    "*.dlive.tv"
+  ],
+  "signature": "56aadca88f053c0a44eedc49cbc8e331153f7f110faf0eb0f233926c1e29e535db90fb682d3a539ef77ac1a1227dc17d9f8d1f35c36c617232dd3453b12d6e05",
+  "publicKey": "5cc7dadd038a3dbcb265d860f5e83d01652dfe2c0ceed234f05a8d2d8f9e6efb",
+  "region": "international",
+  "categories": [
+    "game",
+    "entertainment"
+  ],
+  "networkMode": "proxyRequired",
+  "isNsfw": false,
+  "entryPoint": "index.js"
+}

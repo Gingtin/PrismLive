@@ -1,0 +1,19 @@
+{
+  "platform": "douyin",
+  "roomId": "10001",
+  "title": "抖音官方现场",
+  "nick": "抖音主播",
+  "avatar": "https://p3-pc.douyinpic.com/avatar.jpg",
+  "cover": "https://p3-pc.douyinpic.com/cover.jpg",
+  "liveStatus": "live",
+  "watching": "35000",
+  "qualities": [
+    {
+      "quality": "原画",
+      "codec": "hevc",
+      "urls": [
+        "https://pull-flv-f26.douyincdn.com/stage/stream-10001.flv"
+      ]
+    }
+  ]
+}

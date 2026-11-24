@@ -1,0 +1,19 @@
+{
+  "id": "radiko",
+  "name": "radiko",
+  "version": "1.0.0",
+  "author": "PrismLive Official",
+  "allowedDomains": [
+    "radiko.jp",
+    "*.radiko.jp"
+  ],
+  "signature": "c6f262a8a6e0cffc38b01e052be54b5868917d92e5c1c1b16963704f58f884eba32e0990b23793eb22fab204da8a4b987a00b98e1d35b1e209965624ec585801",
+  "publicKey": "5cc7dadd038a3dbcb265d860f5e83d01652dfe2c0ceed234f05a8d2d8f9e6efb",
+  "region": "eastAsia",
+  "categories": [
+    "audio"
+  ],
+  "networkMode": "proxyRequired",
+  "isNsfw": false,
+  "entryPoint": "index.js"
+}

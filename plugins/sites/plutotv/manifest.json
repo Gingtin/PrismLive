@@ -1,0 +1,21 @@
+{
+  "id": "plutotv",
+  "name": "Pluto TV",
+  "version": "1.0.0",
+  "author": "PrismLive Official",
+  "allowedDomains": [
+    "pluto.tv",
+    "*.pluto.tv"
+  ],
+  "signature": "d528bc3505d7b30e179147fe5519f544f74222e0de4b4b3bf537ea9386dbe473ce4a7849f83a6a4399418020066443eb197e78526d0da9b592590e42e0567505",
+  "publicKey": "5cc7dadd038a3dbcb265d860f5e83d01652dfe2c0ceed234f05a8d2d8f9e6efb",
+  "region": "international",
+  "categories": [
+    "fastTv",
+    "news",
+    "entertainment"
+  ],
+  "networkMode": "proxyRequired",
+  "isNsfw": false,
+  "entryPoint": "index.js"
+}

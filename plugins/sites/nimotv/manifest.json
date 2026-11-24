@@ -1,0 +1,19 @@
+{
+  "id": "nimotv",
+  "name": "Nimo TV",
+  "version": "1.0.0",
+  "author": "PrismLive Official",
+  "allowedDomains": [
+    "nimo.tv",
+    "*.nimo.tv"
+  ],
+  "signature": "91365b92997f990e5497d5b6815c003492e7c0cd5b1703d16467646b5b36f6f560d4523e64fe9804ce003e6bc1748a2ab202e228842d5b9e8ef0e7075aa6da09",
+  "publicKey": "5cc7dadd038a3dbcb265d860f5e83d01652dfe2c0ceed234f05a8d2d8f9e6efb",
+  "region": "southeastAsia",
+  "categories": [
+    "game"
+  ],
+  "networkMode": "proxyRecommended",
+  "isNsfw": false,
+  "entryPoint": "index.js"
+}

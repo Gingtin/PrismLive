@@ -1,0 +1,57 @@
+name: 6h Platform & IPTV Site Probe
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    name: Platform & IPTV Source Inspection
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Read toolchain.env
+        run: |
+          grep -E '^FLUTTER_VERSION=' toolchain.env >> "$GITHUB_ENV"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: Prepare workspace dependencies
+        run: |
+          set -euo pipefail
+          python3 tools/flutter_sdk/prepare.py --apply || true
+          flutter pub get
+
+      - name: Architecture and Security Gate
+        run: |
+          set -euo pipefail
+          python3 tools/arch_lint/check_architecture.py
+          dart test packages/live_plugin_runtime
+          dart test tools/live_cli
+
+      - name: Run 6h Live Source Patrol
+        run: |
+          set -euo pipefail
+          mkdir -p reports
+          # Run domestic platforms probe and output JSON + Markdown report
+          dart run tools/live_cli/bin/live_cli.dart patrol --domestic --out reports/patrol_report.md --json reports/patrol_report.json || true
+
+      - name: Upload Inspection Report Artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: site-probe-report
+          path: reports/
+          if-no-files-found: warn

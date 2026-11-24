@@ -1,0 +1,19 @@
+{
+  "platform": "kuaishou",
+  "roomId": "ks12345",
+  "title": "快手热门直播",
+  "nick": "快手官方",
+  "avatar": "https://tx2.a.yximgs.com/avatar.jpg",
+  "cover": "https://tx2.a.yximgs.com/cover.jpg",
+  "liveStatus": "live",
+  "watching": "42000",
+  "qualities": [
+    {
+      "quality": "原画",
+      "codec": "avc",
+      "urls": [
+        "https://hlsproxy.kuaishou.com/live/ks12345.m3u8"
+      ]
+    }
+  ]
+}

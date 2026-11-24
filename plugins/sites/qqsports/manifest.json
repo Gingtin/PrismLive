@@ -1,0 +1,19 @@
+{
+  "id": "qqsports",
+  "name": "企鹅体育",
+  "version": "1.0.0",
+  "author": "PrismLive Official",
+  "allowedDomains": [
+    "live.qq.com",
+    "*.live.qq.com"
+  ],
+  "signature": "a1366ac8ff20f58b19e517c70298aeeec17b9a0d1fa4a03d24235b8ddf3b2798f5bc258c06231cd24896ae94f5ea3000d53c0f8d1be922f9587d6ecfff64a20e",
+  "publicKey": "5cc7dadd038a3dbcb265d860f5e83d01652dfe2c0ceed234f05a8d2d8f9e6efb",
+  "region": "domestic",
+  "categories": [
+    "sports"
+  ],
+  "networkMode": "direct",
+  "isNsfw": false,
+  "entryPoint": "index.js"
+}

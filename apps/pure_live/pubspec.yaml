@@ -68,6 +68,7 @@ dependencies:
   live_media: any
   live_net: any
   live_player: any
+  live_plugin_runtime: any
   live_record: any
   live_store: any
   live_ui: any

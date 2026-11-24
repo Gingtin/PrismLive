@@ -1,0 +1,19 @@
+{
+  "id": "chaturbate",
+  "name": "Chaturbate",
+  "version": "1.0.0",
+  "author": "PrismLive Official",
+  "allowedDomains": [
+    "chaturbate.com",
+    "*.chaturbate.com"
+  ],
+  "signature": "d560dcc760a295c898b22803cfeaf387593afbeb43c11035435b55c09efffa49ea1d0d5d26097f6a44f8a76957487e4ced3742a89c314c1275af7d9aff7a9d0e",
+  "publicKey": "5cc7dadd038a3dbcb265d860f5e83d01652dfe2c0ceed234f05a8d2d8f9e6efb",
+  "region": "international",
+  "categories": [
+    "adult"
+  ],
+  "networkMode": "proxyRequired",
+  "isNsfw": true,
+  "entryPoint": "index.js"
+}

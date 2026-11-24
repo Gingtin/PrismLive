@@ -1,0 +1,19 @@
+{
+  "id": "cam4",
+  "name": "Cam4",
+  "version": "1.0.0",
+  "author": "PrismLive Official",
+  "allowedDomains": [
+    "cam4.com",
+    "*.cam4.com"
+  ],
+  "signature": "499973d4b3c4190a96b909eafc56ce3764c7bd55e23c0dc84524a322c2f1193c2d1072cf8f348290db0fa465ff01f2ac6b135593fed27284f8ef278fa6533e05",
+  "publicKey": "5cc7dadd038a3dbcb265d860f5e83d01652dfe2c0ceed234f05a8d2d8f9e6efb",
+  "region": "international",
+  "categories": [
+    "adult"
+  ],
+  "networkMode": "proxyRequired",
+  "isNsfw": true,
+  "entryPoint": "index.js"
+}

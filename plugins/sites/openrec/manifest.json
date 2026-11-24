@@ -1,0 +1,19 @@
+{
+  "id": "openrec",
+  "name": "OPENREC.tv",
+  "version": "1.0.0",
+  "author": "PrismLive Official",
+  "allowedDomains": [
+    "openrec.tv",
+    "*.openrec.tv"
+  ],
+  "signature": "770874be82a9631396645377c1de56ee5c3e6b990eb7549ebd7d58628f699aa77dd9145e164561691c0f64505fd46f289f470d84a60765e5f58d20f29fbe3002",
+  "publicKey": "5cc7dadd038a3dbcb265d860f5e83d01652dfe2c0ceed234f05a8d2d8f9e6efb",
+  "region": "eastAsia",
+  "categories": [
+    "game"
+  ],
+  "networkMode": "proxyRecommended",
+  "isNsfw": false,
+  "entryPoint": "index.js"
+}

@@ -3,6 +3,7 @@
 /// the gate (D-017).
 library;
 
+export 'src/fixture/offline_fixture.dart';
 export 'src/patrol/checks.dart';
 export 'src/patrol/danmaku.dart';
 export 'src/patrol/media.dart';

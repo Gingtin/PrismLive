@@ -1,0 +1,76 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PrismLivePluginManifest",
+  "description": "Schema for PrismLive (棱镜直播) external signed live plugins.",
+  "type": "object",
+  "required": ["id", "name", "version", "author", "signature", "allowedDomains"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9_]+$",
+      "description": "Unique identifier of the platform"
+    },
+    "name": {
+      "type": "string",
+      "description": "Display name of the platform"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Semantic versioning"
+    },
+    "author": {
+      "type": "string",
+      "description": "Plugin author or organization"
+    },
+    "description": {
+      "type": "string",
+      "description": "Human-readable description"
+    },
+    "allowedDomains": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Whitelisted network domains for host.http"
+    },
+    "signature": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{128}$",
+      "description": "Ed25519 cryptographic signature of index.js payload"
+    },
+    "publicKey": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$",
+      "description": "Ed25519 public key hex string"
+    },
+    "region": {
+      "type": "string",
+      "enum": ["domestic", "international", "eastAsia", "southeastAsia", "other"]
+    },
+    "categories": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["game", "entertainment", "audio", "sports", "fastTv", "news", "lifestyle", "adult"]
+      }
+    },
+    "networkMode": {
+      "type": "string",
+      "enum": ["direct", "proxyRecommended", "proxyRequired"]
+    },
+    "isNsfw": {
+      "type": "boolean",
+      "default": false
+    },
+    "entryPoint": {
+      "type": "string",
+      "default": "index.js"
+    },
+    "websiteUrl": {
+      "type": "string"
+    },
+    "aliases": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

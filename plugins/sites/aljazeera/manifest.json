@@ -1,0 +1,20 @@
+{
+  "id": "aljazeera",
+  "name": "Al Jazeera English",
+  "version": "1.0.0",
+  "author": "PrismLive Official",
+  "allowedDomains": [
+    "aljazeera.com",
+    "*.aljazeera.com"
+  ],
+  "signature": "1defae769c09e8c1a697f22e10f004960c8db81c7286e31bc7aad76eb9d704285782aefc64ca3e062c8ef8f4f901297a34fe0784e1afe9b7a570c7a6a753eb01",
+  "publicKey": "5cc7dadd038a3dbcb265d860f5e83d01652dfe2c0ceed234f05a8d2d8f9e6efb",
+  "region": "international",
+  "categories": [
+    "news",
+    "fastTv"
+  ],
+  "networkMode": "direct",
+  "isNsfw": false,
+  "entryPoint": "index.js"
+}

@@ -1,0 +1,21 @@
+{
+  "id": "cctvlive",
+  "name": "央视频/咪咕公开流",
+  "version": "1.0.0",
+  "author": "PrismLive Official",
+  "allowedDomains": [
+    "miguvideo.com",
+    "*.miguvideo.com"
+  ],
+  "signature": "cdb3fdb37f16b85b4bf4554b5d189c64b6fbc73298eb62412af3bb9906ae13cdf118e2fd939840be7dac9430fee5df8ec5d75da7a8d02330efd4ae916b744802",
+  "publicKey": "5cc7dadd038a3dbcb265d860f5e83d01652dfe2c0ceed234f05a8d2d8f9e6efb",
+  "region": "domestic",
+  "categories": [
+    "sports",
+    "news",
+    "fastTv"
+  ],
+  "networkMode": "direct",
+  "isNsfw": false,
+  "entryPoint": "index.js"
+}

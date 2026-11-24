@@ -1,0 +1,20 @@
+{
+  "id": "vimeo",
+  "name": "Vimeo Live",
+  "version": "1.0.0",
+  "author": "PrismLive Official",
+  "allowedDomains": [
+    "vimeo.com",
+    "*.vimeo.com"
+  ],
+  "signature": "cdbe5baf3031d263c983ad86d63d6a0e83d187c8592d61c39697462beca22e7eb2fd490a07460d4ffe632804effe7ca019a911f02ca4e377ff7e43e2a3f80905",
+  "publicKey": "5cc7dadd038a3dbcb265d860f5e83d01652dfe2c0ceed234f05a8d2d8f9e6efb",
+  "region": "international",
+  "categories": [
+    "entertainment",
+    "lifestyle"
+  ],
+  "networkMode": "proxyRequired",
+  "isNsfw": false,
+  "entryPoint": "index.js"
+}

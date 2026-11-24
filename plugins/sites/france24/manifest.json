@@ -1,0 +1,20 @@
+{
+  "id": "france24",
+  "name": "France 24",
+  "version": "1.0.0",
+  "author": "PrismLive Official",
+  "allowedDomains": [
+    "france24.com",
+    "*.france24.com"
+  ],
+  "signature": "a8343271ff2e016d077a0d8cee49c3b2f9bdd531fa2fcd34c5e501960730a3ff0eea4e14224ed2e20005f59797f555cb33c5d847e53f889b7c4dcc6e00676703",
+  "publicKey": "5cc7dadd038a3dbcb265d860f5e83d01652dfe2c0ceed234f05a8d2d8f9e6efb",
+  "region": "international",
+  "categories": [
+    "news",
+    "fastTv"
+  ],
+  "networkMode": "direct",
+  "isNsfw": false,
+  "entryPoint": "index.js"
+}

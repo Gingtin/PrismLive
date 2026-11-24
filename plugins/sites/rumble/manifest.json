@@ -1,0 +1,20 @@
+{
+  "id": "rumble",
+  "name": "Rumble",
+  "version": "1.0.0",
+  "author": "PrismLive Official",
+  "allowedDomains": [
+    "rumble.com",
+    "*.rumble.com"
+  ],
+  "signature": "845ee4e2b5e12b74a5f17c74864f6494f8d7753b98a156393cb5ff3d3dd8dff2fffa8269c3a2e8f18787e49453f670e0286c89915100a91e786be4b2d7664304",
+  "publicKey": "5cc7dadd038a3dbcb265d860f5e83d01652dfe2c0ceed234f05a8d2d8f9e6efb",
+  "region": "international",
+  "categories": [
+    "news",
+    "entertainment"
+  ],
+  "networkMode": "proxyRequired",
+  "isNsfw": false,
+  "entryPoint": "index.js"
+}

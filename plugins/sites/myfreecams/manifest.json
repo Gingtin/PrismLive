@@ -1,0 +1,19 @@
+{
+  "id": "myfreecams",
+  "name": "MyFreeCams",
+  "version": "1.0.0",
+  "author": "PrismLive Official",
+  "allowedDomains": [
+    "myfreecams.com",
+    "*.myfreecams.com"
+  ],
+  "signature": "8b70a4e27ae585fb53896f253962480c80f7b4c0a93f9bd03ee77128e602402ed2d4c823c76b26f3959f7eb076b6adf2274f5463fec32769c03b292f85dcc509",
+  "publicKey": "5cc7dadd038a3dbcb265d860f5e83d01652dfe2c0ceed234f05a8d2d8f9e6efb",
+  "region": "international",
+  "categories": [
+    "adult"
+  ],
+  "networkMode": "proxyRequired",
+  "isNsfw": true,
+  "entryPoint": "index.js"
+}

@@ -1,0 +1,19 @@
+{
+  "platform": "huya",
+  "roomId": "666666",
+  "title": "虎牙官方高清赛事",
+  "nick": "虎牙官方",
+  "avatar": "https://huyaimg.msstatic.com/avatar.jpg",
+  "cover": "https://huyaimg.msstatic.com/cover.jpg",
+  "liveStatus": "live",
+  "watching": "620000",
+  "qualities": [
+    {
+      "quality": "原画",
+      "codec": "avc",
+      "urls": [
+        "https://al.hls.huya.com/src/666666.m3u8"
+      ]
+    }
+  ]
+}

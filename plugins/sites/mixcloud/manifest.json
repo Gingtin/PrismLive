@@ -1,0 +1,19 @@
+{
+  "id": "mixcloud",
+  "name": "Mixcloud Live",
+  "version": "1.0.0",
+  "author": "PrismLive Official",
+  "allowedDomains": [
+    "mixcloud.com",
+    "*.mixcloud.com"
+  ],
+  "signature": "124bc36f93f334075634f9cdbd8a2247227004dd258da11b4085560e337a3b8e8c8262c2180f37a5d9d14373b505364ca00d4f8b9f4c7202335a68d5c626c20b",
+  "publicKey": "5cc7dadd038a3dbcb265d860f5e83d01652dfe2c0ceed234f05a8d2d8f9e6efb",
+  "region": "international",
+  "categories": [
+    "audio"
+  ],
+  "networkMode": "proxyRequired",
+  "isNsfw": false,
+  "entryPoint": "index.js"
+}

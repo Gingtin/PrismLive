@@ -1,0 +1,19 @@
+{
+  "platform": "douyu",
+  "roomId": "9999",
+  "title": "斗鱼官方赛事直播间",
+  "nick": "官方赛事",
+  "avatar": "https://apic.douyucdn.cn/upload/avatar.jpg",
+  "cover": "https://rpic.douyucdn.cn/live-cover/roomcover.jpg",
+  "liveStatus": "live",
+  "watching": "850000",
+  "qualities": [
+    {
+      "quality": "原画",
+      "codec": "avc",
+      "urls": [
+        "https://hw-tct.douyucdn.cn/live/9999r.flv"
+      ]
+    }
+  ]
+}

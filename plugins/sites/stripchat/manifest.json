@@ -1,0 +1,19 @@
+{
+  "id": "stripchat",
+  "name": "Stripchat",
+  "version": "1.0.0",
+  "author": "PrismLive Official",
+  "allowedDomains": [
+    "stripchat.com",
+    "*.stripchat.com"
+  ],
+  "signature": "db81d410520bd3b6e6b7e9d74613fb00a2ec28c4c5643931128b305ffd73e6ddd0747d74e7d310a8fc50b35a0709128f273c68ef6901924ecbbf099202decb0b",
+  "publicKey": "5cc7dadd038a3dbcb265d860f5e83d01652dfe2c0ceed234f05a8d2d8f9e6efb",
+  "region": "international",
+  "categories": [
+    "adult"
+  ],
+  "networkMode": "proxyRequired",
+  "isNsfw": true,
+  "entryPoint": "index.js"
+}

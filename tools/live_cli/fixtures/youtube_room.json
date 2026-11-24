@@ -1,0 +1,19 @@
+{
+  "platform": "youtube",
+  "roomId": "live_news_stream",
+  "title": "Sky News 24/7 Live Stream",
+  "nick": "Sky News",
+  "avatar": "https://yt3.googleusercontent.com/avatar.jpg",
+  "cover": "https://i.ytimg.com/vi/live_news_stream/hqdefault_live.jpg",
+  "liveStatus": "live",
+  "watching": "45000",
+  "qualities": [
+    {
+      "quality": "1080p",
+      "codec": "avc",
+      "urls": [
+        "https://manifest.googlevideo.com/api/manifest/hls_live/stream.m3u8"
+      ]
+    }
+  ]
+}

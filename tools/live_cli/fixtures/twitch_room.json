@@ -1,0 +1,19 @@
+{
+  "platform": "twitch",
+  "roomId": "esl_csgo",
+  "title": "ESL Pro League Live Broadcast",
+  "nick": "ESL_CSGO",
+  "avatar": "https://static-cdn.jtvnw.net/jtv_user_pictures/esl_avatar.png",
+  "cover": "https://static-cdn.jtvnw.net/previews-ttv/live_user_esl_csgo.jpg",
+  "liveStatus": "live",
+  "watching": "75000",
+  "qualities": [
+    {
+      "quality": "1080p60",
+      "codec": "avc",
+      "urls": [
+        "https://video-weaver.sfo01.hls.ttvnw.net/v1/playlist/esl_csgo.m3u8"
+      ]
+    }
+  ]
+}
