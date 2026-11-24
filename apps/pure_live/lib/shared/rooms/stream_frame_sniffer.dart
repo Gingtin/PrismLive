@@ -22,11 +22,13 @@ final class StreamFrameSniffer {
   static final StreamFrameSniffer instance = StreamFrameSniffer._();
 
   final List<LiveRoom> _queue = [];
+  final List<LiveRoom> _pendingQueue = [];
   final Set<String> _failed = {};
   bool _running = false;
   bool _paused = false;
   MpvEngine? _engine;
   Timer? _idleTimer;
+  Timer? _debounceTimer;
 
   /// Whether the sniffer is paused (e.g. while watching a live room in player).
   bool get isPaused => _paused;
@@ -34,6 +36,9 @@ final class StreamFrameSniffer {
   /// Pauses sniffing (call when entering full player page).
   void pause() {
     _paused = true;
+    _debounceTimer?.cancel();
+    _debounceTimer = null;
+    _pendingQueue.clear();
     _queue.clear();
   }
 
@@ -44,8 +49,9 @@ final class StreamFrameSniffer {
 
   /// Requests a real-time video snapshot for [room].
   ///
-  /// Safe to call multiple times from visible card builders.
-  void request(LiveRoom room) {
+  /// Features a 300ms debounce buffer so that rapid list scrolling does not trigger
+  /// background decoder instances until scrolling has settled.
+  void request(LiveRoom room, {Duration debounce = const Duration(milliseconds: 300)}) {
     if (_paused) {
       debugPrint('[StreamFrameSniffer] request skipped: paused');
       return;
@@ -53,7 +59,6 @@ final class StreamFrameSniffer {
     final key = room.identityKey;
     final rawData = room.data;
     final data = rawData is String ? rawData.trim() : '';
-    debugPrint('[StreamFrameSniffer] request: ${room.nick} key=$key data=$data');
     if (key.isEmpty || data.isEmpty) return;
     if (RealtimeCoverCache.get(key) != null) return;
     if (_failed.contains(key)) return;
@@ -64,8 +69,30 @@ final class StreamFrameSniffer {
       return;
     }
 
-    _queue.removeWhere((r) => r.identityKey == key);
-    _queue.insert(0, room);
+    _pendingQueue.removeWhere((r) => r.identityKey == key);
+    _pendingQueue.insert(0, room);
+    if (_pendingQueue.length > 4) {
+      _pendingQueue.removeRange(4, _pendingQueue.length);
+    }
+
+    if (debounce == Duration.zero) {
+      _flushPendingQueue();
+      return;
+    }
+
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(debounce, _flushPendingQueue);
+  }
+
+  void _flushPendingQueue() {
+    _debounceTimer = null;
+    if (_paused || _pendingQueue.isEmpty) return;
+    for (final room in _pendingQueue) {
+      if (!_queue.any((r) => r.identityKey == room.identityKey)) {
+        _queue.add(room);
+      }
+    }
+    _pendingQueue.clear();
     if (_queue.length > 4) {
       _queue.removeRange(4, _queue.length);
     }
@@ -199,7 +226,10 @@ final class StreamFrameSniffer {
   /// Disposes everything immediately.
   Future<void> dispose() async {
     _paused = true;
+    _debounceTimer?.cancel();
+    _debounceTimer = null;
     _idleTimer?.cancel();
+    _pendingQueue.clear();
     _queue.clear();
     final engine = _engine;
     _engine = null;

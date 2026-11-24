@@ -6,6 +6,7 @@ import 'package:live_store/src/block_lists.dart';
 import 'package:live_store/src/database.dart';
 import 'package:live_store/src/legacy/legacy_rules.dart';
 import 'package:live_store/src/local_events.dart';
+import 'package:live_store/src/local_first.dart';
 import 'package:live_store/src/rooms.dart';
 import 'package:live_store/src/secrets.dart';
 import 'package:live_store/src/settings/settings.dart';
@@ -103,6 +104,9 @@ final class LiveStore {
       accounts = AccountRoster(secrets, now: now),
       localEvents = LocalEventStore(database),
       meta = MetaStore(database);
+
+  /// Local-First incremental change-log synchronization manager.
+  LocalFirstSyncManager get syncManager => LocalFirstSyncManager(this);
 
   /// Opens (or creates) the store in [directory] (`<directory>/pure_live.db`)
   /// with the platform's [cipher]. Settings and secrets are loaded before

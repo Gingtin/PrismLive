@@ -17,6 +17,7 @@ export 'src/filters/message_gate.dart';
 export 'src/filters/notice_throttle.dart';
 export 'src/filters/partial_ratio.dart';
 export 'src/filters/repeated_filter.dart';
+export 'src/filters/simhash_filter.dart';
 export 'src/filters/similarity_filter.dart';
 export 'src/filters/text_shape.dart';
 export 'src/registry.dart';

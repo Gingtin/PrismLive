@@ -112,10 +112,10 @@ class DecoderBudgetManager {
   /// Maximum concurrent hardware decoders allowed on this device.
   final int maxHardwareDecoders;
 
-  /// Platform default budget: 2 on Android/iOS/TV, 8 on Desktop.
+  /// Platform default budget: 4 on Android/iOS/TV (quad-split ceiling), 8 on Desktop.
   static int get defaultMaxDecoders {
     if (kIsWeb) return 4;
-    return (Platform.isAndroid || Platform.isIOS) ? 2 : 8;
+    return (Platform.isAndroid || Platform.isIOS) ? 4 : 8;
   }
 
   final Set<int> _activeHardwareCells = {};

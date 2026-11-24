@@ -1,6 +1,7 @@
 pub mod api;
 pub mod relay;
 pub mod remuxer;
+pub mod simhash;
 pub mod stream_tee;
 pub mod tls_client;
 

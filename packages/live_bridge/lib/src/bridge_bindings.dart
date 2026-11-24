@@ -76,6 +76,21 @@ typedef _RelayDestroyDart = void Function(Pointer<Void> handle);
 typedef _FreeStringC = Void Function(Pointer<Utf8> ptr);
 typedef _FreeStringDart = void Function(Pointer<Utf8> ptr);
 
+typedef _SimHash64C = Uint64 Function(Pointer<Utf8> text);
+typedef _SimHash64Dart = int Function(Pointer<Utf8> text);
+
+typedef _HammingDistanceC = Uint32 Function(Uint64 h1, Uint64 h2);
+typedef _HammingDistanceDart = int Function(int h1, int h2);
+
+typedef _DanmakuFilterCreateC = Pointer<Void> Function(IntPtr capacity, Uint32 threshold);
+typedef _DanmakuFilterCreateDart = Pointer<Void> Function(int capacity, int threshold);
+
+typedef _DanmakuFilterIsDuplicateC = Bool Function(Pointer<Void> handle, Pointer<Utf8> text);
+typedef _DanmakuFilterIsDuplicateDart = bool Function(Pointer<Void> handle, Pointer<Utf8> text);
+
+typedef _DanmakuFilterFreeC = Void Function(Pointer<Void> handle);
+typedef _DanmakuFilterFreeDart = void Function(Pointer<Void> handle);
+
 /// Native FFI bindings to `purelive_core_rs`
 final class PureLiveCoreBindings {
   PureLiveCoreBindings._(DynamicLibrary lib)
@@ -92,7 +107,16 @@ final class PureLiveCoreBindings {
         _relayStopRecord = lib.lookupFunction<_RelayStopRecordC, _RelayStopRecordDart>('purelive_relay_stop_record'),
         _relayIsRecording = lib.lookupFunction<_RelayIsRecordingC, _RelayIsRecordingDart>('purelive_relay_is_recording'),
         _relayDestroy = lib.lookupFunction<_RelayDestroyC, _RelayDestroyDart>('purelive_relay_destroy'),
-        _freeString = lib.lookupFunction<_FreeStringC, _FreeStringDart>('purelive_free_string');
+        _freeString = lib.lookupFunction<_FreeStringC, _FreeStringDart>('purelive_free_string'),
+        _simhash64 = lib.lookupFunction<_SimHash64C, _SimHash64Dart>('purelive_simhash64'),
+        _hammingDistance = lib.lookupFunction<_HammingDistanceC, _HammingDistanceDart>('purelive_hamming_distance'),
+        _danmakuFilterCreate =
+            lib.lookupFunction<_DanmakuFilterCreateC, _DanmakuFilterCreateDart>('purelive_danmaku_filter_create'),
+        _danmakuFilterIsDuplicate = lib.lookupFunction<_DanmakuFilterIsDuplicateC, _DanmakuFilterIsDuplicateDart>(
+          'purelive_danmaku_filter_is_duplicate',
+        ),
+        _danmakuFilterFree =
+            lib.lookupFunction<_DanmakuFilterFreeC, _DanmakuFilterFreeDart>('purelive_danmaku_filter_free');
 
   final _CoreVersionDart _version;
   final _CoreInitDart _init;
@@ -105,6 +129,11 @@ final class PureLiveCoreBindings {
   final _RelayIsRecordingDart _relayIsRecording;
   final _RelayDestroyDart _relayDestroy;
   final _FreeStringDart _freeString;
+  final _SimHash64Dart _simhash64;
+  final _HammingDistanceDart _hammingDistance;
+  final _DanmakuFilterCreateDart _danmakuFilterCreate;
+  final _DanmakuFilterIsDuplicateDart _danmakuFilterIsDuplicate;
+  final _DanmakuFilterFreeDart _danmakuFilterFree;
 
   static PureLiveCoreBindings? _cached;
 
@@ -226,4 +255,28 @@ final class PureLiveCoreBindings {
   }
 
   void relayDestroy(Pointer<Void> handle) => _relayDestroy(handle);
+
+  int computeSimHash64(String text) {
+    final cText = text.toNativeUtf8();
+    try {
+      return _simhash64(cText);
+    } finally {
+      malloc.free(cText);
+    }
+  }
+
+  int hammingDistance(int h1, int h2) => _hammingDistance(h1, h2);
+
+  Pointer<Void> danmakuFilterCreate(int capacity, int threshold) => _danmakuFilterCreate(capacity, threshold);
+
+  bool danmakuFilterIsDuplicate(Pointer<Void> handle, String text) {
+    final cText = text.toNativeUtf8();
+    try {
+      return _danmakuFilterIsDuplicate(handle, cText);
+    } finally {
+      malloc.free(cText);
+    }
+  }
+
+  void danmakuFilterFree(Pointer<Void> handle) => _danmakuFilterFree(handle);
 }

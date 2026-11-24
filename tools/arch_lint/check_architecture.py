@@ -18,7 +18,7 @@ ALLOWED_LAYERING = {
     'packages/live_net': set(),
     'packages/live_bridge': {'live_core', 'live_net'},
     'packages/live_core': {'live_net'},
-    'packages/live_danmaku': {'live_core', 'live_net'},
+    'packages/live_danmaku': {'live_core', 'live_net', 'live_bridge'},
     'packages/live_iptv': {'live_core', 'live_net'},
     'packages/live_media': {'live_core', 'live_net', 'live_bridge'},
     'packages/live_player': {'live_media', 'live_core', 'live_net'},

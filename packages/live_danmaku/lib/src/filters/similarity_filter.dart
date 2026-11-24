@@ -1,6 +1,7 @@
 import 'dart:collection';
 
 import 'package:live_danmaku/src/filters/partial_ratio.dart';
+import 'package:live_danmaku/src/filters/simhash_filter.dart';
 
 /// Hides a text that is too similar to one shown in the last few seconds
 /// (3.x `DanmakuSimilarityFilter`; off by default, see
@@ -13,6 +14,8 @@ import 'package:live_danmaku/src/filters/partial_ratio.dart';
 ///   newest [maxComparisons] cached texts reaches [similarityThreshold], is
 ///   hidden and refreshes that entry (moves it to the newest and restarts
 ///   its time).
+/// - When [useSimHash] is true, delegates to Rust 2-gram SimHash 64-bit sliding window
+///   deduplication for sub-millisecond throughput under high-concurrency chat spikes.
 /// - Entries older than [cacheDuration] are dropped; at most [maxCacheSize]
 ///   are kept.
 final class DanmakuSimilarityFilter {
@@ -23,11 +26,23 @@ final class DanmakuSimilarityFilter {
     this._cacheDuration = const Duration(seconds: 3),
     int maxCacheSize = 100,
     int maxComparisons = 96,
+    this.useSimHash = false,
+    int simHashMaxDistance = 3,
     DateTime Function()? clock,
   }) : _similarityThreshold = similarityThreshold.clamp(0, 100),
        _maxCacheSize = maxCacheSize.clamp(1, 1000),
        maxComparisons = maxComparisons.clamp(1, 256),
+       _simHashFilter = useSimHash
+           ? DanmakuSimHashFilter(
+               maxCapacity: maxCacheSize.clamp(1, 1000),
+               maxDistance: simHashMaxDistance,
+             )
+           : null,
        _clock = clock ?? DateTime.now;
+
+  /// Whether to use the ultra-fast Rust SimHash engine.
+  final bool useSimHash;
+  final DanmakuSimHashFilter? _simHashFilter;
 
   int _similarityThreshold;
   Duration _cacheDuration;
@@ -70,6 +85,9 @@ final class DanmakuSimilarityFilter {
   bool shouldDisplay(String text) {
     final normalized = text.trim();
     if (normalized.isEmpty) return false;
+    if (_simHashFilter case final filter?) {
+      return filter.shouldDisplay(normalized);
+    }
     final now = _clock();
     _lastComparisonCount = 0;
     _cache.removeWhere((_, cached) => now.difference(cached.lastSeenAt) > _cacheDuration);
@@ -97,7 +115,16 @@ final class DanmakuSimilarityFilter {
   }
 
   /// Forgets every reference.
-  void clear() => _cache.clear();
+  void clear() {
+    _cache.clear();
+    _simHashFilter?.clear();
+  }
+
+  /// Disposes filter resources.
+  void dispose() {
+    _cache.clear();
+    _simHashFilter?.dispose();
+  }
 
   void _refresh(String key, _Cached cached, DateTime now) {
     cached.lastSeenAt = now;

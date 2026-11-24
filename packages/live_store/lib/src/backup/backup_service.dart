@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:live_core/live_core.dart';
 import 'package:live_store/src/block_lists.dart';
 import 'package:live_store/src/legacy/legacy_snapshot.dart';
 import 'package:live_store/src/live_store.dart';
@@ -46,11 +47,18 @@ final class BackupService {
     sections.putIfAbsent('favorite', () => {}).addAll({
       'shieldList': await _store.blockLists.list(BlockKind.keyword),
       'blockedDanmakuUsers': await _store.blockLists.list(BlockKind.user),
-      'favoriteRooms': [for (final room in await _store.follows.all()) room.toJson()],
-      'favoriteAreas': [for (final area in await _store.followAreas.all()) area.toJson()],
+      'favoriteRooms': [
+        for (final room in await _store.follows.all())
+          if (!SiteIds.descriptorOf(room.platform).isNsfw) room.toJson(),
+      ],
+      'favoriteAreas': [
+        for (final area in await _store.followAreas.all())
+          if (!SiteIds.descriptorOf(area.platform).isNsfw) area.toJson(),
+      ],
     });
     sections.putIfAbsent('history', () => {})['historyRooms'] = [
-      for (final room in await _store.history.all()) room.toJson(),
+      for (final room in await _store.history.all())
+        if (!SiteIds.descriptorOf(room.platform).isNsfw) room.toJson(),
     ];
     final tags = await _store.tags.all();
     sections['tags'] = {
@@ -93,8 +101,14 @@ final class BackupService {
     'backupVersion': version,
     'backupScope': 'favorites',
     'favorite': {
-      'favoriteRooms': [for (final room in await _store.follows.all()) room.toJson()],
-      'favoriteAreas': [for (final area in await _store.followAreas.all()) area.toJson()],
+      'favoriteRooms': [
+        for (final room in await _store.follows.all())
+          if (!SiteIds.descriptorOf(room.platform).isNsfw) room.toJson(),
+      ],
+      'favoriteAreas': [
+        for (final area in await _store.followAreas.all())
+          if (!SiteIds.descriptorOf(area.platform).isNsfw) area.toJson(),
+      ],
     },
   };
 

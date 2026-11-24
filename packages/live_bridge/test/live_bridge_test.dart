@@ -55,5 +55,17 @@ void main() {
       relay.dispose();
       expect(relay.isClosed, isTrue);
     });
+
+    test('DanmakuFilter detects and deduplicates near-duplicate spam', () {
+      final filter = DanmakuFilter.fallback(capacity: 100, threshold: 3);
+
+      expect(filter.isDuplicate('主播太强了666666'), isFalse);
+      // Near duplicate (flooding spam) should be detected as duplicate
+      expect(filter.isDuplicate('主播太强了66666'), isTrue);
+      // Completely different danmaku should pass
+      expect(filter.isDuplicate('今天这波操作拉满了'), isFalse);
+
+      filter.dispose();
+    });
   });
 }

@@ -193,3 +193,60 @@ pub extern "C" fn purelive_free_string(ptr: *mut c_char) {
         }
     }
 }
+
+use crate::simhash::{compute_simhash64, hamming_distance, DanmakuDedupFilter};
+
+/// Danmaku deduplication filter handle for FFI
+pub struct DanmakuFilterHandle {
+    pub filter: DanmakuDedupFilter,
+}
+
+#[no_mangle]
+pub extern "C" fn purelive_simhash64(text: *const c_char) -> u64 {
+    if text.is_null() {
+        return 0;
+    }
+    let c_str = unsafe { CStr::from_ptr(text) };
+    if let Ok(s) = c_str.to_str() {
+        compute_simhash64(s)
+    } else {
+        0
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn purelive_hamming_distance(h1: u64, h2: u64) -> u32 {
+    hamming_distance(h1, h2)
+}
+
+#[no_mangle]
+pub extern "C" fn purelive_danmaku_filter_create(capacity: usize, threshold: u32) -> *mut DanmakuFilterHandle {
+    let filter = DanmakuDedupFilter::new(capacity, threshold);
+    Box::into_raw(Box::new(DanmakuFilterHandle { filter }))
+}
+
+#[no_mangle]
+pub extern "C" fn purelive_danmaku_filter_is_duplicate(
+    handle: *mut DanmakuFilterHandle,
+    text: *const c_char,
+) -> bool {
+    if handle.is_null() || text.is_null() {
+        return false;
+    }
+    let filter_ref = unsafe { &*handle };
+    let c_str = unsafe { CStr::from_ptr(text) };
+    if let Ok(s) = c_str.to_str() {
+        filter_ref.filter.is_duplicate(s)
+    } else {
+        false
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn purelive_danmaku_filter_free(handle: *mut DanmakuFilterHandle) {
+    if !handle.is_null() {
+        unsafe {
+            drop(Box::from_raw(handle));
+        }
+    }
+}

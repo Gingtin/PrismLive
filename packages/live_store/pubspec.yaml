@@ -9,6 +9,7 @@ environment:
 resolution: workspace
 
 dependencies:
+  crypto: ^3.0.8
   drift: ^2.35.3
   live_core: any
   meta: ^1.19.0

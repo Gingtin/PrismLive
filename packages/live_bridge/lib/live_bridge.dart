@@ -5,4 +5,5 @@
 library live_bridge;
 
 export 'src/bridge_bindings.dart' show PureLiveCoreBindings;
-export 'src/purelive_core_bridge.dart' show PureLiveCoreBridge, RustRelayServer;
+export 'src/purelive_core_bridge.dart'
+    show DanmakuFilter, PureLiveCoreBridge, RustRelayServer, computeSimHash64, hammingDistance;

@@ -10,6 +10,7 @@ resolution: workspace
 
 dependencies:
   crypto: ^3.0.8
+  live_bridge: any
   live_core: any
   live_net: any
   meta: ^1.19.0
