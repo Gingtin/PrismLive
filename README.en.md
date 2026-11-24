@@ -19,6 +19,7 @@
 
 <p align="center">
   <a href="https://github.com/Gingtin/PureLive/releases/latest"><b>Download 5.6.5</b></a>
+  &nbsp;·&nbsp; <a href="PROJECT_STATUS.md">Project Status</a>
   &nbsp;·&nbsp; <a href="docs/Y-发布和运营/Y03-发布说明和README/releases/5.6.5.md">Release notes (Chinese)</a>
   &nbsp;·&nbsp; <a href="#features">Features</a>
   &nbsp;·&nbsp; <a href="#supported-platforms">Platforms</a>
