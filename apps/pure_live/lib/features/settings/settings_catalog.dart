@@ -689,6 +689,22 @@ List<SettingsEntry> _build() {
       desc: 'settings_show_unplayable_desc',
       keywords: ['付费', '加锁', '受限'],
     )
+    ..toggle(
+      'hide_offline_rooms',
+      'settings_hide_offline_rooms',
+      Settings.hideOfflineRooms,
+      Icons.videocam_off_outlined,
+      desc: 'settings_hide_offline_rooms_desc',
+      keywords: ['离线', '未开播', '隐藏', 'offline'],
+    )
+    ..toggle(
+      'prefer_realtime_cover',
+      'settings_prefer_realtime_cover',
+      Settings.preferRealtimeCover,
+      Icons.camera_alt_outlined,
+      desc: 'settings_prefer_realtime_cover_desc',
+      keywords: ['封面', '实时画面', '截图', '抓取', 'keyframe', 'cover'],
+    )
     ..add(
       'twitch_languages',
       'settings_twitch_languages',
@@ -887,6 +903,57 @@ List<SettingsEntry> _build() {
       desc: 'volume_boost_desc',
       keywords: ['音量', '声音小', '增强', '响度', 'volume', 'boost', 'gain', 'loud'],
     )
+    ..toggle(
+      'audio_loudnorm',
+      'audio_loudnorm',
+      Settings.audioLoudnorm,
+      AppIcons.settingsVolumeBoost,
+      desc: 'audio_loudnorm_desc',
+      keywords: ['响度均衡', '夜间模式', '护耳', '音量平衡', 'loudnorm', 'normalize', 'compressor'],
+    )
+    ..slider(
+      'audio_loudnorm_target',
+      'audio_loudnorm_target',
+      Settings.audioLoudnormTarget,
+      AppIcons.settingsVolumeBoost,
+      min: -24,
+      max: -12,
+      step: 1,
+      format: (value) => '${value.round()} LUFS',
+      requires: () => [needsOn(Settings.audioLoudnorm, 'audio_loudnorm')],
+      desc: 'audio_loudnorm_target_desc',
+      keywords: ['目标响度', 'LUFS', 'target', 'loudness'],
+    )
+    ..choice<String>(
+      'audio_equalizer_preset',
+      'audio_equalizer_preset',
+      Settings.audioEqualizerPreset,
+      Icons.equalizer_rounded,
+      () => [
+        (value: 'off', label: i18n('equalizer_preset_off'), description: null),
+        (value: 'vocal', label: i18n('equalizer_preset_vocal'), description: null),
+        (value: 'bass_boost', label: i18n('equalizer_preset_bass_boost'), description: null),
+        (value: 'treble_boost', label: i18n('equalizer_preset_treble_boost'), description: null),
+        (value: 'cinema', label: i18n('equalizer_preset_cinema'), description: null),
+        (value: 'custom', label: i18n('equalizer_preset_custom'), description: null),
+      ],
+      desc: 'audio_equalizer_preset_desc',
+      keywords: ['均衡器', 'EQ', '调音', '人声', '重低音', '高音', 'equalizer'],
+    )
+    ..choice<String>(
+      'audio_channel_mode',
+      'audio_channel_mode',
+      Settings.audioChannelMode,
+      Icons.hearing_rounded,
+      () => [
+        (value: 'stereo', label: i18n('audio_channel_stereo'), description: null),
+        (value: 'mono', label: i18n('audio_channel_mono'), description: null),
+        (value: 'left_to_both', label: i18n('audio_channel_left_to_both'), description: null),
+        (value: 'right_to_both', label: i18n('audio_channel_right_to_both'), description: null),
+      ],
+      desc: 'audio_channel_mode_desc',
+      keywords: ['声道', '立体声', '单声道', '左耳', '右耳', 'channel', 'stereo', 'mono'],
+    )
     ..group = 'video_quality_settings'
     ..choice<String>(
       'prefer_resolution',
@@ -940,7 +1007,99 @@ List<SettingsEntry> _build() {
       desc: 'settings_video_fit_desc',
       keywords: ['比例', '裁剪', 'fit', 'crop'],
     )
+    ..toggle(
+      'ambient_lighting',
+      'settings_ambient_lighting',
+      Settings.enableAmbientLighting,
+      AppIcons.settingsAmbientLighting,
+      desc: 'settings_ambient_lighting_desc',
+      keywords: ['流光', '氛围', '背景', '背光', 'ambilight', 'glow', 'cinema'],
+    )
+    ..slider(
+      'ambient_lighting_intensity',
+      'settings_ambient_lighting_intensity',
+      Settings.ambientLightingIntensity,
+      AppIcons.settingsAmbientIntensity,
+      min: 0.1,
+      max: 1,
+      step: 0.05,
+      format: _percent,
+      requires: () => [needsOn(Settings.enableAmbientLighting, 'settings_ambient_lighting')],
+      desc: 'settings_ambient_lighting_intensity_desc',
+      keywords: ['流光亮度', '氛围强度', 'intensity'],
+    )
+    ..slider(
+      'ambient_lighting_blur_radius',
+      'settings_ambient_lighting_blur_radius',
+      Settings.ambientLightingBlurRadius,
+      AppIcons.settingsAmbientBlur,
+      min: 10,
+      max: 80,
+      step: 5,
+      format: (value) => '${value.round()} px',
+      requires: () => [needsOn(Settings.enableAmbientLighting, 'settings_ambient_lighting')],
+      desc: 'settings_ambient_lighting_blur_radius_desc',
+      keywords: ['流光扩散', '模糊半径', 'blur'],
+    )
+    ..slider(
+      'video_sharpen',
+      'video_sharpen',
+      Settings.videoSharpen,
+      Icons.auto_fix_high_rounded,
+      min: 0,
+      max: 1,
+      step: 0.1,
+      format: (val) => val == 0 ? i18n('off') : '${(val * 100).round()}%',
+      desc: 'video_sharpen_desc',
+      keywords: ['锐化', '画质增强', '清晰度', 'sharpen', 'unsharp'],
+    )
+    ..toggle(
+      'smooth_motion',
+      'smooth_motion',
+      Settings.smoothMotion,
+      Icons.motion_photos_on_rounded,
+      desc: 'smooth_motion_desc',
+      keywords: ['动态平滑', '重采样', '高刷', '120Hz', 'motion', 'interpolation'],
+    )
     ..group = 'playback_behavior_settings'
+    ..toggle(
+      'auto_line_failover',
+      'auto_line_failover',
+      Settings.autoLineFailover,
+      AppIcons.switchRoom,
+      desc: 'auto_line_failover_desc',
+      keywords: ['切线', '卡顿', '线路', '自动切线', 'failover', 'stall', 'line'],
+    )
+    ..slider(
+      'auto_line_failover_delay',
+      'auto_line_failover_delay',
+      Settings.autoLineFailoverDelay,
+      AppIcons.switchRoom,
+      min: 2,
+      max: 10,
+      step: 1,
+      format: (value) => '${value.round()} s',
+      requires: () => [needsOn(Settings.autoLineFailover, 'auto_line_failover')],
+      desc: 'auto_line_failover_delay_desc',
+      keywords: ['卡顿阈值', '切线延迟', 'stall delay', 'seconds'],
+    )
+    ..toggle(
+      'auto_quality_fallback',
+      'auto_quality_fallback',
+      Settings.autoQualityFallback,
+      AppIcons.settingsQuality,
+      desc: 'auto_quality_fallback_desc',
+      keywords: ['画质降级', '自适应降级', '流畅度优先', 'downgrade', 'adaptive quality'],
+    )
+    ..toggle(
+      'player_haptic_feedback',
+      'player_haptic_feedback',
+      Settings.playerHapticFeedback,
+      AppIcons.settingsHaptic,
+      desc: 'player_haptic_feedback_desc',
+      keywords: ['震动', '触觉', '手势震动', '反馈', 'haptic', 'vibrate'],
+      when: _mobile,
+    )
     ..toggle(
       'auto_switch_live_follows',
       'auto_switch_live_follows',
@@ -948,6 +1107,35 @@ List<SettingsEntry> _build() {
       AppIcons.switchRoom,
       desc: 'auto_switch_live_follows_desc',
       keywords: ['自动换台', '下播', '播放失败', '关注', '多画面', 'auto', 'next'],
+    )
+    ..toggle(
+      'long_press_speedup',
+      'long_press_speedup',
+      Settings.longPressSpeedup,
+      Icons.speed_rounded,
+      desc: 'long_press_speedup_desc',
+      keywords: ['长按', '快进', '2.0X', '倍速', 'speed', 'speedup'],
+    )
+    ..toggle(
+      'live_low_latency_chase',
+      'live_low_latency_chase',
+      Settings.liveLowLatencyChase,
+      Icons.fast_forward_rounded,
+      desc: 'live_low_latency_chase_desc',
+      keywords: ['追帧', '延迟', '低延迟', 'chase', 'latency'],
+    )
+    ..choice<String>(
+      'live_buffer_profile',
+      'live_buffer_profile',
+      Settings.liveBufferProfile,
+      Icons.tune_rounded,
+      () => [
+        (value: 'ultra_low', label: i18n('buffer_profile_ultra_low'), description: i18n('buffer_profile_ultra_low_desc')),
+        (value: 'balanced', label: i18n('buffer_profile_balanced'), description: i18n('buffer_profile_balanced_desc')),
+        (value: 'anti_stall', label: i18n('buffer_profile_anti_stall'), description: i18n('buffer_profile_anti_stall_desc')),
+      ],
+      desc: 'live_buffer_profile_desc',
+      keywords: ['缓冲', '延迟', '卡顿', 'buffer', 'profile'],
     )
     ..toggle(
       'desktop_pause_when_minimized',
@@ -2019,6 +2207,39 @@ List<SettingsEntry> _build() {
       requires: () => [needsOn(Settings.enableDanmakuStroke, 'danmaku_stroke')],
       keywords: ['描边', 'stroke', '弹幕'],
     )
+    ..slider(
+      'danmaku_outline_thickness',
+      'danmaku_outline_thickness',
+      Settings.danmakuOutlineThickness,
+      null,
+      min: 0.5,
+      max: 3,
+      step: 0.1,
+      format: (value) => '${value.toStringAsFixed(1)}x',
+      requires: () => [needsOn(Settings.enableDanmakuStroke, 'danmaku_stroke')],
+      desc: 'danmaku_outline_thickness_desc',
+      keywords: ['描边粗细', '轮廓', 'thickness', 'stroke', '弹幕'],
+    )
+    ..slider(
+      'danmaku_glow_radius',
+      'danmaku_glow_radius',
+      Settings.danmakuGlowRadius,
+      null,
+      min: 0,
+      max: 4,
+      step: 0.5,
+      format: (value) => value == 0 ? i18n('off') : '${value.toStringAsFixed(1)} px',
+      desc: 'danmaku_glow_radius_desc',
+      keywords: ['发光', '光晕', '阴影', '霓虹', 'glow', 'shadow', '弹幕'],
+    )
+    ..toggle(
+      'danmaku_burst_alert',
+      'danmaku_burst_alert',
+      Settings.danmakuBurstAlert,
+      Icons.local_fire_department_rounded,
+      desc: 'danmaku_burst_alert_desc',
+      keywords: ['高能', '弹幕突增', '热度', '高潮', 'burst', 'spike'],
+    )
     ..toggle(
       'danmaku_no_emoji',
       'danmaku_no_emoji',
@@ -2234,6 +2455,27 @@ List<SettingsEntry> _build() {
       AppIcons.chatGift,
       desc: 'record_danmaku_gifts_desc',
       keywords: ['录制', '录像', '弹幕', '礼物', '醒目留言', 'SC', 'XML', 'gift'],
+    )
+    ..toggle(
+      'auto_record_follows',
+      'auto_record_follows',
+      Settings.autoRecordFollows,
+      AppIcons.autoRecord,
+      desc: 'auto_record_follows_desc',
+      keywords: ['开播录制', '自动录制', '开播自动录制', '守护', '关注录制', 'auto record', 'live'],
+    )
+    ..slider(
+      'auto_record_max_streams',
+      'auto_record_max_streams',
+      Settings.autoRecordMaxStreams,
+      AppIcons.autoRecord,
+      min: 1,
+      max: 5,
+      step: 1,
+      format: (value) => '${value.round()}',
+      requires: () => [needsOn(Settings.autoRecordFollows, 'auto_record_follows')],
+      desc: 'auto_record_max_streams_desc',
+      keywords: ['并发路数', '录制上限', 'max streams'],
     );
   return List.unmodifiable(c.entries);
 }

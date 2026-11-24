@@ -22,7 +22,7 @@
 - **多语言**：保留 v3 的 `assets/translations/zh.json`、`en.json` 和用法：全局函数 `i18n(key, args:)`、`i18nOr`、`i18nExists` 同名同参，`{name}` 占位符同 easy_localization。语言来自设置 `language`（`简体中文`/`English`）；用户没选过时跟随系统（同 v3 实际行为），都不匹配时中文。`LiveUiScope` 的文字（`LiveUiStrings`）从同一份翻译取。
 - **主题和界面基础**：`LiveDynamicColorBuilder` + `LiveTheme`（种子色或系统动态色、五档字体大小、字体）、`themeMode`、`MaterialUiThemeBridge`、`LiveUiScope`（文字、加载样式和颜色）、文字缩放、Android 的 `AdaptiveRefreshRateScope`（刷新率策略来自设置，经原生 `pure_live/display_mode`）、滚动行为 `AppScrollBehavior`（v3 `MyCustomScrollBehavior`）；`pubspec.yaml` 写了 `uses-material-design: true`。
 - **Android 原生**（`apps/pure_live/android`，照 v3 改）：
-  - 包名：release 保持 `com.mystyle.purelive`（Y01 覆盖安装 3.x）；debug 和 profile 加后缀 `.v4dev`、应用名“纯粹直播 v4dev”，和手机上的 3.x 并存；签名照 v3 读 `key.properties`（不进 Git）；
+  - 包名：release 保持 `com.mystyle.purelive`（Y01 覆盖安装 3.x）；debug 和 profile 加后缀 `.v4dev`、应用名“棱镜直播 v4dev”，和手机上的 3.x 并存；签名照 v3 读 `key.properties`（不进 Git）；
   - `MainActivity` 改为 `FlutterActivity`（v3 的 `AudioServiceActivity` 属于后台播放，随系统媒体通知一起回来），保留 v3 的 `pure_live/display_mode`、`pure_live/background_playback`、`pure_live/predictive_back`，加 `pure_live/app`（返回键退到后台，代替 v3 的 move_to_desktop 插件）；
   - `AppChannelsPlugin`（不依赖 Activity）：`pure_live/secret_cipher`（Android Keystore 的 AES-256-GCM，密钥不可导出，名字作附加数据）、`pure_live/native_http`（系统 TLS 的 HTTPS，只放行白名单主机）、`pure_live/text_codec`（严格 GBK 解码）、`pure_live/multicast_lock`（DLNA 发现用的组播锁）；
   - 清单：v3 的权限、深链和分享入口照旧，加 `CHANGE_WIFI_MULTICAST_STATE`；去掉 Firebase（`google-services`）、录制前台服务和 audio_service 的声明（随 H01.1/M13 的原生部分回来）、调试探针。
@@ -149,7 +149,7 @@ v3 调用方（`git grep` v3.2.11 的 `lib`）：`AppNavigator` 被 13 个文件
 
 ## 构建
 
-- WSL：`flutter analyze` 无问题；`flutter build apk --debug` 成功，产物包名 `com.mystyle.purelive.v4dev`、名字“纯粹直播 v4dev”、targetSdk 37。构建产物不进 Git。
+- WSL：`flutter analyze` 无问题；`flutter build apk --debug` 成功，产物包名 `com.mystyle.purelive.v4dev`、名字“棱镜直播 v4dev”、targetSdk 37。构建产物不进 Git。
 - Windows：在主机上构建，本次没做（见上表）。
 
 ## 测试

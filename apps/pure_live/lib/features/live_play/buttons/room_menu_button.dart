@@ -10,10 +10,13 @@ import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/desktop/desktop_window.dart';
 import 'package:pure_live/app/services.dart';
+import 'package:pure_live/features/live_play/dialogs/audio_equalizer_sheet.dart';
+import 'package:pure_live/features/live_play/dialogs/instant_clip_dialog.dart';
 import 'package:pure_live/features/live_play/dialogs/playback_info_panel.dart';
 import 'package:pure_live/features/live_play/dialogs/player_dialogs.dart';
 import 'package:pure_live/features/live_play/dialogs/room_dialogs.dart';
 import 'package:pure_live/features/live_play/dialogs/stream_dialogs.dart';
+import 'package:pure_live/features/live_play/dialogs/video_picture_sheet.dart';
 import 'package:pure_live/features/live_play/layout/room_panel.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/features/live_play/switch_room/room_switch_panel.dart';
@@ -154,6 +157,21 @@ enum RoomMenuEntry {
   /// The player's volume for this room.
   volume,
 
+  /// 10-band audio equalizer.
+  audioEqualizer,
+
+  /// Video picture color adjustments (brightness, contrast, saturation, gamma).
+  pictureColor,
+
+  /// Instant replay highlight clip.
+  instantClip,
+
+  /// Captures current video frame as real-time cover for this room.
+  captureCover,
+
+  /// Buffer profile selection ('ultra_low', 'balanced', 'anti_stall').
+  bufferProfile,
+
   /// The picture's fit ("画面比例", U.2a change 5: off the portrait bar).
   videoFit,
 
@@ -209,6 +227,11 @@ List<List<RoomMenuEntry>> roomMenuGroups({
       RoomMenuEntry.switchRoom,
       RoomMenuEntry.timer,
       RoomMenuEntry.volume,
+      RoomMenuEntry.audioEqualizer,
+      RoomMenuEntry.pictureColor,
+      RoomMenuEntry.instantClip,
+      RoomMenuEntry.captureCover,
+      RoomMenuEntry.bufferProfile,
       RoomMenuEntry.videoFit,
       if (huya || replay) RoomMenuEntry.replayArchive,
     ],
@@ -249,10 +272,15 @@ bool roomMenuOpensPanel(RoomMenuEntry entry) => switch (entry) {
   RoomMenuEntry.switchRoom ||
   RoomMenuEntry.timer ||
   RoomMenuEntry.volume ||
+  RoomMenuEntry.audioEqualizer ||
+  RoomMenuEntry.pictureColor ||
   RoomMenuEntry.cast ||
   RoomMenuEntry.streamLink ||
   RoomMenuEntry.playbackInfo ||
   RoomMenuEntry.localInteraction => true,
+  RoomMenuEntry.captureCover ||
+  RoomMenuEntry.bufferProfile ||
+  RoomMenuEntry.instantClip ||
   RoomMenuEntry.replayArchive ||
   RoomMenuEntry.videoFit ||
   RoomMenuEntry.share ||
@@ -284,6 +312,19 @@ List<List<RoomMenuItem>> roomMenuItems(
             : i18n('live_play_timer_left', args: {'minutes': '${deadline.difference(controller.now()).inMinutes + 1}'}),
       ),
       RoomMenuEntry.volume => (AppIcons.roomVolume, i18n('room_volume'), null),
+      RoomMenuEntry.audioEqualizer => (Icons.equalizer_rounded, i18n('audio_equalizer'), null),
+      RoomMenuEntry.pictureColor => (Icons.tune_rounded, i18n('video_picture_color'), null),
+      RoomMenuEntry.instantClip => (Icons.movie_filter_rounded, i18n('instant_clip_title'), null),
+      RoomMenuEntry.captureCover => (Icons.camera_alt_outlined, i18n('capture_realtime_cover'), null),
+      RoomMenuEntry.bufferProfile => (
+        Icons.speed_rounded,
+        i18n('live_buffer_profile'),
+        switch (settings.get(Settings.liveBufferProfile)) {
+          'ultra_low' => i18n('buffer_profile_ultra_low'),
+          'anti_stall' => i18n('buffer_profile_anti_stall'),
+          _ => i18n('buffer_profile_balanced'),
+        },
+      ),
       RoomMenuEntry.videoFit => (
         AppIcons.aspectRatio,
         i18n('settings_video_fit'),
@@ -408,6 +449,102 @@ class RoomMenuButton extends ConsumerWidget {
         showSleepTimer(context, controller);
       case RoomMenuEntry.volume:
         showRoomVolume(context, controller);
+      case RoomMenuEntry.audioEqualizer:
+        showAudioEqualizerSheet(context, controller);
+      case RoomMenuEntry.pictureColor:
+        showVideoPictureSheet(context, controller);
+      case RoomMenuEntry.instantClip:
+        await showInstantClipDialog(context, controller);
+      case RoomMenuEntry.captureCover:
+        final engine = controller.session.engine;
+        if (engine case final FrameCaptureControl capture) {
+          final bytes = await capture.captureFrame();
+          if (bytes != null && bytes.isNotEmpty) {
+            RealtimeCoverCache.put(controller.room.identityKey, bytes);
+            AppNavigator.toast(i18n('capture_realtime_cover_success'));
+          } else {
+            AppNavigator.toast(i18n('capture_realtime_cover_failed'));
+          }
+        } else {
+          AppNavigator.toast(i18n('capture_realtime_cover_failed'));
+        }
+      case RoomMenuEntry.bufferProfile:
+        final settings = ref.read(storeProvider).settings;
+        final current = settings.get(Settings.liveBufferProfile);
+        final choice = await showDialog<String>(
+          context: context,
+          builder: (dialogCtx) => SimpleDialog(
+            title: Text(i18n('live_buffer_profile')),
+            children: [
+              SimpleDialogOption(
+                onPressed: () => Navigator.of(dialogCtx).pop('ultra_low'),
+                child: Row(
+                  children: [
+                    Icon(current == 'ultra_low' ? Icons.radio_button_checked : Icons.radio_button_off, size: 20),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(i18n('buffer_profile_ultra_low'), style: const TextStyle(fontWeight: FontWeight.bold)),
+                          Text(i18n('buffer_profile_ultra_low_desc'), style: Theme.of(dialogCtx).textTheme.bodySmall),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Divider(height: 1),
+              SimpleDialogOption(
+                onPressed: () => Navigator.of(dialogCtx).pop('balanced'),
+                child: Row(
+                  children: [
+                    Icon(current == 'balanced' ? Icons.radio_button_checked : Icons.radio_button_off, size: 20),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(i18n('buffer_profile_balanced'), style: const TextStyle(fontWeight: FontWeight.bold)),
+                          Text(i18n('buffer_profile_balanced_desc'), style: Theme.of(dialogCtx).textTheme.bodySmall),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Divider(height: 1),
+              SimpleDialogOption(
+                onPressed: () => Navigator.of(dialogCtx).pop('anti_stall'),
+                child: Row(
+                  children: [
+                    Icon(current == 'anti_stall' ? Icons.radio_button_checked : Icons.radio_button_off, size: 20),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(i18n('buffer_profile_anti_stall'), style: const TextStyle(fontWeight: FontWeight.bold)),
+                          Text(i18n('buffer_profile_anti_stall_desc'), style: Theme.of(dialogCtx).textTheme.bodySmall),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+        if (choice != null && choice != current) {
+          await settings.set(Settings.liveBufferProfile, choice);
+          await controller.session.setLiveBufferProfile(choice);
+          final label = switch (choice) {
+            'ultra_low' => i18n('buffer_profile_ultra_low'),
+            'anti_stall' => i18n('buffer_profile_anti_stall'),
+            _ => i18n('buffer_profile_balanced'),
+          };
+          AppNavigator.toast('${i18n('live_buffer_profile')}: $label');
+        }
       case RoomMenuEntry.streamLink:
         showStreamPanel(context, controller, StreamUse.copy);
       case RoomMenuEntry.playbackInfo:

@@ -316,9 +316,9 @@ def home_ios(extra=''):
 
 # ---------- PiP on the home screen ----------
 def pip_ios():
-    names = ['相机', '照片', '日历', '天气', '时钟', '地图', '备忘录', '设置', '提醒事项', '音乐', '文件', '纯粹直播']
+    names = ['相机', '照片', '日历', '天气', '时钟', '地图', '备忘录', '设置', '提醒事项', '音乐', '文件', '棱镜直播']
     cols = ['#9AA5B1', '#F2C1D6', '#F4C7B8', '#BFD8F2', '#2F3237', '#C8E6C9', '#FFE0A3', '#8E8E93', '#FFFFFF', '#F28CA0', '#9EC5F2', '#FFFFFF']
-    apps = ''.join(f'<div><i style="background-color:{c}' + (f';background-image:url({ICON});background-size:80%;background-repeat:no-repeat;background-position:center' if nm == '纯粹直播' else '') + f'"></i>{nm}</div>'
+    apps = ''.join(f'<div><i style="background-color:{c}' + (f';background-image:url({ICON});background-size:80%;background-repeat:no-repeat;background-position:center' if nm == '棱镜直播' else '') + f'"></i>{nm}</div>'
                    for nm, c in zip(names, cols))
     dock = ''.join(f'<div><i style="background:{c}"></i></div>' for c in ('#7BD389', '#5AA9F0', '#9EC5F2', '#F2994A'))
     w, h, x, y = 240, 135, 393 - 16 - 240, 468
@@ -335,19 +335,19 @@ def pip_ios():
 # ---------- share sheet (system) ----------
 def share_sheet(mode):
     if mode == 'out':
-        head = ('<div class="hd"><i style="background-image:url(' + ICON + ')"></i><div class="x"><div class="t">纯粹直播分享口令</div>'
+        head = ('<div class="hd"><i style="background-image:url(' + ICON + ')"></i><div class="x"><div class="t">棱镜直播分享口令</div>'
                 '<div class="s">gqFtqXB1cmVfbGl2ZaFwqGJpbGliaWxp…</div></div><div class="c">' + mr('close', 18) + '</div></div>')
         apps = [('#34C759', mr('sms', 30), '信息'), ('#0A84FF', mr('mail', 28), '邮件'), ('#FFCC00', mr('sticky_note_2', 28), '备忘录'), ('#E5E5EA', '<span style="color:#3C3C43">' + mr('more_horiz', 30) + '</span>', '更多')]
         acts = [('拷贝', mo('content_copy', 22)), ('存储到“文件”', mo('folder', 22)), ('编辑操作…', '')]
     else:
         head = ('<div class="hd"><i style="background:#8E8E93;display:grid;place-items:center;color:#fff">' + mr('link', 26) + '</i><div class="x"><div class="t">深夜电台 · 点歌接龙到天亮</div>'
                 '<div class="s">live.bilibili.com/1234567</div></div><div class="c">' + mr('close', 18) + '</div></div>')
-        apps = [('#34C759', mr('sms', 30), '信息'), ('#0A84FF', mr('mail', 28), '邮件'), ('#FFFFFF', '', '纯粹直播'), ('#E5E5EA', '<span style="color:#3C3C43">' + mr('more_horiz', 30) + '</span>', '更多')]
+        apps = [('#34C759', mr('sms', 30), '信息'), ('#0A84FF', mr('mail', 28), '邮件'), ('#FFFFFF', '', '棱镜直播'), ('#E5E5EA', '<span style="color:#3C3C43">' + mr('more_horiz', 30) + '</span>', '更多')]
         acts = [('拷贝', mo('content_copy', 22)), ('用 Safari 浏览器打开', mo('explore', 22)), ('编辑操作…', '')]
     ap = ''
     for col, icon, label in apps:
-        st = f'background-color:{col}' + (f';background-image:url({ICON})' if label == '纯粹直播' else '')
-        hl = ' class="hl"' if (mode == 'in' and label == '纯粹直播') else ''
+        st = f'background-color:{col}' + (f';background-image:url({ICON})' if label == '棱镜直播' else '')
+        hl = ' class="hl"' if (mode == 'in' and label == '棱镜直播') else ''
         ap += f'<div><i style="{st}"{hl}>{icon}</i>{label}</div>'
     grp = ''.join(f'<div><span>{t}</span>{ic}</div>' for t, ic in acts)
     return f'<div class="shs">{head}<div class="ap">{ap}</div><div class="grp">{grp}</div></div>'
@@ -364,7 +364,7 @@ def other_app():
 
 
 def share_in():
-    cap = ('<div class="capx" style="left:16px;top:208px;max-width:361px;z-index:90">选“纯粹直播”：直接打开应用；直播间链接进直播间，'
+    cap = ('<div class="capx" style="left:16px;top:208px;max-width:361px;z-index:90">选“棱镜直播”：直接打开应用；直播间链接进直播间，'
            '分享口令弹“口令导入”（U.3d），播放列表和节目单文件走导入（U.9），和 Android 收到分享一样（U.14）</div>')
     return doc(393, 852, 3, iphone(other_app() + '<div class="scrim" style="z-index:60;background:rgba(0,0,0,.35)"></div>' + share_sheet('in') + cap, syn=False))
 
@@ -372,14 +372,14 @@ def share_in():
 def share_in_v3():
     cmp = ('<div class="cmp"><div class="nb2"><span>取消</span><b>ShareExtension</b><span>发布</span></div>'
            '<div class="bd"><p>深夜电台 · 点歌接龙到天亮 https://live.bilibili.com/1234567</p><i>' + mr('link', 26) + '</i></div></div>')
-    cap = ('<div class="capx" style="left:16px;top:320px;max-width:361px;z-index:90">v3：选“纯粹直播”后弹出 Xcode 模板的发布框，'
+    cap = ('<div class="capx" style="left:16px;top:320px;max-width:361px;z-index:90">v3：选“棱镜直播”后弹出 Xcode 模板的发布框，'
            '点“发布”什么也不做（ShareViewController.swift:18-23）；应用本身也只在 Android 接收分享（main.dart:105-106）</div>')
     return doc(393, 852, 3, iphone(other_app() + '<div class="scrim" style="z-index:60;background:rgba(0,0,0,.35)"></div>' + cmp + cap, syn=False))
 
 
 # ---------- clipboard share codes ----------
 def paste_v3():
-    alert = ('<div class="scrim" style="z-index:60;background:rgba(0,0,0,.25)"></div><div class="alert"><div class="h">“纯粹直播”想从“哔哩哔哩”粘贴</div>'
+    alert = ('<div class="scrim" style="z-index:60;background:rgba(0,0,0,.25)"></div><div class="alert"><div class="h">“棱镜直播”想从“哔哩哔哩”粘贴</div>'
              '<div class="m">是否允许？</div><div class="a"><span>不允许粘贴</span><span>允许粘贴</span></div></div>')
     cap = '<div class="capx" style="left:16px;top:560px;max-width:361px;z-index:90">v3：每次回到前台都读剪贴板（desktop_manager.dart:612-625），iOS 16 起每次都弹这个系统提示（示意）</div>'
     return doc(393, 852, 3, home_ios(alert + cap), A.CSS, HOME_CSS)
@@ -452,7 +452,7 @@ def ipad_split():
     lines = ''.join(f'<div class="ln2" style="width:{w}%"></div>' for w in (50, 86, 92, 72, 84, 64, 90, 58, 80, 70, 88, 62, 76, 90, 54, 82))
     right = (f'<div class="other" style="left:{lw + 10}px;right:0;padding-top:40px">{lines}'
              '<div class="capx" style="left:24px;top:36px">另一个应用（示意）</div></div>')
-    cap = ('<div class="capx" style="left:24px;top:640px;z-index:80;max-width:520px">纯粹直播占一半（585 宽，小于 600）：按手机排法（U.2a），'
+    cap = ('<div class="capx" style="left:24px;top:640px;z-index:80;max-width:520px">棱镜直播占一半（585 宽，小于 600）：按手机排法（U.2a），'
            '和 iPhone 一样；拖动中间的分隔条变宽到 600 以上换成宽屏排法，播放不中断。</div>')
     inner = (f'<div class="win ipad" style="--w:1180px;--h:820px;background:#000">{left}<div class="split" style="left:{lw}px"><i></i></div>{right}'
              f'{ipad_status()}{cap}<div class="hind p"></div><div class="syn" style="left:16px;bottom:30px;transform:none">示意图片</div></div>')
@@ -477,7 +477,7 @@ def ipad_stage():
 
 
 SHORTCUTS = [
-    ('纯粹直播', [('设置…', '⌘,')]),
+    ('棱镜直播', [('设置…', '⌘,')]),
     ('文件', [('链接解析…', '⌘L')]),
     ('编辑', [('搜索直播…', '⌘F')]),
     ('显示', [('关注', '⌘1'), ('热门', '⌘2'), ('分区', '⌘3'), ('录制中心', '⌘4'), ('历史记录', '⌘Y'), ('返回', '⌘['), ('全屏', '⌃⌘F')]),
@@ -489,13 +489,13 @@ def ipad_keys():
     body = d_body(1180, 796, windows=False)
     body = body.replace(D.ib(D.rx('f235'), None, 'ib vic'), '', 1)
     cols = {0: [], 1: [], 2: [], 3: []}
-    place = {'纯粹直播': 0, '文件': 0, '编辑': 0, '显示': 1, '播放': 2}
+    place = {'棱镜直播': 0, '文件': 0, '编辑': 0, '显示': 1, '播放': 2}
     for g, items in SHORTCUTS:
         items = [(t, k) for t, k in items if k != '—']   # the list shows only commands with a key
         cols[place[g]].append(f'<div class="g">{g}</div>' + ''.join(f'<div class="hk"><span>{t}</span><b>{k}</b></div>' for t, k in items))
     cols[3].append('<div class="g">v3 的单键（照旧）</div>' + ''.join(f'<div class="hk"><span>{t}</span><b>{k}</b></div>' for t, k in
                    (('播放 / 暂停', '空格'), ('刷新', 'R'), ('音量', '↑ ↓'), ('翻页', '← →'), ('关弹层、退全屏、返回', 'Esc'))))
-    hud = ('<div class="hud" style="left:150px;top:190px;width:880px"><div class="h"><i style="background-image:url(' + ICON + ')"></i>纯粹直播</div><div class="cols">'
+    hud = ('<div class="hud" style="left:150px;top:190px;width:880px"><div class="h"><i style="background-image:url(' + ICON + ')"></i>棱镜直播</div><div class="cols">'
            + ''.join(f'<div>{"".join(c)}</div>' for c in cols.values()) + '</div></div>')
     cap = '<div class="capx" style="left:150px;top:150px;z-index:80">按住 ⌘ 时系统显示的快捷键列表（示意）；和 macOS 菜单栏同一套（U.17b）</div>'
     inner = (f'<div class="win ipad" style="--w:1180px;--h:820px;padding-top:24px">{ipad_status()}{body}'

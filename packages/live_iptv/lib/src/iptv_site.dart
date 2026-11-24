@@ -156,7 +156,32 @@ final class IptvSite extends LiveSite implements LiveSiteRecordRoomResolver {
     if (page > 1) return const [];
     final id = shownIptvPlaylist(await library.playlists(), wanted: popularPlaylistId(), hotRemoved: hotRemoved());
     if (id == null) return const [];
-    return id == IptvPlaylist.hotId ? await hotRooms() : await _playlistRooms(id);
+    if (id == IptvPlaylist.hotId) {
+      return await hotRooms();
+    }
+    final playlist = await library.playlist(id);
+    if (playlist != null && playlist.isRemote) {
+      final last = playlist.lastRefresh;
+      if (last == null || now().difference(last) > const Duration(seconds: 15)) {
+        try {
+          await importer.syncPlaylist(playlist);
+        } on Object catch (_) {}
+      }
+    }
+    return await _playlistRooms(id);
+  }
+
+  /// Forces a sync of the active remote playlist on pull-to-refresh,
+  /// pulling fresh streamers and live snapshot covers from upstream.
+  Future<void> syncCurrentPlaylist() async {
+    final id = shownIptvPlaylist(await library.playlists(), wanted: popularPlaylistId(), hotRemoved: hotRemoved());
+    if (id == null || id == IptvPlaylist.hotId) return;
+    final playlist = await library.playlist(id);
+    if (playlist != null && playlist.isRemote) {
+      try {
+        await importer.syncPlaylist(playlist);
+      } on Object catch (_) {}
+    }
   }
 
   /// The hot playlist's channels as rooms, imported on first use; none when
@@ -335,6 +360,8 @@ final class IptvSite extends LiveSite implements LiveSiteRecordRoomResolver {
     final entry = channel.entry;
     final progTitle = guide?.programme?.title;
     final isOffAir = isOffAirProgramme(progTitle);
+    final probe = StreamProbe.getCached(entry.streamUrl.trim());
+    final isDead = probe != null && probe.health == StreamHealth.dead;
     final displayTitle = title ?? entry.name;
     final logo = entry.tvgLogo ?? '';
     return LiveRoom(
@@ -346,7 +373,7 @@ final class IptvSite extends LiveSite implements LiveSiteRecordRoomResolver {
       cover: logo,
       area: entry.groupTitle ?? '',
       watching: '',
-      liveStatus: isOffAir ? LiveStatus.offline : LiveStatus.live,
+      liveStatus: (isOffAir || isDead) ? LiveStatus.offline : LiveStatus.live,
       introduction: introduction,
       link: entry.streamUrl,
       data: entry.streamUrl,

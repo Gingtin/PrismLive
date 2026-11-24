@@ -46,15 +46,15 @@ abstract final class StoreTables {
 }
 
 const List<String> _schema = [
-  'CREATE TABLE follows (identity TEXT NOT NULL PRIMARY KEY, position INTEGER NOT NULL, room TEXT NOT NULL)',
-  'CREATE TABLE history (identity TEXT NOT NULL PRIMARY KEY, seq INTEGER NOT NULL, room TEXT NOT NULL)',
-  'CREATE TABLE follow_areas (identity TEXT NOT NULL PRIMARY KEY, position INTEGER NOT NULL, area TEXT NOT NULL)',
-  'CREATE TABLE tags (id TEXT NOT NULL PRIMARY KEY, position INTEGER NOT NULL, name TEXT NOT NULL, description TEXT NOT NULL)',
-  'CREATE TABLE room_tags (room TEXT NOT NULL, tag_id TEXT NOT NULL, position INTEGER NOT NULL, PRIMARY KEY (room, tag_id))',
-  'CREATE TABLE block_rules (kind TEXT NOT NULL, folded TEXT NOT NULL, value TEXT NOT NULL, position INTEGER NOT NULL, PRIMARY KEY (kind, folded))',
-  'CREATE TABLE settings (key TEXT NOT NULL PRIMARY KEY, value TEXT NOT NULL)',
+  "CREATE TABLE follows (identity TEXT NOT NULL PRIMARY KEY, position INTEGER NOT NULL, room TEXT NOT NULL, sync_id TEXT NOT NULL DEFAULT '', updated_at INTEGER NOT NULL DEFAULT 0, is_deleted INTEGER NOT NULL DEFAULT 0)",
+  "CREATE TABLE history (identity TEXT NOT NULL PRIMARY KEY, seq INTEGER NOT NULL, room TEXT NOT NULL, sync_id TEXT NOT NULL DEFAULT '', updated_at INTEGER NOT NULL DEFAULT 0, is_deleted INTEGER NOT NULL DEFAULT 0)",
+  "CREATE TABLE follow_areas (identity TEXT NOT NULL PRIMARY KEY, position INTEGER NOT NULL, area TEXT NOT NULL, sync_id TEXT NOT NULL DEFAULT '', updated_at INTEGER NOT NULL DEFAULT 0, is_deleted INTEGER NOT NULL DEFAULT 0)",
+  'CREATE TABLE tags (id TEXT NOT NULL PRIMARY KEY, position INTEGER NOT NULL, name TEXT NOT NULL, description TEXT NOT NULL, updated_at INTEGER NOT NULL DEFAULT 0, is_deleted INTEGER NOT NULL DEFAULT 0)',
+  'CREATE TABLE room_tags (room TEXT NOT NULL, tag_id TEXT NOT NULL, position INTEGER NOT NULL, updated_at INTEGER NOT NULL DEFAULT 0, is_deleted INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (room, tag_id))',
+  'CREATE TABLE block_rules (kind TEXT NOT NULL, folded TEXT NOT NULL, value TEXT NOT NULL, position INTEGER NOT NULL, updated_at INTEGER NOT NULL DEFAULT 0, is_deleted INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (kind, folded))',
+  'CREATE TABLE settings (key TEXT NOT NULL PRIMARY KEY, value TEXT NOT NULL, updated_at INTEGER NOT NULL DEFAULT 0)',
   'CREATE TABLE secrets (ref TEXT NOT NULL PRIMARY KEY, sealed BLOB NOT NULL)',
-  'CREATE TABLE webdav_profiles (name TEXT NOT NULL PRIMARY KEY, position INTEGER NOT NULL, address TEXT NOT NULL, username TEXT NOT NULL)',
+  'CREATE TABLE webdav_profiles (name TEXT NOT NULL PRIMARY KEY, position INTEGER NOT NULL, address TEXT NOT NULL, username TEXT NOT NULL, updated_at INTEGER NOT NULL DEFAULT 0, is_deleted INTEGER NOT NULL DEFAULT 0)',
   'CREATE TABLE meta (key TEXT NOT NULL PRIMARY KEY, value TEXT NOT NULL)',
   'CREATE TABLE legacy_values (key TEXT NOT NULL PRIMARY KEY, value TEXT NOT NULL)',
   ..._localEventsSchema,
@@ -100,9 +100,9 @@ final class StoreDatabase extends GeneratedDatabase {
   /// process's.
   static const Duration busyTimeout = Duration(seconds: 5);
 
-  /// 1: 4.0.0's tables; 2: `local_events` (D08.1).
+  /// 1: 4.0.0's tables; 2: `local_events` (D08.1); 3: Local-First sync contracts (UUIDv7, updated_at, is_deleted).
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   Iterable<TableInfo<Table, Object?>> get allTables => const [];
@@ -119,6 +119,18 @@ final class StoreDatabase extends GeneratedDatabase {
         for (final statement in _localEventsSchema) {
           await customStatement(statement);
         }
+      }
+      if (from < 3) {
+        for (final table in ['follows', 'history', 'follow_areas']) {
+          await customStatement("ALTER TABLE $table ADD COLUMN sync_id TEXT NOT NULL DEFAULT ''");
+          await customStatement('ALTER TABLE $table ADD COLUMN updated_at INTEGER NOT NULL DEFAULT 0');
+          await customStatement('ALTER TABLE $table ADD COLUMN is_deleted INTEGER NOT NULL DEFAULT 0');
+        }
+        for (final table in ['tags', 'room_tags', 'block_rules', 'webdav_profiles']) {
+          await customStatement('ALTER TABLE $table ADD COLUMN updated_at INTEGER NOT NULL DEFAULT 0');
+          await customStatement('ALTER TABLE $table ADD COLUMN is_deleted INTEGER NOT NULL DEFAULT 0');
+        }
+        await customStatement('ALTER TABLE settings ADD COLUMN updated_at INTEGER NOT NULL DEFAULT 0');
       }
     },
     beforeOpen: (_) => customStatement('PRAGMA foreign_keys = ON'),

@@ -231,7 +231,7 @@ def v4_dialog():
     c += scrbox(f'<div class="dg4" style="width:{DLG_W}px"><div class="t">重置小窗位置和大小</div><div class="c">确定要清除已保存的小窗位置和大小吗？</div>'
                 f'<div class="ac">{xb("txt", "取消")}{xb("err", "重置")}</div></div>')
     c += cap('消息', '一个“知道了”；有去处时多一个按钮（例：U.2j 无法打开画中画的“去设置”，正文是示意）')
-    c += scrbox(f'<div class="dg4" style="width:{DLG_W}px"><div class="t">无法打开画中画</div><div class="c">系统设置里关掉了纯粹直播的画中画权限。</div>'
+    c += scrbox(f'<div class="dg4" style="width:{DLG_W}px"><div class="t">无法打开画中画</div><div class="c">系统设置里关掉了棱镜直播的画中画权限。</div>'
                 f'<div class="ac">{xb("txt", "知道了")}{xb("fill", "去设置")}</div></div>')
     c += cap('输入', '默认单行；正文字体；框下是说明或错误、字数；主要按钮写明动作；键盘弹出时整个对话框留在键盘上方')
     c += scrbox(f'<div class="dg4" style="width:{DLG_W}px"><div class="t">屏蔽弹幕关键词</div>'

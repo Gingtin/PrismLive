@@ -201,12 +201,12 @@ def menubar(titles, open_idx=None, tray='', right_extra=''):
             f'<span>10月1日 周三 21:36</span></div></div>')
 
 
-V3_TITLES = ['纯粹直播', 'Edit', 'View', 'Window', 'Help']
-V4_TITLES = ['纯粹直播', '文件', '编辑', '显示', '播放', '窗口', '帮助']
-V3_APP = [('About 纯粹直播', ''), '-', ('Preferences…', '⌘,', 'dis'), '-', ('Services', '>'), '-',
-          ('Hide 纯粹直播', '⌘H'), ('Hide Others', '⌥⌘H'), ('Show All', ''), '-', ('Quit 纯粹直播', '⌘Q')]
-V4_APP = [('关于纯粹直播', ''), ('检查更新…', ''), '-', ('设置…', '⌘,', 'hi'), '-', ('服务', '>'), '-',
-          ('隐藏纯粹直播', '⌘H'), ('隐藏其他', '⌥⌘H'), ('全部显示', ''), '-', ('退出纯粹直播', '⌘Q')]
+V3_TITLES = ['棱镜直播', 'Edit', 'View', 'Window', 'Help']
+V4_TITLES = ['棱镜直播', '文件', '编辑', '显示', '播放', '窗口', '帮助']
+V3_APP = [('About 棱镜直播', ''), '-', ('Preferences…', '⌘,', 'dis'), '-', ('Services', '>'), '-',
+          ('Hide 棱镜直播', '⌘H'), ('Hide Others', '⌥⌘H'), ('Show All', ''), '-', ('Quit 棱镜直播', '⌘Q')]
+V4_APP = [('关于棱镜直播', ''), ('检查更新…', ''), '-', ('设置…', '⌘,', 'hi'), '-', ('服务', '>'), '-',
+          ('隐藏棱镜直播', '⌘H'), ('隐藏其他', '⌥⌘H'), ('全部显示', ''), '-', ('退出棱镜直播', '⌘Q')]
 V4_MENUS = [
     ('文件', '', [('链接解析…', '⌘L'), ('多画面', ''), '-', ('关闭窗口', '⌘W')]),
     ('编辑', '系统会在末尾加自动填充、听写、表情与符号', [('撤销', '⌘Z'), ('重做', '⇧⌘Z'), '-', ('剪切', '⌘X'), ('拷贝', '⌘C'), ('粘贴', '⌘V'), ('全选', '⌘A'), '-', ('搜索直播…', '⌘F')]),
@@ -226,7 +226,7 @@ def screen_with_window(win_html, h, extra):
 def menubar_v3():
     win = home_v3().replace('v3：窗口按钮在标准位置', 'v3：窗口按钮在标准位置').replace('<div class="capx"', '<div class="capx" style="display:none"', 1)
     m = menubar(V3_TITLES, 0) + menu(V3_APP, 10, 25, 250)
-    cap = ('<div class="capx" style="left:300px;top:40px;max-width:520px">v3：Flutter 模板的英文菜单（MainMenu.xib），只有应用名换成了“纯粹直播”；'
+    cap = ('<div class="capx" style="left:300px;top:40px;max-width:520px">v3：Flutter 模板的英文菜单（MainMenu.xib），只有应用名换成了“棱镜直播”；'
            '“Preferences… ⌘,”没有接功能，是灰的；Edit、View、Window、Help 里也没有应用自己的命令</div>')
     return doc(W, 420, 1.5, screen_with_window(win, 420, m + cap), A.CSS, B.CSS)
 
@@ -255,7 +255,7 @@ def tray(ver):
                '（desktop_manager.dart:213-239，desktop_tray_service.dart:28-56）</div>')
     else:
         icon = '<span class="trayon"><i class="ti"><i class="tdot"></i></i></span>'
-        m = menu([('正在录制 2 个直播间', '', 'dis'), ('录制中心…', ''), '-', ('隐藏窗口', ''), '-', ('退出纯粹直播', '⌘Q')], 1000, 25, 200)
+        m = menu([('正在录制 2 个直播间', '', 'dis'), ('录制中心…', ''), '-', ('隐藏窗口', ''), '-', ('退出棱镜直播', '⌘Q')], 1000, 25, 200)
         cap = ('<div class="capx" style="left:600px;top:90px;max-width:380px">新：单色图标（跟着菜单栏深浅变），录制中右下角一个红点；'
                '左键或右键都出菜单；录制中才有前两行</div>')
     body = f'<div class="scr" style="height:300px">{menubar(V4_TITLES if ver == 4 else V3_TITLES, None, icon)}{m}{cap}</div>'
@@ -274,18 +274,18 @@ def close_v3():
 
 def quit_v4():
     body = inner_of(D.v4(W, H, 1.5, windows=True, recording=True, n=False))
-    dlg = ('<div class="scrim" style="z-index:61"></div><div class="mdlg" style="width:420px"><div class="h">要退出纯粹直播吗？</div>'
+    dlg = ('<div class="scrim" style="z-index:61"></div><div class="mdlg" style="width:420px"><div class="h">要退出棱镜直播吗？</div>'
            '<div class="b">正在录制 2 个直播间，退出会停止录制，已经录下的部分会保存。</div>'
            '<div class="a" style="justify-content:flex-end"><span>取消</span><span class="er">退出</span></div></div>')
     cap = ('<div class="capx" style="left:96px;top:62px;z-index:90;max-width:520px">新：红色按钮和 ⌘W 只关窗口，应用留在程序坞里继续录制；'
-           '⌘Q 或菜单“退出纯粹直播”才退出，有录制或开播自动录时先问这一句，没有就直接退出</div>')
+           '⌘Q 或菜单“退出棱镜直播”才退出，有录制或开播自动录时先问这一句，没有就直接退出</div>')
     return doc(W, H, 1.5, window(body, lights(20, 22) + dlg + cap), D.CSS)
 
 
 # ---------- full screen space ----------
 def full_v4():
     page = strip_n(C.v4(W, H, 1.5, android=False))
-    over = ('<div class="mb" style="z-index:70"><i class="sys"></i><span class="app">纯粹直播</span><span>文件</span><span>编辑</span><span>显示</span>'
+    over = ('<div class="mb" style="z-index:70"><i class="sys"></i><span class="app">棱镜直播</span><span>文件</span><span>编辑</span><span>显示</span>'
             '<span>播放</span><span>窗口</span><span>帮助</span></div><div class="fsbar" style="z-index:69"></div>'
             '<div class="tl" style="left:12px;top:32px;z-index:72"><i class="c"></i><i class="m"></i><i class="z"></i></div>'
             + CURSOR.format(x=640, y=4) +

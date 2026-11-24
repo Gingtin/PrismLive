@@ -47,7 +47,7 @@ MpvPlatform? mpvPlatformOf(TargetPlatform platform) => switch (platform) {
 ///   output off (the fork's `setVideoOutputEnabled`), desktop selects
 ///   `vid=no`; Android does not re-send `vid=auto` after an open.
 /// - Windows reports presented frames (the fork's `frameRevision`).
-final class MpvEngine implements PlayerEngine, PlaybackRate, PlaybackStatsSource, VolumeGainControl {
+final class MpvEngine implements PlayerEngine, PlaybackRate, PlaybackStatsSource, VolumeGainControl, AudioLoudnormControl, VideoEnhancementControl, AudioEqualizerControl, FrameCaptureControl, LiveBufferControl {
   new _(
     this.player,
     this.controller,
@@ -56,6 +56,16 @@ final class MpvEngine implements PlayerEngine, PlaybackRate, PlaybackStatsSource
     this._trace, {
     void Function(String)? onBufferingSnapshot,
   }) {
+    _audioLoudnorm = config.audioLoudnorm;
+    _audioLoudnormTarget = config.audioLoudnormTarget;
+    _audioEqualizerBands = Map.of(config.audioEqualizerBands);
+    _audioChannelMode = config.audioChannelMode;
+    _videoSharpen = config.videoSharpen;
+    _smoothMotion = config.smoothMotion;
+    _videoBrightness = config.videoBrightness;
+    _videoContrast = config.videoContrast;
+    _videoSaturation = config.videoSaturation;
+    _videoGamma = config.videoGamma;
     _bufferingProbe = NativeBufferingProbe(
       read: _readProperty,
       report: (line) => (onBufferingSnapshot ?? debugPrint)('$line engine=$_diagnosticEngine open=$_diagnosticOpens'),
@@ -144,11 +154,99 @@ final class MpvEngine implements PlayerEngine, PlaybackRate, PlaybackStatsSource
   /// Configuration.
   final MpvEngineConfig config;
   int? _roomGainDb;
+  bool _audioLoudnorm = false;
+  int _audioLoudnormTarget = -16;
+  Map<String, double> _audioEqualizerBands = const {};
+  String _audioChannelMode = 'stereo';
+  double _videoSharpen = 0;
+  bool _smoothMotion = false;
+  int _videoBrightness = 0;
+  int _videoContrast = 0;
+  int _videoSaturation = 0;
+  int _videoGamma = 0;
 
   @override
   Future<void> setVolumeGainDb(int? decibels) async {
     _roomGainDb = decibels?.clamp(-12, 12);
     await _setProperty('volume-gain', '${(_roomGainDb ?? config.volumeGainDb).clamp(-12, 12)}');
+  }
+
+  @override
+  Future<void> setAudioLoudnorm({required bool enabled, int target = -16}) async {
+    _audioLoudnorm = enabled;
+    _audioLoudnormTarget = target;
+    await _applyAudioFilters();
+  }
+
+  @override
+  Future<void> setAudioEqualizer(Map<String, double> bandGains) async {
+    _audioEqualizerBands = Map.unmodifiable(bandGains);
+    await _applyAudioFilters();
+  }
+
+  @override
+  Future<void> setAudioChannelMode(String mode) async {
+    _audioChannelMode = mode;
+    await _applyAudioFilters();
+  }
+
+  Future<void> _applyAudioFilters() async {
+    final af = buildAudioFilterString(
+      loudnorm: _audioLoudnorm,
+      loudnormTarget: _audioLoudnormTarget,
+      equalizerBands: _audioEqualizerBands,
+      channelMode: _audioChannelMode,
+    );
+    await _setProperty('af', af);
+  }
+
+  @override
+  Future<void> setVideoEnhancements({double sharpen = 0.0, bool smoothMotion = false}) async {
+    _videoSharpen = sharpen.clamp(0.0, 1.0);
+    _smoothMotion = smoothMotion;
+    final vf = buildVideoFilterString(
+      sharpen: _videoSharpen,
+      rtxSuperResolution: config.rtxVideoSuperResolution,
+      platform: config.platform,
+    );
+    await _setProperty('vf', vf);
+    if (_smoothMotion) {
+      await _setProperty('video-sync', 'display-resample');
+      await _setProperty('interpolation', 'yes');
+      await _setProperty('tscale', 'oversample');
+    } else {
+      await _setProperty('video-sync', 'audio');
+      await _setProperty('interpolation', 'no');
+    }
+  }
+
+  @override
+  Future<void> setPictureColor({
+    int brightness = 0,
+    int contrast = 0,
+    int saturation = 0,
+    int gamma = 0,
+  }) async {
+    _videoBrightness = brightness.clamp(-50, 50);
+    _videoContrast = contrast.clamp(-50, 50);
+    _videoSaturation = saturation.clamp(-50, 50);
+    _videoGamma = gamma.clamp(-50, 50);
+    await _setProperty('brightness', '$_videoBrightness');
+    await _setProperty('contrast', '$_videoContrast');
+    await _setProperty('saturation', '$_videoSaturation');
+    await _setProperty('gamma', '$_videoGamma');
+  }
+
+  @override
+  Future<void> setLiveBufferProfile(String profile) async {
+    final (cacheSecs, readaheadSecs, maxBytes) = switch (profile) {
+      'ultra_low' => ('1', '0.5', '${16 * 1024 * 1024}'),
+      'anti_stall' => ('15', '6', '${64 * 1024 * 1024}'),
+      _ => ('6', '2', '${32 * 1024 * 1024}'),
+    };
+    await _setProperty('cache-secs', cacheSecs);
+    await _setProperty('demuxer-readahead-secs', readaheadSecs);
+    await _setProperty('demuxer-max-bytes', maxBytes);
   }
 
   late final NativeDiagnosticGate _gate;
@@ -390,6 +488,16 @@ final class MpvEngine implements PlayerEngine, PlaybackRate, PlaybackStatsSource
   }
 
   @override
+  Future<Uint8List?> captureFrame({String format = 'image/jpeg'}) async {
+    try {
+      return await player.safeScreenshot(format: format);
+    } on Object catch (e) {
+      debugPrint('[MpvEngine] captureFrame error: $e');
+      return null;
+    }
+  }
+
+  @override
   Future<void> dispose() async {
     if (_disposed) return;
     _disposed = true;
@@ -402,11 +510,15 @@ final class MpvEngine implements PlayerEngine, PlaybackRate, PlaybackStatsSource
       await subscription.cancel();
     }
     try {
-      await player.stop();
+      await player.stop().timeout(const Duration(milliseconds: 1500));
     } on Object {
-      // Already stopped or never opened.
+      // Already stopped, timed out, or never opened.
     }
-    await player.dispose();
+    try {
+      await player.dispose().timeout(const Duration(milliseconds: 2500));
+    } on Object {
+      // Already disposed or native teardown timed out.
+    }
     await _events.close();
   }
 }

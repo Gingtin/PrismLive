@@ -264,12 +264,11 @@ P2P,p2p://f/p2p
     });
   });
 
-    test('UTF-8 with BOM, and non-UTF-8 only through the legacy decoder', () async {
-      final bom = Uint8List.fromList([0xef, 0xbb, 0xbf, ...utf8.encode('#EXTM3U')]);
-      expect(await decodePlaylistBytes(bom), '#EXTM3U');
-      final gbk = Uint8List.fromList([0xd6, 0xd0, 0xce, 0xc4]);
-      expect(() => decodePlaylistBytes(gbk), throwsFormatException);
-      expect(await decodePlaylistBytes(gbk, legacy: (bytes) => '中文'), '中文');
-    });
+  test('UTF-8 with BOM, and non-UTF-8 only through the legacy decoder', () async {
+    final bom = Uint8List.fromList([0xef, 0xbb, 0xbf, ...utf8.encode('#EXTM3U')]);
+    expect(await decodePlaylistBytes(bom), '#EXTM3U');
+    final gbk = Uint8List.fromList([0xd6, 0xd0, 0xce, 0xc4]);
+    expect(() => decodePlaylistBytes(gbk), throwsFormatException);
+    expect(await decodePlaylistBytes(gbk, legacy: (bytes) => '中文'), '中文');
   });
 }

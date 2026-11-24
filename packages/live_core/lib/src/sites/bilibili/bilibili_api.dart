@@ -235,6 +235,7 @@ abstract final class BilibiliApi {
       nick: decodeHtmlEntities(jsonString(item['uname']) ?? ''),
       avatar: _image(item['face']),
       cover: _image(item['cover'], '@400w.jpg').ifEmpty(() => _image(item['user_cover'], '@400w.jpg')),
+      keyframe: _image(item['cover'], '@400w.jpg'),
       area: jsonString(item['area_v2_name']) ?? jsonString(item['area_name']) ?? jsonString(item['areaName']) ?? '',
       watching: online,
       popularity: online,
@@ -286,6 +287,7 @@ abstract final class BilibiliApi {
       // `cover` is a keyframe screenshot; the room cover (what 3.x asked for
       // with cover_type=user_cover) is `user_cover`.
       cover: _image(item['user_cover'], '@400w.jpg').ifEmpty(() => _image(item['cover'], '@400w.jpg')),
+      keyframe: _image(item['cover'], '@400w.jpg'),
       area: _highlighted(item['cate_name']),
       watching: online,
       popularity: online,
@@ -367,6 +369,7 @@ abstract final class BilibiliApi {
         nick: decodeHtmlEntities(jsonString(base?['uname']) ?? ''),
         avatar: _image(base?['face'], '@100w.jpg'),
         cover: _image(room['cover']),
+        keyframe: _image(room['keyframe'] ?? room['cover']),
         area: jsonString(room['area_name']) ?? '',
         watching: online,
         popularity: online,

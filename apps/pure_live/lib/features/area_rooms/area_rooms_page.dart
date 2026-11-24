@@ -68,6 +68,7 @@ class _AreaRoomsViewState extends ConsumerState<AreaRoomsView> {
   late final RoomFeed _feed;
   late final StreamSubscription<Setting<Object>> _settings;
   late bool _showUnplayable;
+  late bool _hideOffline;
 
   @override
   void initState() {
@@ -75,18 +76,31 @@ class _AreaRoomsViewState extends ConsumerState<AreaRoomsView> {
     final services = ref.read(appServicesProvider);
     final probe = ref.read(networkProbeProvider);
     _showUnplayable = services.store.settings.get(Settings.showUnplayableInDiscover);
+    _hideOffline = services.store.settings.get(Settings.hideOfflineRooms);
     // I03.2 c4: the setting changed while the page is open applies at once.
     _settings = services.store.settings.changes.listen((setting) {
-      if (setting.key != Settings.showUnplayableInDiscover.key || !mounted) return;
-      setState(() => _showUnplayable = services.store.settings.get(Settings.showUnplayableInDiscover));
-      _feed.visibilityChanged();
+      if (!mounted) return;
+      if (setting.key == Settings.showUnplayableInDiscover.key ||
+          setting.key == Settings.hideOfflineRooms.key ||
+          setting.key == Settings.preferRealtimeCover.key) {
+        setState(() {
+          _showUnplayable = services.store.settings.get(Settings.showUnplayableInDiscover);
+          _hideOffline = services.store.settings.get(Settings.hideOfflineRooms);
+        });
+        _feed.visibilityChanged();
+      }
     });
     _feed = RoomFeed(
       platform: widget.site.id,
       source: AreaRoomSource(widget.loader ?? areaRoomLoader(widget.site, widget.area), areaName: widget.area.areaName),
       // Rooms that cannot play here are hidden unless shown (UPGRADES 统一原则).
       visible: (room) =>
-          _showUnplayable || !cannotPlayHere(room, signedIn: signedInOn(services.cookies, room.platform)),
+          _showUnplayable ||
+          !cannotPlayHere(
+            room,
+            signedIn: signedInOn(services.cookies, room.platform),
+            hideOffline: _hideOffline,
+          ),
       // 3.x kept up to 20000 rooms of a directory.
       maxRooms: 5000,
       // I03.2 c1: offline and mobile data, as on the popular page.
@@ -137,7 +151,17 @@ class _AreaRoomsViewState extends ConsumerState<AreaRoomsView> {
             ),
           ],
         ),
-        actions: [FollowAreaButton(area: area)],
+        actions: [
+          IconButton(
+            icon: Icon(_hideOffline ? Icons.filter_alt : Icons.filter_alt_outlined),
+            tooltip: _hideOffline ? i18n('show_all_rooms') : i18n('hide_offline_rooms'),
+            onPressed: () {
+              setState(() => _hideOffline = !_hideOffline);
+              _feed.visibilityChanged();
+            },
+          ),
+          FollowAreaButton(area: area),
+        ],
       ),
       body: RoomFeedView(
         feed: _feed,

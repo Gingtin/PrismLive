@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:live_media/live_media.dart';
 import 'package:meta/meta.dart';
@@ -101,6 +102,45 @@ typedef ExternalAudioFor = ExternalAudio? Function(PlaybackSource source);
 abstract interface class VolumeGainControl {
   /// Applies a room's gain or restores the configured default.
   Future<void> setVolumeGainDb(int? decibels);
+}
+
+/// An engine that supports dynamic audio loudness normalization (loudnorm).
+abstract interface class AudioLoudnormControl {
+  /// Sets dynamic audio loudness normalization.
+  Future<void> setAudioLoudnorm({required bool enabled, int target = -16});
+}
+
+/// An engine that supports dynamic video enhancements (sharpening, smooth motion and picture color tuning).
+abstract interface class VideoEnhancementControl {
+  /// Sets video sharpening (0.0 = off, 0.1..1.0) and display-resampled smooth motion.
+  Future<void> setVideoEnhancements({
+    double sharpen = 0.0,
+    bool smoothMotion = false,
+  });
+
+  /// Sets video picture color properties (brightness, contrast, saturation, gamma, each -50..+50).
+  Future<void> setPictureColor({
+    int brightness = 0,
+    int contrast = 0,
+    int saturation = 0,
+    int gamma = 0,
+  });
+}
+
+/// An engine that supports 10-band audio equalizer and channel mode control.
+abstract interface class AudioEqualizerControl {
+  /// Sets 10-band equalizer gains in dB (-12 to +12).
+  /// Frequencies: [31, 62, 125, 250, 500, 1000, 2000, 4000, 8000, 16000] Hz.
+  Future<void> setAudioEqualizer(Map<String, double> bandGains);
+
+  /// Sets audio channel mode ('stereo', 'left_to_both', 'right_to_both', 'mono').
+  Future<void> setAudioChannelMode(String mode);
+}
+
+/// An engine that supports dynamic live buffer profile adjustments.
+abstract interface class LiveBufferControl {
+  /// Sets the live buffer profile ('ultra_low', 'balanced', 'anti_stall').
+  Future<void> setLiveBufferProfile(String profile);
 }
 
 /// One event of the engine, in arrival order.
@@ -248,6 +288,12 @@ abstract interface class PlayerEngine {
 abstract interface class PlaybackRate {
   /// Sets the speed, 1 = normal.
   Future<void> setRate(double rate);
+}
+
+/// An engine that supports capturing a video frame / screenshot.
+abstract interface class FrameCaptureControl {
+  /// Captures the current video frame as image bytes (e.g. JPEG), or null if not available.
+  Future<Uint8List?> captureFrame({String format = 'image/jpeg'});
 }
 
 /// Creates an engine on first need.

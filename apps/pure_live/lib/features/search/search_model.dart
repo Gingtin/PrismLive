@@ -67,7 +67,9 @@ final class SearchModel extends ChangeNotifier {
     required this.audienceCompare,
     this.timeout = searchRequestTimeout,
     this.pageSize = 20,
-  }) : sites = List.unmodifiable(sites) {
+    bool initialIncludeOffline = true,
+  }) : sites = List.unmodifiable(sites),
+       _includeOffline = initialIncludeOffline {
     if (timeout <= Duration.zero) throw ArgumentError.value(timeout, 'timeout');
   }
 

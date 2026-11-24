@@ -307,7 +307,7 @@ CATALOG_TV = [  # pure_live_TV settingsCatalog, live mode (tv_settings_page.dart
     ('平台设置', [(rx('ea42'), '平台显示与授权', '修改直播平台显示')]),
     ('数据管理', [(rx('ec16'), '缓存与数据管理', '清理图片缓存、视频缓存')]),
     ('备份管理', [(mr('settings_backup_restore'), '备份与恢复', '一键导出您的本地配置或从云端导入')]),
-    ('关于', [(mr('info_outline'), '纯粹直播 TV', '检查更新')]),
+    ('关于', [(mr('info_outline'), '棱镜直播 TV', '检查更新')]),
 ]
 
 
@@ -715,14 +715,14 @@ def v4_log():
 def v3_about():
     body = (o_group('关于', [o_row(mr('system_update_alt'), '在线更新', '当前版本： v1.6.2+162')]) + '<div class="o-gap"></div>'
             + o_group('项目', [o_row(mo('cloud'), '使用 GitHub 直连更新', '不经过镜像加速，直连 GitHub 检查更新', o_sw(True))]))
-    write('v3-about', o_page('纯粹直播 TV', body), new=False)
+    write('v3-about', o_page('棱镜直播 TV', body), new=False)
 
 
 def v3_update():
     hero = (f'<div style="display:flex;flex-direction:column;align-items:center;padding:6px 0 12px">'
             f'<div style="width:48px;height:48px;border-radius:12px;background:#1F1F1F;border:.5px solid rgba(0,161,255,.35);box-shadow:0 0 9px 1px rgba(0,161,255,.25);padding:7px">'
             f'<div style="width:100%;height:100%;background:url({ICON}) center/contain no-repeat"></div></div>'
-            f'<div style="font-size:11px;font-weight:700;margin-top:7px">纯粹直播 TV</div>'
+            f'<div style="font-size:11px;font-weight:700;margin-top:7px">棱镜直播 TV</div>'
             f'<div style="margin-top:4px;padding:2px 7px;border-radius:99px;background:rgba(0,161,255,.14);color:#00A1FF;font-size:8px;font-weight:600">v1.6.2+162</div></div>')
     status = ('<div style="height:90px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px">'
               '<span class="mr" style="font-size:22px;opacity:.6">inbox</span><div style="font-size:9px;font-weight:600">已是最新版本</div>'
@@ -739,7 +739,7 @@ def v3_update():
 def v4_about():
     hero = (f'<div style="display:flex;align-items:center;gap:18px;padding:6px 4px 4px">'
             f'<div style="width:64px;height:64px;border-radius:16px;background:url({ICON}) center/cover"></div>'
-            f'<div><div style="font-size:22px;font-weight:700">纯粹直播</div><div style="font-size:15px;color:var(--onv);margin-top:2px;font-feature-settings:\'tnum\'">v4.0.0+400</div></div></div>')
+            f'<div><div style="font-size:22px;font-weight:700">棱镜直播</div><div style="font-size:15px;color:var(--onv);margin-top:2px;font-feature-settings:\'tnum\'">v4.0.0+400</div></div></div>')
     body = (head('关于', path='设置 ›') + hero
             + group('关于', [row(rx('ec56'), '在线更新', '发现新版本 v4.1.0', value='去更新', n='2', focus=True),
                            row(rx('ee17'), '历史记录', '历史版本更新记录', n='3'),

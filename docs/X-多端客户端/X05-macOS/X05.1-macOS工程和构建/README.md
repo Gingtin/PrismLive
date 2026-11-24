@@ -24,7 +24,7 @@
 ## 方案
 
 - c1 方案（不需要 Mac）：包名（沿用 3.x 的 `com.mystyle.pureLive` 能不能覆盖 3.x，3.x 用户怎么升级）、沙盒和权限清单、录制做不做、14 个平台通道每个在 macOS 怎么处理（照 X04.1 的表）。写进 `record.md`，维护者确认。
-- c2 工程：`flutter create --platforms=macos` 生成后只提交需要的文件；`Info.plist`（显示名“纯粹直播”，权限说明中文）、`entitlements`（网络客户端和服务端、用户选择的文件读写）、`Podfile`；`.gitignore` 加 `*.p12`、`*.mobileprovision`、`*.p8`（和 X04.1 共用）。
+- c2 工程：`flutter create --platforms=macos` 生成后只提交需要的文件；`Info.plist`（显示名“棱镜直播”，权限说明中文）、`entitlements`（网络客户端和服务端、用户选择的文件读写）、`Podfile`；`.gitignore` 加 `*.p12`、`*.mobileprovision`、`*.p8`（和 X04.1 共用）。
 - c3 原生：Keychain 加密器；通道按方案降级；`desktop_window.dart` 在 macOS 启用外壳。
 - c4 桌面外壳的 macOS 做法：A18.2 c2（标题栏和系统按钮）、c4（菜单栏）、c5（Cmd 快捷键）、c6（关闭和退出）、c7（菜单栏图标）、c8（全屏）的工程部分；界面细节按 A18.2 的设计。
 

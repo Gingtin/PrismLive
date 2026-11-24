@@ -4,7 +4,7 @@ launcher, share sheet, splash screen), so the pictures are illustrations in stoc
 Android 15 style; what the app decides (texts, icons, actions) follows the code.
 
 v3 (tag v3.2.11):
-  media notification   lib/player/core/live_audio_service.dart:50-67 (channel 纯粹直播播放, no
+  media notification   lib/player/core/live_audio_service.dart:50-67 (channel 棱镜直播播放, no
                        notification icon -> audio_service default mipmap/ic_launcher, colour blue),
                        :157-170 (title = room title, artist = streamer, album = app name, art = cover);
                        live_audio_handler.dart:177-201 (controls play/pause + stop)
@@ -200,11 +200,11 @@ def rec_card(v4, top, n=False, state='one'):
     N = (lambda k: k) if n else (lambda k: None)
     T = (lambda t: t) if n else (lambda t: None)
     if not v4:
-        return (f'<div class="nc" style="top:{top}px"><div class="hd"><span class="ci2 gr">{small(False, "rec", 18)}</span>纯粹直播 · 现在'
+        return (f'<div class="nc" style="top:{top}px"><div class="hd"><span class="ci2 gr">{small(False, "rec", 18)}</span>棱镜直播 · 现在'
                 '<span class="ex">' + mr('expand_more', 18) + '</span></div>'
                 '<div class="t">直播录制进行中</div><div class="x">录制与封装由独立后台服务保护，点按返回应用</div></div>')
     if state == 'stopped':
-        return (f'<div class="nc" style="top:{top}px"><div class="hd"><span class="ci2">{small(True, "rec", 16)}</span>纯粹直播 · 现在'
+        return (f'<div class="nc" style="top:{top}px"><div class="hd"><span class="ci2">{small(True, "rec", 16)}</span>棱镜直播 · 现在'
                 '<span class="ex">' + mr('expand_less', 18) + '</span></div>'
                 '<div class="t">录制已停止 · 晚风</div><div class="x">系统给后台录制的时间用完了。已录下的 5:52:10 已保存，回到应用可以重新开始。</div>'
                 '<div class="ac"><span>打开录制中心</span></div></div>')
@@ -213,7 +213,7 @@ def rec_card(v4, top, n=False, state='one'):
     else:
         head, title, text, stop = '12:34', '正在录制 · 晚风', '深夜电台 · 点歌接龙到天亮 · 原画', '停止录制'
     return (f'<div class="nc" style="top:{top}px"' + attrs(N(4), T('chg'), 'tl' if n else None) + f'><div class="hd"><span class="ci2">{small(True, "rec", 16)}</span>'
-            f'纯粹直播 · <span class="tnum">{head}</span><span class="ex">' + mr('expand_less', 18) + '</span></div>'
+            f'棱镜直播 · <span class="tnum">{head}</span><span class="ex">' + mr('expand_less', 18) + '</span></div>'
             f'<div class="t">{title}</div><div class="x">{text}</div>'
             '<div class="ac"><span' + attrs(N(5), T('add'), 'tc' if n else None) + f'>{stop}</span><span'
             + attrs(N(6), T('add'), 'tc' if n else None) + '>录制中心</span></div></div>')
@@ -247,8 +247,8 @@ def notify_states(v4):
         parts += rec_card(True, y, state='stopped'); y += 190
         lab('暂停时的媒体卡片', '同 v3')
         parts += media_card(True, y, playing=False); y += 196
-        lab('通知类别', '系统设置 → 应用 → 纯粹直播 → 通知')
-        parts += ('<div class="cat" style="top:%dpx"><div class="r"><div>纯粹直播播放<small>后台播放时的媒体控制</small></div><span class="sw on"></span></div>'
+        lab('通知类别', '系统设置 → 应用 → 棱镜直播 → 通知')
+        parts += ('<div class="cat" style="top:%dpx"><div class="r"><div>棱镜直播播放<small>后台播放时的媒体控制</small></div><span class="sw on"></span></div>'
                   '<div class="r"><div>录制<small>正在录制时一直显示</small></div><span class="sw on"></span></div>'
                   '<div class="r"><div>录制提醒<span class="newtag">新</span><small>录制被系统停掉、失败时提醒</small></div><span class="sw on"></span></div></div>' % y)
         y += 206
@@ -260,8 +260,8 @@ def notify_states(v4):
         y += 104
         lab('暂停时的媒体卡片')
         parts += media_card(False, y, playing=False); y += 196
-        lab('通知类别', '系统设置 → 应用 → 纯粹直播 → 通知')
-        parts += ('<div class="cat" style="top:%dpx"><div class="r"><div>纯粹直播播放<small></small></div><span class="sw on"></span></div>'
+        lab('通知类别', '系统设置 → 应用 → 棱镜直播 → 通知')
+        parts += ('<div class="cat" style="top:%dpx"><div class="r"><div>棱镜直播播放<small></small></div><span class="sw on"></span></div>'
                   '<div class="r"><div>Recording<small>Active live-stream recording</small></div><span class="sw on"></span></div></div>' % y)
         y += 150
     return page(W, y + 16, 2, parts, root='win', syn=False)
@@ -304,7 +304,7 @@ def icon_cell(v4, d=56, shape=''):
 
 def home_with_icon(v4, menu='', n=False):
     cols = ['#BFD8F2', '#C8E6C9', '#FFE0A3', '#D7C8F0', '#F2C1D6', '#B9E2E0', '#E8E0D0']
-    first = ('<div class="a"' + attrs(11 if n else None, 'chg' if n else None, 'tr' if n else None) + '>' + icon_cell(v4) + '纯粹直播</div>')
+    first = ('<div class="a"' + attrs(11 if n else None, 'chg' if n else None, 'tr' if n else None) + '>' + icon_cell(v4) + '棱镜直播</div>')
     apps = first + ''.join(f'<div class="a"><i style="background:{c}"></i>&nbsp;</div>' for c in cols)
     return ('<div class="ln"><div class="status"><span>21:40</span><span class="r"><span class="mi">signal_cellular_alt</span><span class="mi">wifi</span><span class="mi">battery_full</span></span></div>'
             f'<div class="apps">{apps}</div><div class="sbar"></div>'
@@ -391,7 +391,7 @@ def splash_seq(v4):
 def share_sheet(n=False):
     N = (lambda k: k) if n else (lambda k: None)
     T = (lambda t: t) if n else (lambda t: None)
-    apps = [('#07C160', rx('f2b5', 26), '微信'), ('#12B7F5', rx('f03a', 26), 'QQ'), ('ours', '', '纯粹直播'), ('#5F6368', rx('ecd5', 24), '复制'),
+    apps = [('#07C160', rx('f2b5', 26), '微信'), ('#12B7F5', rx('f03a', 26), 'QQ'), ('ours', '', '棱镜直播'), ('#5F6368', rx('ecd5', 24), '复制'),
             ('#1A73E8', rx('eb8c', 26), '浏览器'), ('#E1E2EC', mr('more_horiz', 26), '更多')]
     cells = ''
     for bg, icon, label in apps:
@@ -442,7 +442,7 @@ def v4_perm(denied=False, n=False):
     N = (lambda k: k) if n else (lambda k: None)
     T = (lambda t: t) if n else (lambda t: None)
     if denied:
-        t, msg, ok = '通知权限已关闭', '系统设置里关掉了“纯粹直播”的通知，后台播放要用它显示控制条。打开后回到这里再开一次。', '去设置'
+        t, msg, ok = '通知权限已关闭', '系统设置里关掉了“棱镜直播”的通知，后台播放要用它显示控制条。打开后回到这里再开一次。', '去设置'
     else:
         t, msg, ok = '需要通知权限', '为了在后台播放时显示控制条并防止直播中断，我们需要开启通知权限。', '去开启'
     dlg = (f'<div class="d4" style="width:361px"><div class="t">{t}</div><div class="msg">{msg}</div>'

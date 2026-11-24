@@ -20,13 +20,13 @@
 - `DesktopShell.supported` 加上 macOS；`DesktopWindow.macStyle`（按 `defaultTargetPlatform`）决定 Mac 的不同之处，Windows、Linux 不变。
 - c2：`DesktopFrame` 在 Mac 上画 `MacTitleBar`（28 高，系统按钮），不画 `DesktopTitleBar`。
 - c3：没有毛玻璃（4.x 起就没有）。
-- c6：红色按钮和 ⌘W 只隐藏窗口（`WindowCloser.hideOnClose`，没有关闭对话框和“不再询问”），录制照常；`AppDelegate.applicationShouldTerminateAfterLastWindowClosed` 改成 false，点程序坞图标（`applicationShouldHandleReopen`）窗口回来；⌘Q、程序坞“退出”、菜单栏图标“退出”都走系统的退出，Flutter 先问 `AppLifecycleListener.onExitRequested`：录制中弹“要退出纯粹直播吗？正在录制 N 个直播间……”，取消就不退出；退出前保存窗口、停止录制（已录的保留）。窗口在设好大小位置前保持隐藏（`hiddenWindowAtLaunch`）。
+- c6：红色按钮和 ⌘W 只隐藏窗口（`WindowCloser.hideOnClose`，没有关闭对话框和“不再询问”），录制照常；`AppDelegate.applicationShouldTerminateAfterLastWindowClosed` 改成 false，点程序坞图标（`applicationShouldHandleReopen`）窗口回来；⌘Q、程序坞“退出”、菜单栏图标“退出”都走系统的退出，Flutter 先问 `AppLifecycleListener.onExitRequested`：录制中弹“要退出棱镜直播吗？正在录制 N 个直播间……”，取消就不退出；退出前保存窗口、停止录制（已录的保留）。窗口在设好大小位置前保持隐藏（`hiddenWindowAtLaunch`）。
 - Mac 上不开新窗口进程（Mac 不这样开窗口），窗口边缘用系统的缩放。
 
 ### 第 3 阶段：菜单栏和快捷键（c4、c5）
 
 - `app/commands.dart`：一张命令表 `AppCommand`（⌘, 设置、⌘F 搜索直播、⌘L 链接解析、⌘Y 观看记录、⌘1～⌘4 关注 / 热门 / 分区 / 录制中心、⌘[ 返回），Mac 菜单栏和 iPad 键盘（A18.1 c10）共用；⌘1～⌘4 回到首页再切页（`HomeSignals.select`）。
-- `app/desktop/mac_menu_bar.dart`：纯粹直播（关于纯粹直播、检查更新…、设置… ⌘,、服务、隐藏、隐藏其他、全部显示、退出）、文件（链接解析… ⌘L、多画面、关闭窗口 ⌘W）、编辑（撤销、重做、剪切、拷贝、粘贴、全选：交给输入框的文本操作；搜索直播… ⌘F）、显示（关注 ⌘1 … 观看记录 ⌘Y、返回 ⌘[、进入全屏幕 ⌃⌘F）、播放（播放 / 暂停、刷新 ⌘R、全屏；只有直播间在最上面时可用，`RoomCommands`）、窗口（系统的）、帮助（项目主页、更新日志）。
+- `app/desktop/mac_menu_bar.dart`：棱镜直播（关于棱镜直播、检查更新…、设置… ⌘,、服务、隐藏、隐藏其他、全部显示、退出）、文件（链接解析… ⌘L、多画面、关闭窗口 ⌘W）、编辑（撤销、重做、剪切、拷贝、粘贴、全选：交给输入框的文本操作；搜索直播… ⌘F）、显示（关注 ⌘1 … 观看记录 ⌘Y、返回 ⌘[、进入全屏幕 ⌃⌘F）、播放（播放 / 暂停、刷新 ⌘R、全屏；只有直播间在最上面时可用，`RoomCommands`）、窗口（系统的）、帮助（项目主页、更新日志）。
 - 和设计的差别：菜单里写“观看记录”（应用里的叫法，U.5c Z1），不写“历史记录”；“播放”菜单先放三项，音量、弹幕、清晰度等留到第 4 阶段。
 
 ### 测试

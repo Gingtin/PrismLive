@@ -29,7 +29,8 @@ DanmakuLook danmakuLookOf(WidgetRef ref) {
     topMargin: watchSetting(ref, Settings.danmakuTopArea),
     bottomMargin: watchSetting(ref, Settings.danmakuBottomArea),
     stroke: watchSetting(ref, Settings.enableDanmakuStroke),
-    strokeWidth: watchSetting(ref, Settings.danmakuFontBorder),
+    strokeWidth: watchSetting(ref, Settings.danmakuFontBorder) * watchSetting(ref, Settings.danmakuOutlineThickness),
+    glowRadius: watchSetting(ref, Settings.danmakuGlowRadius),
     // F.2a: the danmaku font ("Default" is the system's) and text-only mode.
     fontFamily: danmakuFontFamilyOf(font),
     textOnly: watchSetting(ref, Settings.noEmojiMode),

@@ -174,14 +174,21 @@ class MultiviewController extends ChangeNotifier {
     required this.danmakuFor,
     required this.danmakuSupports,
     required this.store,
+    this.sessionBuilder,
     this.mobile = false,
     int? maxCells,
     this.toast,
     this.danmakuStartTimeout = const Duration(seconds: 30),
     this.emotes,
     DateTime Function()? now,
+    DecoderBudgetManager? decoderBudgetManager,
   }) : maxCells = maxCells ?? (mobile ? MultiviewLayout.focus.capacity : desktopMaxCells),
-       _now = now ?? DateTime.now {
+       _now = now ?? DateTime.now,
+       decoderBudgetManager = decoderBudgetManager ??
+           DecoderBudgetManager(
+             maxHardwareDecoders: mobile ? 2 : 8,
+             onBudgetNotice: toast,
+           ) {
     if (this.maxCells < MultiviewLayout.focus.capacity || this.maxCells > desktopMaxCells) {
       throw ArgumentError.value(this.maxCells, 'maxCells', 'must be between 4 and $desktopMaxCells');
     }
@@ -189,6 +196,12 @@ class MultiviewController extends ChangeNotifier {
     _filter = DanmakuMessageFilter(clock: _now);
     _cells.addAll([for (var i = 0; i < _layout.capacity; i++) _newCell()]);
   }
+
+  /// Manages hardware decoder budget allocation across multiview cells.
+  final DecoderBudgetManager decoderBudgetManager;
+
+  /// Optional session factory that receives a configured [DecoderFallback].
+  final PlaybackSession Function({DecoderFallback? decoders})? sessionBuilder;
 
   /// The bundled emoticon lists, for "屏蔽只有表情的弹幕" and "屏蔽超长弹幕"
   /// (D02.2 c3, as the room); null knows only the codes a message names and
@@ -577,6 +590,27 @@ class MultiviewController extends ChangeNotifier {
     }
   }
 
+  /// Swaps positions of cell [from] and cell [to] in the grid.
+  /// Audio focus automatically follows the promoted cell.
+  Future<void> swapCells(int from, int to) async {
+    if (from < 0 || from >= _cells.length || to < 0 || to >= _cells.length || from == to) return;
+    final temp = _cells[from];
+    _cells[from] = _cells[to];
+    _cells[to] = temp;
+
+    if (_focused == from) {
+      _focused = to;
+    } else if (_focused == to) {
+      _focused = from;
+    }
+
+    await setAudioFocus(to);
+    _applyVolumes();
+    _notify();
+    unawaited(_syncDanmaku());
+    unawaited(_save());
+  }
+
   // ---- rooms ----
 
   /// The cell that already shows [room], or -1.
@@ -799,7 +833,13 @@ class MultiviewController extends ChangeNotifier {
       .._stage = CellStage.playing
       .._failure = null;
     final opened = ++cell._opens;
-    final session = cell._session ??= newSession();
+    final mode = decoderBudgetManager.allocateDecoderForCell(
+      cell.id,
+      isAudible: _cells.indexOf(cell) == _audio,
+    );
+    final session = cell._session ??= (sessionBuilder != null
+        ? sessionBuilder!(decoders: DecoderFallback(preferred: mode))
+        : newSession());
     cell._autoPlayback ??= session.states.listen((_) => _syncAutoSwitch(cell));
     _notify();
     final quality = cell._qualities[playing];
@@ -993,6 +1033,7 @@ class MultiviewController extends ChangeNotifier {
   }
 
   Future<void> _release(MultiviewCell cell) async {
+    decoderBudgetManager.releaseCell(cell.id);
     final session = _clear(cell);
     cell._autoSwitch.dispose();
     if (session != null) await session.dispose();
@@ -1061,6 +1102,7 @@ class MultiviewController extends ChangeNotifier {
   Future<void> setAudioFocus(int index) async {
     if (index < 0 || index >= _cells.length) return;
     _audio = index;
+    decoderBudgetManager.focusedCellId = _cells[index].id;
     _applyVolumes();
     _notify();
     unawaited(_syncDanmaku());
@@ -1211,6 +1253,7 @@ class MultiviewController extends ChangeNotifier {
   @override
   void dispose() {
     _disposed = true;
+    decoderBudgetManager.reset();
     _autoRefresh?.cancel();
     _danmakuEpoch++;
     for (final subscription in [..._subscriptions, ..._refusals.values]) {

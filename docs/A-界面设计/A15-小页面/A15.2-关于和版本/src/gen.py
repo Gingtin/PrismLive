@@ -97,7 +97,7 @@ FILES = [('pure_live-3.2.11-android-arm64-v8a.apk', '38.6 MB', '1,204'), ('pure_
 # ---------------------------------------------------------------- about
 def about_head(v3=True, version=CUR):
     return (f'<div style="padding:12px 0 28px;text-align:center"><div class="logo"><img src="{ICON}"></div>'
-            f'<div class="app">纯粹直播</div><span class="vpill3">v{version}</span></div>')
+            f'<div class="app">棱镜直播</div><span class="vpill3">v{version}</span></div>')
 
 
 def v3_about():

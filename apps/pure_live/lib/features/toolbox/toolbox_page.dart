@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:live_iptv/live_iptv.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/services.dart';
@@ -95,7 +96,8 @@ class _ToolboxPageState extends ConsumerState<ToolboxPage> {
     final edits = _edits;
     final text = await ref.read(toolboxClipboardProvider)();
     if (!mounted || text == null || _edits != edits || _link.text.isNotEmpty) return;
-    if (!ref.read(toolboxLinksProvider).containsSupportedLink(text)) return;
+    final containsIptv = IptvSmartExtractor.extract(text).isNotEmpty;
+    if (!ref.read(toolboxLinksProvider).containsSupportedLink(text) && !containsIptv) return;
     _link.text = text.trim();
     AppNavigator.toast(i18n('toolbox_auto_fill'));
   }
@@ -240,6 +242,7 @@ class _LinkCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     final muted = context.textStyles.t13.copyWith(color: colors.onSurfaceVariant);
+    final iptvSources = IptvSmartExtractor.extract(link.text);
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
       child: Column(
@@ -279,6 +282,32 @@ class _LinkCard extends StatelessWidget {
               ),
             ),
           ),
+          if (iptvSources.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: colors.primaryContainer.withValues(alpha: 0.5),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                children: [
+                  Icon(AppIcons.batchSources, size: 20, color: colors.primary),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      i18n('iptv_toolbox_banner', args: {'count': '${iptvSources.length}'}),
+                      style: context.textStyles.t12.emphasis.copyWith(color: colors.onPrimaryContainer),
+                    ),
+                  ),
+                  FilledButton.tonal(
+                    onPressed: () => unawaited(AppNavigator.toNamed<void>(RoutePath.kIptv, arguments: link.text)),
+                    child: Text(i18n('iptv_open_batch_dialog')),
+                  ),
+                ],
+              ),
+            ),
+          ],
           const SizedBox(height: 12),
           _ActionButtons(controller: controller, onJump: onJump, onDirectLink: onDirectLink),
           if (controller.isBusy) ...[

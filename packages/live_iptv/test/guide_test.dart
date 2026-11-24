@@ -91,7 +91,7 @@ void main() {
     expect(guide.programmes, hasLength(4));
     final [p1, p2, p3, p4] = guide.programmes;
     expect(p1.title, '朝闻天下');
-    expect(p1.start, DateTime(2026, 11, 17, 6, 0));
+    expect(p1.start, DateTime(2026, 11, 17, 6));
     expect(p1.stop, DateTime(2026, 11, 17, 8, 30));
 
     expect(p2.title, '生活圈');

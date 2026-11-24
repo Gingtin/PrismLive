@@ -34,7 +34,7 @@
 |---|---|
 | 启动 | `main` 在 `runApp` 前调 `DesktopShell.start(store, primary:)`（只在 Windows）：隐藏系统标题栏、最小 400×300、按设置 `window_width`/`window_height`（3.x 同名键）开窗 |
 | 位置记忆（新） | 主窗口移动、调整大小 0.5 秒后保存：尺寸写回 3.x 的两个设置，位置写 `meta` 的 `window.position`（`x,y`）；最大化、最小化、全屏时不存。下次启动时，标题栏那一行还在某个显示器上才用这个位置，否则居中（3.x 只记尺寸、总是居中） |
-| 自绘标题栏 | `DesktopTitleBar`：图标和“纯粹直播”（点击打开项目主页，同 v3）、拖动区、最小化、最大化/还原、关闭（悬停红色）。`DesktopFrame` 在 `app.dart` 的 `builder` 里把它放在应用上方，全屏时隐藏。没做 v3 拖动时显示窗口尺寸的小字和启动页的渐变背景 |
+| 自绘标题栏 | `DesktopTitleBar`：图标和“棱镜直播”（点击打开项目主页，同 v3）、拖动区、最小化、最大化/还原、关闭（悬停红色）。`DesktopFrame` 在 `app.dart` 的 `builder` 里把它放在应用上方，全屏时隐藏。没做 v3 拖动时显示窗口尺寸的小字和启动页的渐变背景 |
 | 关闭窗口 | 关闭按钮和系统关闭（`setPreventClose`）都走 `requestClose`：额外窗口直接关闭；主窗口在“退出不再询问”关时弹框（最小化到托盘/退出应用 + 不再询问），开时按“关闭窗口时”（`exitChoose`）执行；没有托盘时“最小化”改为最小化到任务栏 |
 | 托盘 | `DesktopTray`（主窗口）：单击显示窗口；右键菜单“隐藏/显示窗口”“退出应用”，打开前按窗口状态改文字；对象只建一次（同 v3 的修正）；切换语言后更新文字 |
 | 开机自启 | `startup_entry.dart`：写 `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` 下 **`PureLiveV4`**（3.x 是 `PureLive`，不读不改；也不碰 `D:\Soft\pure_live`、`D:\Soft\PureLive`），值是当前 exe 加引号。跟随设置 `enableStartUp` 的改动；**只有 release 构建**才在启动时按设置补写/删除（3.x 默认开，开发版不应自己注册） |

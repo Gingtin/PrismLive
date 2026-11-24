@@ -23,7 +23,7 @@
 ## 结果
 
 - 提交：`e3a0799cf`（08:58，“chore(release): v4.0.0+5000 (Android)”：版本号两处、`version_page_test.dart` 跟着改、`assets/version.json`、`assets/releases.json`）；`da69896ba`（09:18，`releases.json` 里填上三个包的实际大小）。登记表没写 `commit`。
-- 发布页：GitHub Release“纯粹直播 v4.0.0”，发布时间 2026-10-02 09:16（`publishedAt` 01:16:53Z），正文是 `releases/v4.0.0.md` 加“下载哪个”和“SHA-256”两节（本机留了一份 `~/ref/release/v4.0.0/body.md`）。
+- 发布页：GitHub Release“棱镜直播 v4.0.0”，发布时间 2026-10-02 09:16（`publishedAt` 01:16:53Z），正文是 `releases/v4.0.0.md` 加“下载哪个”和“SHA-256”两节（本机留了一份 `~/ref/release/v4.0.0/body.md`）。
 - 5000 的校验和（`~/ref/release/v4.0.0/SHA256SUMS.txt`）：arm64-v8a `b3cc3aa7…93b23`、armeabi-v7a `7e7601e1…71be`、x86_64 `a7456f16…7c3b`。
 - 当晚覆盖发布后（Y01.3），发布页上的 5000 安装包被 5001 替换，标签 `v4.0.0` 移到 `4b039e0c7`；5000 的包只留在本机 `~/ref/release/v4.0.0/`。
 - 偏差：无记录（这次发布没有单独的 `record.md`；以上从 git 历史、发布页和本机的发布文件夹查实）。

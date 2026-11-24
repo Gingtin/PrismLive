@@ -48,7 +48,7 @@
       ["D2", "下载完成后只有“打开文件夹”“立即安装”，没有“关闭”；点外面、电脑上 Esc 都关不掉", "<code>download_apk_dialog.dart:670-699</code>；<code>update.dart:110</code>"],
       ["D3", "下载失败直接关掉对话框，只在页面底部弹一行“下载失败，请稍后重试”，不能重试，也不能换下载源", "<code>download_apk_dialog.dart:245-252</code>、<code>:479-487</code>"],
       ["D4", "下载完成、打开失败时标题还是“正在下载 v3.2.11...”", "<code>download_apk_dialog.dart:499-506</code>"],
-      ["D5", "打开下载对话框的同时弹提示条“正在下载 纯粹直播v3.2.11...”，和对话框标题重复", "<code>update.dart:95-99</code>"],
+      ["D5", "打开下载对话框的同时弹提示条“正在下载 棱镜直播v3.2.11...”，和对话框标题重复", "<code>update.dart:95-99</code>"],
       ["D6", "窄于 420 时换成上下排（图标在标题上、按钮竖排），手机和平板电脑是两种样子；状态行只有 12 号", "<code>download_apk_dialog.dart:494</code>、<code>:510-513</code>、<code>:550-563</code>"],
       ["S1", "口令导入的标题是“分享”，其实是在问要不要打开别人分享的直播间", "<code>share_command_import_dialog.dart:27</code>"],
       ["S2", "“平台”一栏显示平台的英文 id（bilibili），不是中文名", "<code>share_command_import_dialog.dart:47</code>"],

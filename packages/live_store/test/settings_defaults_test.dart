@@ -285,6 +285,8 @@ const Map<String, Object> newInV4 = {
   'skippedUpdateVersion': '', // A06.3
   'matchVideoFrameRate': true, // R02.1
   'showUnplayableInDiscover': false, // UPGRADES unified rule, J02.1
+  'hideOfflineRooms': false,
+  'preferRealtimeCover': true,
   'detectClipboardRooms': true, // O03.2 (3.x always looked)
   'douyuForceRenew': false, // UPGRADES 2-1
   'twitchLanguages': <String>[], // UPGRADES 8-3
@@ -306,6 +308,32 @@ const Map<String, Object> newInV4 = {
   'floatWindowPortraitScale': 1.0, // A07.22
   'floatWindowPosition': '', // A07.25 c6
   'portraitFullscreenSwipeSwitch': false, // A07.2, A07.3
+  'enableAmbientLighting': true,
+  'ambientLightingIntensity': 0.65,
+  'ambientLightingBlurRadius': 40.0,
+  'autoLineFailover': true,
+  'autoLineFailoverDelay': 4,
+  'autoQualityFallback': false,
+  'audioLoudnorm': false,
+  'audioLoudnormTarget': -16,
+  'playerHapticFeedback': true,
+  'videoSharpen': 0.0,
+  'smoothMotion': false,
+  'audioEqualizerPreset': 'off',
+  'audioEqualizerBands': {},
+  'liveLowLatencyChase': false,
+  'longPressSpeedup': true,
+  'videoBrightness': 0,
+  'videoContrast': 0,
+  'videoSaturation': 0,
+  'videoGamma': 0,
+  'audioChannelMode': 'stereo',
+  'liveBufferProfile': 'balanced',
+  'danmakuGlowRadius': 0.0,
+  'danmakuOutlineThickness': 1.0,
+  'danmakuBurstAlert': true,
+  'autoRecordFollows': false,
+  'autoRecordMaxStreams': 2,
   'livePlayChatCollapsed': false, // A07.5
   'livePlayWideFooter': true, // A07.44: 5.6.3's bar under the picture stays the default
   'roomSwitcherLayout': 'grid', // A07.13, D-022
@@ -391,6 +419,18 @@ const Map<String, (num?, num?)> ranges = {
   'fontSizeTitleMedium': (13, 20),
   'fontSizeTitleLarge': (16, 26),
   'videoFitIndex': (0, 5),
+  'ambientLightingIntensity': (0.1, 1),
+  'ambientLightingBlurRadius': (10, 80),
+  'autoLineFailoverDelay': (2, 10),
+  'audioLoudnormTarget': (-24, -12),
+  'videoSharpen': (0, 1),
+  'videoBrightness': (-50, 50),
+  'videoContrast': (-50, 50),
+  'videoSaturation': (-50, 50),
+  'videoGamma': (-50, 50),
+  'danmakuGlowRadius': (0, 4),
+  'danmakuOutlineThickness': (0.5, 3),
+  'autoRecordMaxStreams': (1, 5),
   'floatWindowLandscapeScale': (0.25, 4), // A07.22: the window's own bounds apply on top
   'floatWindowPortraitScale': (0.25, 4),
   'danmakuTopArea': (0, 300),

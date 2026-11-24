@@ -25,7 +25,7 @@ Future<void> showIptvSpeedTestDialog(
 /// Interactive speed test dialog for IPTV channels.
 class IptvSpeedTestDialog extends StatefulWidget {
   /// Creates the dialog.
-  const IptvSpeedTestDialog({
+  const new({
     required this.playlist,
     required this.library,
     required this.http,
@@ -66,7 +66,7 @@ class _IptvSpeedTestDialogState extends State<IptvSpeedTestDialog> {
   @override
   void initState() {
     super.initState();
-    _loadChannels();
+    unawaited(_loadChannels());
   }
 
   Future<void> _loadChannels() async {
@@ -79,7 +79,7 @@ class _IptvSpeedTestDialogState extends State<IptvSpeedTestDialog> {
           _loadingChannels = false;
         });
       }
-    } catch (_) {
+    } on Object catch (_) {
       if (mounted) setState(() => _loadingChannels = false);
     }
   }
@@ -110,15 +110,11 @@ class _IptvSpeedTestDialogState extends State<IptvSpeedTestDialog> {
       _currentStatus = null;
     });
 
-    final stream = StreamProbe.probeChannels(
+    StreamProbe.probeChannels(
       widget.http,
       channels,
-      concurrency: 6,
-      timeout: const Duration(seconds: 3),
       cancel: cancel,
-    );
-
-    stream.listen(
+    ).listen(
       (progress) {
         if (!mounted) return;
         final res = progress.currentResult;
@@ -166,7 +162,7 @@ class _IptvSpeedTestDialogState extends State<IptvSpeedTestDialog> {
       await widget.library.savePlaylist(widget.playlist, sorted, expected: widget.playlist);
       AppNavigator.toast(i18n('iptv_speed_test_sorted_toast'));
       if (mounted) Navigator.pop(context);
-    } catch (e) {
+    } on Object catch (_) {
       AppNavigator.toast(i18n('iptv_save_failed'));
     }
   }
@@ -186,7 +182,7 @@ class _IptvSpeedTestDialogState extends State<IptvSpeedTestDialog> {
       await widget.library.savePlaylist(widget.playlist, filtered, expected: widget.playlist);
       AppNavigator.toast(i18n('iptv_speed_test_filtered_toast', args: {'count': '$count'}));
       if (mounted) Navigator.pop(context);
-    } catch (e) {
+    } on Object catch (_) {
       AppNavigator.toast(i18n('iptv_save_failed'));
     }
   }
@@ -196,7 +192,7 @@ class _IptvSpeedTestDialogState extends State<IptvSpeedTestDialog> {
     final scheme = Theme.of(context).colorScheme;
     final styles = context.textStyles;
 
-    final int avgLatency = _liveCount > 0 ? (_totalLatencyMs / _liveCount).round() : 0;
+    final avgLatency = _liveCount > 0 ? (_totalLatencyMs / _liveCount).round() : 0;
 
     return AppDialog(
       title: i18n('iptv_speed_test_title'),
@@ -327,7 +323,7 @@ class _IptvSpeedTestDialogState extends State<IptvSpeedTestDialog> {
 }
 
 class _Badge extends StatelessWidget {
-  const _Badge({
+  const new({
     required this.color,
     required this.label,
     required this.count,

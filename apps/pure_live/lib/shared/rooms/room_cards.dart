@@ -23,7 +23,8 @@ final StreamProvider<Set<String>> followKeysProvider = StreamProvider.autoDispos
 /// hide such rooms unless the user shows them): a carousel, or a restriction
 /// this client cannot pass. A login or age check counts only while the
 /// platform has no cookie ([signedIn]).
-bool cannotPlayHere(LiveRoom room, {required bool signedIn}) {
+bool cannotPlayHere(LiveRoom room, {required bool signedIn, bool hideOffline = false}) {
+  if (hideOffline && (room.isExplicitlyOfflineNow || !room.isLiveNow && !room.isRecord)) return true;
   if (room.effectiveLiveStatus == LiveStatus.carousel) return true;
   return switch (room.effectiveRestriction) {
     LiveRestriction.none => false,
@@ -39,16 +40,20 @@ bool signedInOn(CookieVault cookies, String platform) => cookies.cookieFor(platf
 /// `preferRealOnlineCounts`, `realOnlinePlatforms`).
 final class AudiencePolicy {
   /// Creates the policy.
-  const new({required this.preferRealOnline, required this.realOnlinePlatforms});
+  const new({required this.preferRealOnline, required this.realOnlinePlatforms, this.preferRealtimeCover = true});
 
   /// Reads the policy from [settings].
   factory of(SettingsStore settings) => AudiencePolicy(
     preferRealOnline: settings.get(Settings.preferRealOnlineCounts),
+    preferRealtimeCover: settings.get(Settings.preferRealtimeCover),
     realOnlinePlatforms: {for (final id in settings.get(Settings.realOnlinePlatforms)) id.trim().toLowerCase()},
   );
 
   /// Show concurrent viewers where the platform has them.
   final bool preferRealOnline;
+
+  /// Prefer real-time captured video frame or dynamic keyframe as card cover.
+  final bool preferRealtimeCover;
 
   /// The platforms that setting applies to.
   final Set<String> realOnlinePlatforms;
@@ -95,12 +100,18 @@ final class AudiencePolicy {
     final duration = now == null ? null : liveDuration(room, now);
     final title = room.title.trim();
     final intro = title.toLowerCase() == room.nick.trim().toLowerCase() ? _firstLine(room.introduction) : null;
+    final keyframe = room.keyframe;
+    final hasKeyframe = keyframe != null && keyframe.isNotEmpty;
     return RoomCardData(
       platformId: room.platform,
       title: title.isEmpty ? i18n('untitled_room') : title,
       anchorName: duration == null ? name : '$name · $duration',
       avatarUrl: normalizeImageUrl(room.avatar),
-      coverUrl: normalizeImageUrl(room.cover),
+      coverUrl: normalizeImageUrl(
+        preferRealtimeCover && hasKeyframe ? keyframe : room.cover,
+      ),
+      keyframeUrl: hasKeyframe ? normalizeImageUrl(keyframe) : null,
+      identityKey: room.identityKey,
       isLive: room.isLiveNow,
       isReplay: room.isRecord,
       audience: isIptv ? null : audienceOf(room),

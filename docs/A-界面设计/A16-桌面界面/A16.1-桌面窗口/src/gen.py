@@ -16,7 +16,7 @@ v3 (tag v3.2.11):
   lib/common/services/settings/window_size_controller.dart :97-100 (1280x720, min 400x300)
   lib/common/widgets/menu_button.dart :56-61, live_play_menu_button.dart :186-207 (new window)
   lib/common/global/initialized.dart :126-128 (every instance makes its own tray)
-  windows/runner/main.cpp :18 (every window is titled 纯粹直播); linux/my_application.cc :43-46
+  windows/runner/main.cpp :18 (every window is titled 棱镜直播); linux/my_application.cc :43-46
 The window content (home page, rail) comes from ../../U.3b/src/gen.py.
     python3 docs/ui/compare/U.13/src/gen.py && python3 tools/ui/mock/render.py docs/ui/compare/U.13/src/ --annotate"""
 import importlib.util
@@ -143,7 +143,7 @@ def v3_bar(mode='l', size=None, hover=None):
     (black, white 75%), s = splash route gradient. hover: 'min' | 'max' | 'x'."""
     sz = f'<span class="sz">[{size}]</span>' if size else ''
     btn = lambda key, icon, cls='': (f'<div class="u-wb{cls}{" hv" if hover == key else ""}">' + mi(icon, 16) + '</div>')
-    return (f'<div class="u-tb v3{mode}"><div class="l"><div class="app"><span class="u-ico"></span><span class="nm">纯粹直播</span>{sz}</div></div>'
+    return (f'<div class="u-tb v3{mode}"><div class="l"><div class="app"><span class="u-ico"></span><span class="nm">棱镜直播</span>{sz}</div></div>'
             + btn('min', 'remove') + btn('max', 'crop_square') + btn('x', 'close', ' x') + '</div>')
 
 
@@ -155,7 +155,7 @@ def v4_bar(n=False, size=None, hover=None, maximized=False, room=None, tip=None)
     sz = f'<span class="sz">[{size}]</span>' if size else ''
     rm = f'<span class="room">· {room}</span>' if room else ''
     icon = f'<span class="u-ico"{attrs(N(1), T("chg"), "bl" if n else None)} style="width:24px;height:24px;background-size:16px"></span>'
-    name = f'<div class="l"{attrs(N(2), T("keep"), "tc" if n else None)}><div class="app" style="padding-left:0">{icon}<span class="nm">纯粹直播</span>{rm}{sz}</div></div>'
+    name = f'<div class="l"{attrs(N(2), T("keep"), "tc" if n else None)}><div class="app" style="padding-left:0">{icon}<span class="nm">棱镜直播</span>{rm}{sz}</div></div>'
     btn = lambda key, k, tag, icon, cls='': (f'<div class="u-wb{cls}{" hv" if hover == key else ""}"{attrs(N(k), T(tag), "bc" if n else None)}>' + mi(icon, 16) + '</div>')
     out = (f'<div class="u-tb v4">{name}' + btn('min', 3, 'keep', 'remove') + btn('max', 4, 'chg', 'filter_none' if maximized else 'crop_square')
            + btn('x', 5, 'keep', 'close', ' x') + '</div>')
@@ -207,7 +207,7 @@ def titlebar_states(v4):
             ('最大化以后', '换成“向下还原”的图标', strip(v4_bar(hover='max', maximized=True, tip=('向下还原', 40)), extra='<div style="height:30px"></div>')),
             ('深色', '和页面同一个深色表面', strip(v4_bar(), below='var(--surface)', theme='dark')),
             ('启动页', '和启动页同一个底色（U.3c）', strip(v4_bar(), below=V4_SPLASH_PAGE)),
-            ('直播间里（主窗口或新窗口）', '名字后面是主播名；任务栏和 Alt+Tab 里是“晚风 - 纯粹直播”', strip(v4_bar(room='晚风'))),
+            ('直播间里（主窗口或新窗口）', '名字后面是主播名；任务栏和 Alt+Tab 里是“晚风 - 棱镜直播”', strip(v4_bar(room='晚风'))),
         ]
     body = '<div class="u-sheet"></div><div style="position:relative;width:100%;padding:4px 24px 24px">'
     for lab, sub, html in rows:
@@ -289,7 +289,7 @@ def tray(v4, n=False):
     W, H, PW = 1080, 340, 520
     # our icon sits 4th from the right of the tray: clock ~76, ime 24, volume 28, wifi 28
     icon_x = PW - 6 - 76 - 24 - 28 - 28 - 28 + 14
-    tip_text = '纯粹直播 · 正在录制 2 个' if v4 else '纯粹直播'
+    tip_text = '棱镜直播 · 正在录制 2 个' if v4 else '棱镜直播'
     tip = f'<div class="u-tt" style="left:{icon_x - 40}px;bottom:58px">{tip_text}</div>' + CURSOR.format(x=icon_x - 9, y=H - 32)
     if v4:
         rows = ('<div class="i dis"><span class="g"><i class="rec"></i></span>正在录制 2 个直播间</div><div class="s"></div>'
@@ -321,7 +321,7 @@ def room_window(v4):
 def newwin(v4):
     main = '<div class="u-w" style="left:40px;top:28px;width:900px;height:560px">' + (v4_bar() if v4 else v3_bar()) + wide_content(v4, 3) + '</div>'
     room = '<div class="u-w" style="left:330px;top:150px;width:900px;height:540px">' + room_window(v4) + '</div>'
-    titles = ['纯粹直播', '晚风 - 纯粹直播'] if v4 else ['纯粹直播', '纯粹直播']
+    titles = ['棱镜直播', '晚风 - 棱镜直播'] if v4 else ['棱镜直播', '棱镜直播']
     pics = ['.cache/img/1.jpg', '.cache/img/158.jpg']
     thumbs = ''.join(f'<div class="c"><div class="h"><span class="u-ico"></span>{t}</div><div class="p" style="background-image:url({p})"></div></div>'
                      for t, p in zip(titles, pics))
@@ -330,7 +330,7 @@ def newwin(v4):
     th = f'<div class="u-thumb" style="left:{640 - 216 + 22}px;bottom:56px">{thumbs}</div>'
     cap = ('<div class="u-cap" style="right:12px;bottom:58px">托盘：' + ('只有主窗口有图标' if v4 else '每个窗口各一个，一模一样') + '</div>'
            + '<div class="u-cap" style="left:446px;top:420px">新窗口里的直播间（简化示意）</div>'
-           + '<div class="u-cap" style="left:446px;bottom:256px">鼠标停在任务栏图标上：' + ('标题看得出是哪个窗口' if v4 else '两个窗口都叫“纯粹直播”') + '</div>')
+           + '<div class="u-cap" style="left:446px;bottom:256px">鼠标停在任务栏图标上：' + ('标题看得出是哪个窗口' if v4 else '两个窗口都叫“棱镜直播”') + '</div>')
     return page(1280, 800, 1.5, '<div class="u-desk"></div>' + main + room + task + th + cap)
 
 

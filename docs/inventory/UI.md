@@ -468,7 +468,7 @@
 
 | 编号 | 类型 | 名称 | 位置 |
 |---|---|---|---|
-| A15.2-01 | 页面 | AboutPage（纯粹直播） | `v3:modules/about/about_page.dart:8` |
+| A15.2-01 | 页面 | AboutPage（棱镜直播） | `v3:modules/about/about_page.dart:8` |
 | A15.2-02 | 页面 | VersionHistoryPage | `v3:modules/about/version_history.dart:14` |
 | A15.2-03 | 对话框 | _showMobileDetailsDialog | `v3:modules/about/version_history.dart:310` |
 | A15.2-04 | 对话框 | 点击下载 · `_confirmDownload` | `v3:modules/about/version_history.dart:406` |

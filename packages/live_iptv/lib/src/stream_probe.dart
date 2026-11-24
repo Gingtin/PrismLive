@@ -24,7 +24,7 @@ enum StreamHealth {
 /// The result of a stream health probe.
 class StreamProbeResult {
   /// Creates a probe result.
-  const StreamProbeResult({
+  const new({
     required this.health,
     this.statusCode,
     this.message,
@@ -59,7 +59,7 @@ class StreamProbeResult {
 /// Progress update during a batch stream health probe.
 final class StreamProbeProgress {
   /// Creates a progress update.
-  const StreamProbeProgress({
+  const new({
     required this.completed,
     required this.total,
     required this.liveCount,
@@ -134,9 +134,8 @@ abstract final class StreamProbe {
       final request = LiveRequest(
         site: 'iptv',
         url: url,
-        method: 'GET',
         headers: {
-          if (headers != null) ...headers,
+          ...?headers,
           'range': 'bytes=0-4096',
           'accept': '*/*',
         },
@@ -318,9 +317,7 @@ abstract final class StreamProbe {
       (_) => worker(),
     );
 
-    Future.wait(workers).whenComplete(() {
-      controller.close();
-    });
+    unawaited(Future.wait(workers).whenComplete(controller.close));
 
     yield* controller.stream;
   }
@@ -341,8 +338,7 @@ abstract final class StreamProbe {
     List<IptvChannel> channels,
     Map<String, StreamProbeResult> results,
   ) {
-    final list = List<IptvChannel>.of(channels);
-    list.sort((a, b) {
+    return List<IptvChannel>.of(channels)..sort((a, b) {
       final resA = results[a.entry.streamUrl.trim()] ?? getCached(a.entry.streamUrl.trim());
       final resB = results[b.entry.streamUrl.trim()] ?? getCached(b.entry.streamUrl.trim());
 
@@ -357,7 +353,6 @@ abstract final class StreamProbe {
       }
       return 0;
     });
-    return list;
   }
 
   /// Filters out permanently dead channels.
@@ -391,11 +386,10 @@ abstract final class StreamProbe {
         final r = await probe(http, uri, timeout: timeout, cancel: cancel);
         results[u] = r;
         cacheResult(u, r);
-      } catch (_) {}
+      } on Object catch (_) {}
     }));
 
-    final sorted = List<String>.of(urls);
-    sorted.sort((a, b) {
+    return List<String>.of(urls)..sort((a, b) {
       final resA = results[a];
       final resB = results[b];
       final rankA = _healthRank(resA?.health);
@@ -405,7 +399,5 @@ abstract final class StreamProbe {
       final latB = resB?.latency?.inMilliseconds ?? 99999;
       return latA.compareTo(latB);
     });
-    return sorted;
   }
 }
-

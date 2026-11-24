@@ -9,6 +9,7 @@ import 'package:live_iptv/src/library.dart';
 import 'package:live_iptv/src/model.dart';
 import 'package:live_iptv/src/playlist/playlist_parse_result.dart';
 import 'package:live_iptv/src/playlist/playlist_parser.dart';
+import 'package:live_iptv/src/playlist/smart_extractor.dart';
 import 'package:live_iptv/src/reconcile.dart';
 import 'package:live_iptv/src/text.dart';
 import 'package:live_net/live_net.dart';
@@ -104,6 +105,35 @@ final class IptvImporter {
 
   /// The built-in hot playlist (3.x `AutoSyncScheduler`).
   static const String hotPlaylistUrl = 'https://iptv-org.github.io/iptv/countries/cn.m3u';
+
+  /// High-availability curated public IPTV playlist presets.
+  static const List<({String name, String url, String desc})> curatedPresets = [
+    (
+      name: '央视与各省卫视（每日测速）',
+      url: 'https://fastly.jsdelivr.net/gh/best-fan/iptv-sources@main/cn_all.m3u8',
+      desc: '每日自动化测试高可用直播源，包含 CCTV 全套及各大主流省市卫视',
+    ),
+    (
+      name: '央视频道高清精选',
+      url: 'https://fastly.jsdelivr.net/gh/best-fan/iptv-sources@main/cn_cctv.m3u8',
+      desc: 'CCTV-1 至 CCTV-17、CCTV-5+、CCTV-4K 官方转播源',
+    ),
+    (
+      name: '各省卫视频道精选',
+      url: 'https://fastly.jsdelivr.net/gh/best-fan/iptv-sources@main/cn_province.m3u8',
+      desc: '湖南卫视、浙江卫视、江苏卫视、北京卫视、东方卫视等全套',
+    ),
+    (
+      name: '热门赛事与游戏专线',
+      url: 'https://raw.githubusercontent.com/YanG-1989/m3u/main/Gather.m3u',
+      desc: '电竞赛事轮播与体育专线聚合',
+    ),
+    (
+      name: 'iptv-org 综合列表（国际社区源）',
+      url: 'https://iptv-org.github.io/iptv/countries/cn.m3u',
+      desc: 'iptv-org 国际开源社区维护的中国频道列表',
+    ),
+  ];
 
   /// The default programme guide (3.x `AutoSyncScheduler`).
   static const String defaultGuideUrl = 'https://epg.zsdc.eu.org/t.xml.gz';
@@ -371,6 +401,87 @@ final class IptvImporter {
       format: format,
       name: baseName(name),
       force: force,
+      confirmReplace: confirmReplace,
+    );
+  }
+
+  /// Imports multiple [sources] as separate playlists, invoking [onProgress]
+  /// after each source completes.
+  Future<({int succeeded, int failed, List<String> failedNames})> importBatchSources({
+    required List<ExtractedSource> sources,
+    void Function(int current, int total, String currentName)? onProgress,
+    IptvReplaceConfirm? confirmReplace,
+  }) async {
+    var succeeded = 0;
+    var failed = 0;
+    final failedNames = <String>[];
+    for (var i = 0; i < sources.length; i++) {
+      final src = sources[i];
+      onProgress?.call(i + 1, sources.length, src.name);
+      try {
+        final result = await importPlaylistFromUrl(
+          src.url,
+          name: src.name,
+          confirmReplace: confirmReplace,
+        );
+        if (result.isImported) {
+          succeeded++;
+        } else {
+          failed++;
+          failedNames.add(src.name);
+        }
+      } on Object catch (_) {
+        failed++;
+        failedNames.add(src.name);
+      }
+    }
+    return (succeeded: succeeded, failed: failed, failedNames: failedNames);
+  }
+
+  /// Downloads each source in [sources], tags each channel with its source name
+  /// as group title, and aggregates them into one combined playlist named [name].
+  Future<IptvImportResult> importAggregatedSources({
+    required List<ExtractedSource> sources,
+    required String name,
+    void Function(int current, int total, String currentName)? onProgress,
+    IptvReplaceConfirm? confirmReplace,
+  }) async {
+    final buffer = StringBuffer('#EXTM3U\n');
+    var totalChannels = 0;
+
+    for (var i = 0; i < sources.length; i++) {
+      final src = sources[i];
+      onProgress?.call(i + 1, sources.length, src.name);
+      final uri = Uri.tryParse(src.url.trim());
+      if (uri == null || !isHttpUrl(src.url)) continue;
+
+      try {
+        final bytes = await _download(uri);
+        final text = await decodePlaylistBytes(Uint8List.fromList(bytes), legacy: legacyDecoder);
+        final format = detectPlaylistFormat(text, path: uri.path);
+        if (format == null) continue;
+        final parsed = parsePlaylist(text, format);
+        for (final entry in parsed.entries) {
+          totalChannels++;
+          final logoAttr = entry.tvgLogo != null ? ' tvg-logo="${entry.tvgLogo}"' : '';
+          final groupAttr = ' group-title="${src.name}"';
+          final nameAttr = ' tvg-name="${entry.name}"';
+          buffer
+            ..writeln('#EXTINF:-1$groupAttr$nameAttr$logoAttr,${entry.name}')
+            ..writeln(entry.streamUrl);
+        }
+      } on Object catch (_) {
+        // Skip individual failed sources during aggregation.
+      }
+    }
+
+    if (totalChannels == 0) {
+      return IptvImportResult(IptvImportStatus.invalid, error: 'No channels could be aggregated from sources');
+    }
+
+    return await importPlaylistText(
+      buffer.toString(),
+      name,
       confirmReplace: confirmReplace,
     );
   }

@@ -26,7 +26,7 @@
 ## 3.x 基线
 
 - 3.x 默认省电档，播放时不按帧率选刷新率（`git show v3.2.11:lib/common/widgets/adaptive_refresh_rate_scope.dart`）；弹幕帧率省电档上限 60（`lib/common/services/settings/danmaku_settings_controller.dart:135-158`）。
-- 3.x 在 K90 上是用户的正式包，**不能拿来测**（D-019）。对比包：在独立工作区 `git worktree add <路径> v3.2.11`，`android/app/build.gradle` 的 `applicationId` 改成 `com.mystyle.purelive.v3bench`、应用名改“纯粹直播 v3bench”，本机构建 profile 包；测完卸载（和 G03.1、R04.1 共用这个包；3.x 的设置在 v3bench 里是全新的，要手动设成和 4.x 测试时一样：省电档、同一清晰度、弹幕开）。
+- 3.x 在 K90 上是用户的正式包，**不能拿来测**（D-019）。对比包：在独立工作区 `git worktree add <路径> v3.2.11`，`android/app/build.gradle` 的 `applicationId` 改成 `com.mystyle.purelive.v3bench`、应用名改“棱镜直播 v3bench”，本机构建 profile 包；测完卸载（和 G03.1、R04.1 共用这个包；3.x 的设置在 v3bench 里是全新的，要手动设成和 4.x 测试时一样：省电档、同一清晰度、弹幕开）。
 
 ## 先读
 

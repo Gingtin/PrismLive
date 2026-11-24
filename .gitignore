@@ -54,6 +54,10 @@ build-test/
 
 # Local build and release outputs
 /local-artifacts/
+build-test*/
+*.apk
+deploy_to_*.bat
+deploy_to_*.ps1
 
 # Agent worktrees (Claude Code)
 /.claude/worktrees/

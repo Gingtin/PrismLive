@@ -29,7 +29,7 @@
 ## 方案
 
 - c1（第 1 阶段，可以没有 Mac）方案：包名（沿用 `com.mystyle.purelive.liu` 还是新的）、签名和分发（A：App Store / TestFlight，要付费开发者账号；B：未签名 IPA 照 3.x，由用户自签或 TrollStore；C：免费账号 7 天证书，只适合自用）、录制要不要、14 个通道各自怎么处理；写进 `record.md`，维护者定。
-- c2（第 2 阶段，要 Mac）工程：`flutter create --platforms=ios .`（在 `apps/pure_live`），按 3.x 改 `Info.plist`（中文显示名“纯粹直播”、相册、本地网络、后台音频的说明）、`Runner.entitlements`；`pod install`；模拟器启动到首页。
+- c2（第 2 阶段，要 Mac）工程：`flutter create --platforms=ios .`（在 `apps/pure_live`），按 3.x 改 `Info.plist`（中文显示名“棱镜直播”、相册、本地网络、后台音频的说明）、`Runner.entitlements`；`pod install`；模拟器启动到首页。
 - c3（第 3 阶段）原生：Keychain 的 `SecretCipher`（Dart 侧在 `secret_cipher.dart`，原生用 `Security` 框架或 `flutter_secure_storage` 之类的插件——加依赖要维护者同意）；平台通道按 c1 的结论处理；真机看直播、弹幕。
 - c4（第 4 阶段）签名和分发：按 c1 的结论做出包；`version.json` 加 `platforms.ios` 块（维护者，发布时）。
 

@@ -66,13 +66,14 @@ internal class ShareIntakePlugin :
         internal const val EXTRA_TASK = "task"
         internal const val ROUTE_SEARCH = "/search"
         internal const val ROUTE_RECORDINGS = "/record_mannager"
+        internal const val ROUTE_IPTV = "/iptv"
 
         /**
          * The pages [ACTION_OPEN] may open. The activity is exported (it is
          * the launcher's), so any app can send the action; other routes are
          * dropped here and again in Dart (`ShareIntake.openableRoutes`).
          */
-        private val OPENABLE_ROUTES = setOf(ROUTE_SEARCH, ROUTE_RECORDINGS)
+        private val OPENABLE_ROUTES = setOf(ROUTE_SEARCH, ROUTE_RECORDINGS, ROUTE_IPTV)
 
         /** The intent that opens [route] in the app. */
         internal fun openRoute(context: Context, route: String): Intent =

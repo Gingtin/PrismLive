@@ -30,6 +30,19 @@ import 'package:pure_live/shared/rooms/playback_telemetry.dart';
 import 'package:pure_live/shared/rooms/room_gain.dart';
 import 'package:pure_live/shared/rooms/room_texts.dart';
 
+/// The real-time high-energy danmaku burst state.
+@immutable
+final class DanmakuBurstState {
+  /// Creates the state.
+  const new({this.isActive = false, this.velocity = 0});
+
+  /// Whether a high-energy danmaku spike is currently active.
+  final bool isActive;
+
+  /// Messages per second in the sliding window.
+  final int velocity;
+}
+
 /// Where the room page is (3.x kept `isLoading`, `success`, `isLiving` and
 /// `loadError` as four flags that could contradict each other).
 enum RoomStage {
@@ -238,6 +251,12 @@ class LiveRoomController extends ChangeNotifier {
   /// D02.2 c4).
   final BlockedCount blocked = BlockedCount();
   final StreamController<LiveMessage> _flying = StreamController.broadcast(sync: true);
+  /// Tracks real-time danmaku high-energy burst status.
+  final ValueNotifier<DanmakuBurstState> danmakuBurst = ValueNotifier(const DanmakuBurstState());
+  final List<DateTime> _recentChatTimestamps = [];
+  Timer? _burstDecayTimer;
+  Timer? _edgeChaseTimer;
+  bool _chasing = false;
   final StreamController<LiveRetraction> _retractions = StreamController.broadcast(sync: true);
   final List<StreamSubscription<Object?>> _subscriptions = [];
   LiveQualityDiscoveryScope _qualityScope = LiveQualityDiscoveryScope();
@@ -273,6 +292,7 @@ class LiveRoomController extends ChangeNotifier {
   // tier; a refresh or a reload does not say it again.
   bool _servedToastShown = false;
   int _loggedRecovery = 0;
+  int _lastQualityFallbackRecovery = 0;
 
   /// Counts the streams handed to the session: a recovery of an older one
   /// no longer names the quality shown ([_refreshPlan]).
@@ -409,6 +429,9 @@ class LiveRoomController extends ChangeNotifier {
     _epoch++;
     _refreshTimer?.cancel();
     _superChatTimer?.cancel();
+    _edgeChaseTimer?.cancel();
+    _edgeChaseTimer = null;
+    _chasing = false;
     _stage = RoomStage.loading;
     _notify();
     return _archiveTransition = _archiveTransition.catchError((Object _) {}).then((_) async {
@@ -456,6 +479,7 @@ class LiveRoomController extends ChangeNotifier {
     if (refreshInterval > Duration.zero) {
       _refreshTimer = Timer.periodic(refreshInterval, (_) => unawaited(refreshDetail()));
     }
+    _startEdgeChaseTimer();
     await load();
   }
 
@@ -654,6 +678,22 @@ class LiveRoomController extends ChangeNotifier {
       _activeLineIndex = state.lineIndex;
       _lineSwitchedByRecovery = false;
     }
+
+    if (store.settings.get(Settings.autoQualityFallback) &&
+        !_switching &&
+        !_switchingLine &&
+        _stage == RoomStage.playing &&
+        !isArchive) {
+      final severeStall = (state.recovery >= 2 && state.status == PlaybackStatus.buffering) ||
+          state.status == PlaybackStatus.error;
+      if (severeStall && attempt > _lastQualityFallbackRecovery && _qualityIndex + 1 < _qualities.length) {
+        _lastQualityFallbackRecovery = attempt;
+        final nextIdx = _qualityIndex + 1;
+        final nextQuality = _qualities[nextIdx];
+        toast?.call(i18n('live_play_auto_quality_degraded', args: {'quality': nextQuality.quality}));
+        unawaited(selectQuality(nextIdx));
+      }
+    }
   }
 
   /// G03.1: one app log line per timed open (the room's entry), also on
@@ -740,6 +780,109 @@ class LiveRoomController extends ChangeNotifier {
             ),
           ),
     );
+    if (store.settings.get(Settings.autoLineFailover)) {
+      final delay = Duration(seconds: store.settings.get(Settings.autoLineFailoverDelay));
+      session.timings = session.timings.copyWith(bufferingStall: delay);
+    }
+    if (store.settings.get(Settings.audioLoudnorm)) {
+      unawaited(session.setAudioLoudnorm(
+        enabled: true,
+        target: store.settings.get(Settings.audioLoudnormTarget),
+      ));
+    }
+    _subscriptions.add(
+      store.settings.watch(Settings.autoLineFailoverDelay).skip(1).listen((sec) {
+        if (store.settings.get(Settings.autoLineFailover)) {
+          session.timings = session.timings.copyWith(bufferingStall: Duration(seconds: sec));
+        }
+      }),
+    );
+    _subscriptions.add(
+      store.settings.watch(Settings.autoLineFailover).skip(1).listen((enabled) {
+        final sec = enabled ? store.settings.get(Settings.autoLineFailoverDelay) : 6;
+        session.timings = session.timings.copyWith(bufferingStall: Duration(seconds: sec));
+      }),
+    );
+    _subscriptions.add(
+      store.settings.watch(Settings.audioLoudnorm).skip(1).listen((enabled) {
+        unawaited(session.setAudioLoudnorm(
+          enabled: enabled,
+          target: store.settings.get(Settings.audioLoudnormTarget),
+        ));
+      }),
+    );
+    _subscriptions.add(
+      store.settings.watch(Settings.audioLoudnormTarget).skip(1).listen((target) {
+        if (store.settings.get(Settings.audioLoudnorm)) {
+          unawaited(session.setAudioLoudnorm(enabled: true, target: target));
+        }
+      }),
+    );
+    // Video enhancements: sharpen & smooth motion
+    final initSharpen = store.settings.get(Settings.videoSharpen);
+    final initSmooth = store.settings.get(Settings.smoothMotion);
+    if (initSharpen > 0 || initSmooth) {
+      unawaited(session.setVideoEnhancements(sharpen: initSharpen, smoothMotion: initSmooth));
+    }
+    _subscriptions.add(
+      store.settings.watch(Settings.videoSharpen).skip(1).listen((sharpen) {
+        unawaited(session.setVideoEnhancements(
+          sharpen: sharpen,
+          smoothMotion: store.settings.get(Settings.smoothMotion),
+        ));
+      }),
+    );
+    _subscriptions.add(
+      store.settings.watch(Settings.smoothMotion).skip(1).listen((smooth) {
+        unawaited(session.setVideoEnhancements(
+          sharpen: store.settings.get(Settings.videoSharpen),
+          smoothMotion: smooth,
+        ));
+      }),
+    );
+    // 10-band Graphic Audio Equalizer
+    void applyEqualizer() {
+      final preset = store.settings.get(Settings.audioEqualizerPreset);
+      final custom = store.settings.get(Settings.audioEqualizerBands);
+      final bands = AudioEqualizerConsts.resolveBands(preset, custom);
+      unawaited(session.setAudioEqualizer(bands));
+    }
+    applyEqualizer();
+    _subscriptions.add(store.settings.watch(Settings.audioEqualizerPreset).skip(1).listen((_) => applyEqualizer()));
+    _subscriptions.add(store.settings.watch(Settings.audioEqualizerBands).skip(1).listen((_) => applyEqualizer()));
+
+    // Audio Channel Mode
+    void applyChannelMode() {
+      final mode = store.settings.get(Settings.audioChannelMode);
+      unawaited(session.setAudioChannelMode(mode));
+    }
+    applyChannelMode();
+    _subscriptions.add(store.settings.watch(Settings.audioChannelMode).skip(1).listen((_) => applyChannelMode()));
+
+    // Video picture color adjustments
+    void applyPictureColor() {
+      unawaited(session.setPictureColor(
+        brightness: store.settings.get(Settings.videoBrightness),
+        contrast: store.settings.get(Settings.videoContrast),
+        saturation: store.settings.get(Settings.videoSaturation),
+        gamma: store.settings.get(Settings.videoGamma),
+      ));
+    }
+    applyPictureColor();
+    _subscriptions.add(store.settings.watch(Settings.videoBrightness).skip(1).listen((_) => applyPictureColor()));
+    _subscriptions.add(store.settings.watch(Settings.videoContrast).skip(1).listen((_) => applyPictureColor()));
+    _subscriptions.add(store.settings.watch(Settings.videoSaturation).skip(1).listen((_) => applyPictureColor()));
+    _subscriptions.add(store.settings.watch(Settings.videoGamma).skip(1).listen((_) => applyPictureColor()));
+
+    // Live buffer profile dynamic synchronization
+    _subscriptions.add(
+      store.settings.watch(Settings.liveBufferProfile).skip(1).listen((profile) {
+        unawaited(session.setLiveBufferProfile(profile));
+      }),
+    );
+
+    // Live low-latency auto edge-chase
+    _startEdgeChaseTimer();
     // A08.12: "只显示值钱的礼物" takes the cheap gift lines away at once.
     _subscriptions.add(store.settings.watch(Settings.chatGiftsAboveTier).skip(1).listen(_onGiftTier));
     _subscriptions.add(store.settings.watch(Settings.superChatIncludesMembership).skip(1).listen(_onMembershipCards));
@@ -767,6 +910,7 @@ class LiveRoomController extends ChangeNotifier {
     if (refreshInterval > Duration.zero) {
       _refreshTimer = Timer.periodic(refreshInterval, (_) => unawaited(refreshDetail()));
     }
+    _startEdgeChaseTimer();
     await load();
   }
 
@@ -1240,6 +1384,8 @@ class LiveRoomController extends ChangeNotifier {
     _sleepTimerFinished = false;
     _sleepMinutes = minutes.clamp(1, 525600);
     _sleepTimer?.cancel();
+    _edgeChaseTimer?.cancel();
+    _edgeChaseTimer = null;
     _sleepTimer = null;
     _sleepDeadline = null;
     if (enabled && !_disposed) {
@@ -1596,6 +1742,9 @@ class LiveRoomController extends ChangeNotifier {
         }
         chat.add(ChatLine.chat(message));
         _flying.add(message);
+        if (store.settings.get(Settings.danmakuBurstAlert)) {
+          _trackDanmakuVelocity();
+        }
       case LiveMessageType.online:
         _applyAudience(message.data);
       case LiveMessageType.roomInfo:
@@ -1837,8 +1986,32 @@ class LiveRoomController extends ChangeNotifier {
     return added;
   }
 
+  void _trackDanmakuVelocity() {
+    final now = _now();
+    _recentChatTimestamps.add(now);
+    final cutoff = now.subtract(const Duration(seconds: 3));
+    while (_recentChatTimestamps.isNotEmpty && _recentChatTimestamps.first.isBefore(cutoff)) {
+      _recentChatTimestamps.removeAt(0);
+    }
+    final count = _recentChatTimestamps.length;
+    final velocity = (count / 3.0).round();
+    if (velocity >= 8) {
+      if (!danmakuBurst.value.isActive || danmakuBurst.value.velocity != velocity) {
+        danmakuBurst.value = DanmakuBurstState(isActive: true, velocity: velocity);
+      }
+      _burstDecayTimer?.cancel();
+      _burstDecayTimer = Timer(const Duration(seconds: 4), () {
+        if (!_disposed) {
+          danmakuBurst.value = const DanmakuBurstState();
+        }
+      });
+    }
+  }
+
   @override
   void dispose() {
+    _burstDecayTimer?.cancel();
+    danmakuBurst.dispose();
     _archiveGeneration++;
     final archive = _archive;
     archive?.removeListener(_archiveChanged);
@@ -1859,6 +2032,8 @@ class LiveRoomController extends ChangeNotifier {
     _readSuperChats.clear();
     _superChats = const [];
     _sleepTimer?.cancel();
+    _edgeChaseTimer?.cancel();
+    _edgeChaseTimer = null;
     for (final subscription in _subscriptions) {
       unawaited(subscription.cancel());
     }
@@ -1870,6 +2045,34 @@ class LiveRoomController extends ChangeNotifier {
     chat.dispose();
     blocked.dispose();
     super.dispose();
+  }
+
+  void _startEdgeChaseTimer() {
+    _edgeChaseTimer?.cancel();
+    if (isArchive) return;
+    _edgeChaseTimer = Timer.periodic(const Duration(milliseconds: 2500), _checkEdgeChase);
+  }
+
+  Future<void> _checkEdgeChase([_]) async {
+    if (_disposed || isArchive) return;
+    if (!store.settings.get(Settings.liveLowLatencyChase)) {
+      if (_chasing) {
+        _chasing = false;
+        await session.setRate(1);
+      }
+      return;
+    }
+    if (session.state.status != PlaybackStatus.playing) return;
+    final stats = await telemetry.read();
+    final buffer = stats?.bufferSeconds;
+    if (buffer == null) return;
+    if (!_chasing && buffer > 3.5) {
+      _chasing = true;
+      await session.setRate(1.10);
+    } else if (_chasing && buffer < 1.5) {
+      _chasing = false;
+      await session.setRate(1);
+    }
   }
 }
 

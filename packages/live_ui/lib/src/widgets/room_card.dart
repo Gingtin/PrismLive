@@ -49,6 +49,8 @@ final class RoomCardData {
     required this.anchorName,
     this.avatarUrl,
     this.coverUrl,
+    this.keyframeUrl,
+    this.identityKey,
     this.isLive = false,
     this.isReplay = false,
     this.audience,
@@ -78,6 +80,12 @@ final class RoomCardData {
 
   /// Cover address (normalised by the app); empty or null shows the fallback.
   final String? coverUrl;
+
+  /// Real-time live keyframe URL (if supported by the platform).
+  final String? keyframeUrl;
+
+  /// Room identity key (e.g. `bilibili:123456`) used for local realtime snapshot cache.
+  final String? identityKey;
 
   /// Live now: the audience shows only then.
   final bool isLive;
@@ -109,6 +117,8 @@ final class RoomCardData {
       other.anchorName == anchorName &&
       other.avatarUrl == avatarUrl &&
       other.coverUrl == coverUrl &&
+      other.keyframeUrl == keyframeUrl &&
+      other.identityKey == identityKey &&
       other.isLive == isLive &&
       other.isReplay == isReplay &&
       other.audience == audience &&
@@ -124,6 +134,8 @@ final class RoomCardData {
     anchorName,
     avatarUrl,
     coverUrl,
+    keyframeUrl,
+    identityKey,
     isLive,
     isReplay,
     audience,

@@ -87,7 +87,17 @@ final class JsonPlaylistParser {
         'genre',
       ]) ?? group ?? defaultGroup;
 
-      final logo = _text(item, const ['logo', 'tvg-logo', 'tvgLogo', 'tvg_logo', 'icon', 'image']);
+      final logo = _text(item, const [
+        'logo',
+        'tvg-logo',
+        'tvgLogo',
+        'tvg_logo',
+        'icon',
+        'image',
+        'img',
+        'pic',
+        'avatar',
+      ]);
       final tvgId = _text(item, const ['tvg-id', 'tvgId', 'tvg_id', 'id']);
       final tvgName = _text(item, const ['tvg-name', 'tvgName', 'tvg_name']);
       final chnoStr = _text(item, const ['tvg-chno', 'tvgChno', 'chno', 'channelNumber', 'num', 'number']);
@@ -117,12 +127,19 @@ final class JsonPlaylistParser {
           if (u is String) {
             rawUrls.add(u);
           } else if (u is Map<String, Object?>) {
-            final subUrl = _text(u, const ['url', 'link', 'source', 'playUrl', 'streamUrl']);
+            final subUrl = _text(u, const ['url', 'link', 'source', 'playUrl', 'streamUrl', 'address', 'play_url']);
             if (subUrl != null) rawUrls.add(subUrl);
           }
         }
       }
-      final singleUrl = item['url'] ?? item['link'] ?? item['source'] ?? item['playUrl'] ?? item['streamUrl'];
+      final singleUrl = item['url'] ??
+          item['link'] ??
+          item['source'] ??
+          item['playUrl'] ??
+          item['streamUrl'] ??
+          item['address'] ??
+          item['play_url'] ??
+          item['live_url'];
       if (singleUrl is String) {
         rawUrls.add(singleUrl);
       } else if (singleUrl is List) {
@@ -200,6 +217,9 @@ final class JsonPlaylistParser {
           decoded['channel'] ??
           decoded['list'] ??
           decoded['items'] ??
+          decoded['zhubo'] ??
+          decoded['anchors'] ??
+          decoded['rooms'] ??
           (decoded['data'] is List ? decoded['data'] : null);
 
       if (rootList is List) {
@@ -216,8 +236,7 @@ final class JsonPlaylistParser {
             }
           }
         }
-      } else if (decoded['data'] is Map<String, Object?>) {
-        final dataMap = decoded['data'] as Map<String, Object?>;
+      } else if (decoded['data'] case final Map<String, Object?> dataMap) {
         for (final entry in dataMap.entries) {
           final val = entry.value;
           if (val is List) {
@@ -284,7 +303,7 @@ final class JsonPlaylistParser {
         final rawName = Uri.decodeQueryComponent(option.substring(0, equals).trim());
         final value = Uri.decodeQueryComponent(option.substring(equals + 1).trim());
         headers[rawName] = value;
-      } catch (_) {}
+      } on Object catch (_) {}
     }
     return (url: url, headers: HttpHeaderPolicy.normalize(headers));
   }

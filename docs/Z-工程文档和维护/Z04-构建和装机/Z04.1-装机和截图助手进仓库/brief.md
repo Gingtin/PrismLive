@@ -19,7 +19,7 @@
 ## 现状（读代码得出，写文件:行）
 
 - `~/tools/pl-adb.sh`（16 行，仓库外）：`:3` `D=192.168.1.2:5555`；`:4` `S=<某次会话的 scratchpad>`；`:5` `fg()`（`dumpsys window | grep -m1 mCurrentFocus`，取 `u0 包名`）；`:7` `PL_APP` 默认 `.next`；`:8` `need_pl()`；`:9-12` `tap`、`key`、`text`、`swipe`；`:13` `shot`（`exec-out screencap -p`）；`:15` `ui`（`uiautomator dump` 后用正则取 `text`/`content-desc` 和 `bounds`）；`:16` `tapl`（取第一个匹配的中心点再 `tap`）。
-- 测试包：`apps/pure_live/android/app/build.gradle.kts` 的 debug、profile 构建 `applicationIdSuffix = ".v4dev"`，应用名“纯粹直播 v4dev”；入口 `MainActivity`。
+- 测试包：`apps/pure_live/android/app/build.gradle.kts` 的 debug、profile 构建 `applicationIdSuffix = ".v4dev"`，应用名“棱镜直播 v4dev”；入口 `MainActivity`。
 - 仓库里还没有 `tools/device/`；`tools/gate/tests/` 有三个检查脚本的测试可以照着写。
 
 ## 3.x 基线

@@ -4821,7 +4821,7 @@ tier = 1
 stages = ["版本号、发布说明和 README", "各平台构建和检查", "K90 和 Windows 快速测试", "新仓库、标签、发布页", "更新文件（新仓库和旧仓库）"]
 done = 5
 from = "用户 2026-10-15：完成整个项目，最后发布最终版本，全平台，新仓库和 README"
-note = "新仓库 https://github.com/wzgrx/PureLive （公开，独立，第一个提交 914dbaeac 是旧仓库 2f3a023a7 的同一棵树）；标签 v5.0.0；发布页 https://github.com/wzgrx/PureLive/releases/tag/v5.0.0 （标题“纯粹直播 v5.0.0”，六个包和 SHA256SUMS.txt，GitHub 记的哈希和本机一致）；两个仓库的 assets/version.json（Android、Windows、Linux 都是 5.0.0，下载地址是新仓库的发布页）、assets/releases.json 最前面加 5.0.0"
+note = "新仓库 https://github.com/wzgrx/PureLive （公开，独立，第一个提交 914dbaeac 是旧仓库 2f3a023a7 的同一棵树）；标签 v5.0.0；发布页 https://github.com/wzgrx/PureLive/releases/tag/v5.0.0 （标题“棱镜直播 v5.0.0”，六个包和 SHA256SUMS.txt，GitHub 记的哈希和本机一致）；两个仓库的 assets/version.json（Android、Windows、Linux 都是 5.0.0，下载地址是新仓库的发布页）、assets/releases.json 最前面加 5.0.0"
 
 [[task]]
 id = "Y01.8"
@@ -4834,7 +4834,7 @@ tier = 1
 stages = ["版本号、发布说明和 README", "各平台构建和检查", "K90 快速测试", "标签、发布页", "更新文件（新仓库和旧仓库）"]
 done = 5
 from = "用户 2026-10-15：暂停的功能现在就做，然后发 5.1.0（全平台、新仓库发布页、旧仓库同步更新文件）；稳定版"
-note = "标签 v5.1.0（007631be8）；发布页 https://github.com/wzgrx/PureLive/releases/tag/v5.1.0 （标题“纯粹直播 v5.1.0”，正式版，六个包和 SHA256SUMS.txt，GitHub 记的哈希和本机一致）；两个仓库的 assets/version.json（Android、Windows、Linux 都是 5.1.0、5101）、assets/releases.json 最前面加 5.1.0"
+note = "标签 v5.1.0（007631be8）；发布页 https://github.com/wzgrx/PureLive/releases/tag/v5.1.0 （标题“棱镜直播 v5.1.0”，正式版，六个包和 SHA256SUMS.txt，GitHub 记的哈希和本机一致）；两个仓库的 assets/version.json（Android、Windows、Linux 都是 5.1.0、5101）、assets/releases.json 最前面加 5.1.0"
 
 [[task]]
 id = "Y01.9"

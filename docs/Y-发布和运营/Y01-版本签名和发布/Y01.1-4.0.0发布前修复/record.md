@@ -61,7 +61,7 @@
 
 - **根因**：`main.dart` 直接 `await AppBootstrap.start(args)`，没有捕获。`LiveStore.open`（`bootstrap.dart`）在存储满、数据库损坏或被锁时抛异常，`main` 就此结束，`runApp` 从未调用，用户一直停在系统启动画面，日志也没处看。
 - **改动**：
-  - 新文件 `app/launch_failure.dart`：`launchOrExplain(start, show, retry, exportLog)` 运行启动；抛异常时写进应用日志（`startup`，含堆栈），语言设置还没读到时按系统语言加载文字，然后 `runApp` 一个简单的错误页 `LaunchFailureApp`：live_ui 的 `AppStatusView`，标题“纯粹直播没能启动”，原因（文件错误写出文件夹和系统给的原因，例如“无法读写数据文件夹 …：No space left on device。可能是存储空间不足，或者没有权限。”；其他写“应用数据无法打开：…”，过长截断）和“可以点‘重试’；一直这样的话，请导出日志反馈给我们。”，两个按钮“重试”“导出日志”。
+  - 新文件 `app/launch_failure.dart`：`launchOrExplain(start, show, retry, exportLog)` 运行启动；抛异常时写进应用日志（`startup`，含堆栈），语言设置还没读到时按系统语言加载文字，然后 `runApp` 一个简单的错误页 `LaunchFailureApp`：live_ui 的 `AppStatusView`，标题“棱镜直播没能启动”，原因（文件错误写出文件夹和系统给的原因，例如“无法读写数据文件夹 …：No space left on device。可能是存储空间不足，或者没有权限。”；其他写“应用数据无法打开：…”，过长截断）和“可以点‘重试’；一直这样的话，请导出日志反馈给我们。”，两个按钮“重试”“导出日志”。
   - `main.dart`：首帧前的步骤（服务、日志、文字、字体、桌面窗口）放进 `_prepare`，由 `launchOrExplain` 运行；后面的步骤失败时先关掉已打开的服务。“重试”重新走一遍启动，成功就换成正常的应用。“导出日志”沿用日志页的导出（`AppLog.export`）：手机上弹系统分享，桌面上存到临时文件夹并显示路径；失败提示“日志导出失败”。
   - 中英文各加 6 条（`launch_failed_*`）。
 - **测试**：`test/launch_failure_test.dart`：启动抛 `FileSystemException`（空间不足）→ 返回 null、错误写进日志、错误页显示标题、路径和原因，点“重试”“导出日志”各调用一次并显示导出结果；其他错误的原因文字；启动成功时照常返回、不显示错误页。（新函数，改之前没法跑出失败。）

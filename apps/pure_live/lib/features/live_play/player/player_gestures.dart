@@ -1,9 +1,12 @@
 import 'dart:async';
+import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
+import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/app_log.dart';
 import 'package:pure_live/features/live_play/logic/background_playback.dart';
@@ -80,6 +83,7 @@ class PlayerGestureLayer extends StatefulWidget {
 class PlayerGestureLayerState extends State<PlayerGestureLayer> {
   GestureLevel? _showing;
   double _level = 0;
+  int _lastHapticStep = -1;
   Timer? _hide;
   Timer? _save;
 
@@ -147,9 +151,21 @@ class PlayerGestureLayerState extends State<PlayerGestureLayer> {
 
   void _show(GestureLevel kind, double level) {
     _hide?.cancel();
+    final clamped = level.clamp(0.0, 1.0);
+    final step = (clamped * 20).round();
+    if (step != _lastHapticStep) {
+      _lastHapticStep = step;
+      if (widget.controller.store.settings.get(Settings.playerHapticFeedback)) {
+        if (step == 0 || step == 20) {
+          unawaited(HapticFeedback.mediumImpact());
+        } else {
+          unawaited(HapticFeedback.selectionClick());
+        }
+      }
+    }
     setState(() {
       _showing = kind;
-      _level = level.clamp(0.0, 1.0);
+      _level = clamped;
     });
     _hide = Timer(const Duration(seconds: 1), () {
       if (mounted) setState(() => _showing = null);
@@ -221,6 +237,7 @@ class PlayerGestureLayerState extends State<PlayerGestureLayer> {
     _reportedUpdate = false;
     _trace('start');
     _reading = false;
+    _lastHapticStep = -1;
     _pendingDelta = 0;
     _pendingMinimum = 0;
     _pendingMaximum = 1;
@@ -380,35 +397,56 @@ class PlayerGestureLayerState extends State<PlayerGestureLayer> {
         if (showing != null)
           IgnorePointer(
             child: Center(
-              child: DecoratedBox(
-                key: ValueKey('gesture-level-${showing.name}'),
-                decoration: BoxDecoration(color: OnVideoColors.panel, borderRadius: BorderRadius.circular(10)),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(gestureLevelIcon(showing, _level), color: OnVideoColors.foreground),
-                      const SizedBox(width: 8),
-                      SizedBox(
-                        width: 100,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(6),
-                          child: LinearProgressIndicator(
-                            value: _level,
-                            minHeight: 6,
-                            backgroundColor: OnVideoColors.track,
-                            color: OnVideoColors.foreground,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(28),
+                child: BackdropFilter(
+                  filter: ui.ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+                  child: Container(
+                    key: ValueKey('gesture-level-${showing.name}'),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.65),
+                      borderRadius: BorderRadius.circular(28),
+                      border: Border.all(color: Colors.white.withValues(alpha: 0.16), width: 0.8),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.3),
+                          blurRadius: 16,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(gestureLevelIcon(showing, _level), color: Colors.white, size: 22),
+                        const SizedBox(width: 12),
+                        SizedBox(
+                          width: 110,
+                          height: 6,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(3),
+                            child: LinearProgressIndicator(
+                              value: _level,
+                              minHeight: 6,
+                              backgroundColor: Colors.white.withValues(alpha: 0.22),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Theme.of(context).colorScheme.primary.withValues(alpha: 0.95),
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        '${(_level * 100).round()}%',
-                        style: Theme.of(context).textTheme.bodyMedium?.emphasis.tabular
-                            .copyWith(color: OnVideoColors.foreground),
-                      ),
-                    ],
+                        const SizedBox(width: 12),
+                        Text(
+                          '${(_level * 100).round()}%',
+                          style: Theme.of(context).textTheme.titleSmall?.emphasis.tabular.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),

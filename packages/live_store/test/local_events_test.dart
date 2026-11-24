@@ -26,7 +26,7 @@ void main() {
   test('a new database has the table (schema 2); entries newest first, ids never reused', () async {
     final store = await memoryStore();
     addTearDown(store.close);
-    expect(store.database.schemaVersion, 2);
+    expect(store.database.schemaVersion, 3);
     final events = store.localEvents;
     expect(await events.all(), isEmpty);
     final first = await events.add(_chat('一', minutes: 1));
@@ -158,7 +158,7 @@ void main() {
     expect(await again.localEvents.all(), legacy);
     expect(again.settings.get(Settings.localInteractionHistory), lines);
     final version = await again.database.rows('PRAGMA user_version');
-    expect(version.single.read<int>('user_version'), 2);
+    expect(version.single.read<int>('user_version'), 3);
   });
 
   test('backup: the entries travel in "localEvents" and come back; no section without entries', () async {

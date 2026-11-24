@@ -5,7 +5,7 @@ import 'package:live_net/live_net.dart';
 import 'package:test/test.dart';
 
 final class _MockProbeHttp implements LiveHttp {
-  _MockProbeHttp(this.responder);
+  new(this.responder);
 
   final Future<LiveResponse> Function(LiveRequest request) responder;
 
@@ -71,7 +71,7 @@ void main() {
       expect(res410.isPermanentlyDead, isTrue);
 
       final httpDnsFail = _MockProbeHttp((req) async {
-        throw const TransportFailure('iptv', TransportReason.dns);
+        throw const TransportFailure('iptv', TransportReason.connect, 'dns resolve failed');
       });
       final resDns = await StreamProbe.probe(httpDnsFail, Uri.parse('http://bad.domain/live.m3u8'));
       expect(resDns.health, StreamHealth.dead);
@@ -96,17 +96,17 @@ void main() {
       final c1 = IptvChannel(
         id: '1',
         playlistId: 'p',
-        entry: const IptvEntry(name: 'Ch1', streamUrl: 'http://example.com/dead.m3u8'),
+        entry: IptvEntry(name: 'Ch1', streamUrl: 'http://example.com/dead.m3u8'),
       );
       final c2 = IptvChannel(
         id: '2',
         playlistId: 'p',
-        entry: const IptvEntry(name: 'Ch2', streamUrl: 'http://example.com/slow.m3u8'),
+        entry: IptvEntry(name: 'Ch2', streamUrl: 'http://example.com/slow.m3u8'),
       );
       final c3 = IptvChannel(
         id: '3',
         playlistId: 'p',
-        entry: const IptvEntry(name: 'Ch3', streamUrl: 'http://example.com/fast.m3u8'),
+        entry: IptvEntry(name: 'Ch3', streamUrl: 'http://example.com/fast.m3u8'),
       );
 
       final results = {
@@ -126,6 +126,7 @@ void main() {
       StreamProbe.clearCache();
       final http = _MockProbeHttp((req) async {
         final ms = req.url.path.contains('fast') ? 30 : 200;
+        await Future<void>.delayed(Duration(milliseconds: ms));
         return LiveResponse(
           status: 200,
           bytes: utf8.encode('#EXTM3U\n#EXTINF:10,\ns.ts\n'),

@@ -20,7 +20,7 @@
 | 导航 | `app_navigation.dart`，打开直播间等 `Get.toNamed` 返回（直播间开着时别处打不开房间） | `AppNavigator` 同名方法，防重复只挡 0.5 秒 | `lib/routes/app_navigator.dart` |
 | 首页 | `lib/modules/home/`，宽 > 680 平板 | `lib/home/`，外观照 3.x | 挪到 `lib/features/home/`；侧栏从 600 开始（A06.2） |
 | 多语言 | easy_localization；语言两个来源；缺中文时显示键名 | `lib/i18n/i18n.dart`：`i18n()` 同名同参；一个来源；缺键回退 | 同 |
-| Android 包名 | debug 和正式版同包名，开发时会覆盖用户的 3.x | debug、profile 加 `.v4dev` 和“纯粹直播 v4dev” | 同（Z04） |
+| Android 包名 | debug 和正式版同包名，开发时会覆盖用户的 3.x | debug、profile 加 `.v4dev` 和“棱镜直播 v4dev” | 同（Z04） |
 | `MainActivity` | `AudioServiceActivity` | 改成 `FlutterActivity`（后台播放还没做） | 又改回 `AudioServiceActivity`（`MainActivity.kt:88`，C01.2：后台播放和划掉应用后继续录要它缓存引擎） |
 | 多窗口 | `--config-file` 交接带 Cookie 明文的完整备份，每个窗口一份数据 | 交接改成密钥另用 DPAPI 封装、`restoreAll` 导入 | A16.1 c14 取消交接：所有窗口共用数据目录，`instances\<id>` 只放日志（`data_root.dart:9-31`、`launch_args.dart:9-14`） |
 | Windows 单实例 | 原生层只拦无参数启动，带参数的交给插件 | `runner/main.cpp` 按窗口 id 一律拦截 | 同 |

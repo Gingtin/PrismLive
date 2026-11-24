@@ -38,7 +38,7 @@
 
 - `git show v3.2.11:lib/common/global/initialized.dart`：`AppInitializer.initialize`（`:51` 起）在第一帧前做的事（见 README 的表）；注释写着 `InitialServices.init` 必须在 `MyApp.build` 前完成（首次升级时的竞态）。`lib/main.dart:91` 初始化全局播放器编排器。
 - 启动页 `lib/modules/splash`（停 1 秒）。
-- 3.x 在 K90 上是用户的正式包，不能拿来测；可选的对比包：在独立工作区 `git worktree add <路径> v3.2.11`，`android/app/build.gradle` 的 `applicationId` 改成 `com.mystyle.purelive.v3bench`、应用名改“纯粹直播 v3bench”，本机构建 profile 包，测完卸载（和 G03.1 共用这个包）。
+- 3.x 在 K90 上是用户的正式包，不能拿来测；可选的对比包：在独立工作区 `git worktree add <路径> v3.2.11`，`android/app/build.gradle` 的 `applicationId` 改成 `com.mystyle.purelive.v3bench`、应用名改“棱镜直播 v3bench”，本机构建 profile 包，测完卸载（和 G03.1 共用这个包）。
 
 ## 先读
 

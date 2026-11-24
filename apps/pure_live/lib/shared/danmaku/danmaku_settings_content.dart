@@ -70,6 +70,8 @@ class DanmakuSettingsContent extends ConsumerWidget {
     final weight = watchSetting(ref, Settings.danmakuFontWeight);
     final stroke = watchSetting(ref, Settings.enableDanmakuStroke);
     final border = watchSetting(ref, Settings.danmakuFontBorder);
+    final outlineThickness = watchSetting(ref, Settings.danmakuOutlineThickness);
+    final glowRadius = watchSetting(ref, Settings.danmakuGlowRadius);
     final noEmoji = watchSetting(ref, Settings.noEmojiMode);
     final collapse = watchSetting(ref, Settings.collapseRepeatedDanmaku);
     final window = watchSetting(ref, Settings.repeatedDanmakuWindowSeconds);
@@ -198,6 +200,24 @@ class DanmakuSettingsContent extends ConsumerWidget {
               max: 4,
               display: '${border.toStringAsFixed(1)} px',
               onChanged: stroke ? (value) => set(Settings.danmakuFontBorder, value) : null,
+            ),
+            SettingSliderRow(
+              settingKey: 'outlineThickness',
+              title: i18n('danmaku_outline_thickness'),
+              value: outlineThickness.clamp(0.5, 3.0),
+              min: 0.5,
+              max: 3,
+              display: '${outlineThickness.toStringAsFixed(1)}x',
+              onChanged: stroke ? (value) => set(Settings.danmakuOutlineThickness, value) : null,
+            ),
+            SettingSliderRow(
+              settingKey: 'glowRadius',
+              title: i18n('danmaku_glow_radius'),
+              value: glowRadius.clamp(0.0, 4.0),
+              min: 0,
+              max: 4,
+              display: glowRadius == 0 ? i18n('off') : '${glowRadius.toStringAsFixed(1)} px',
+              onChanged: (value) => set(Settings.danmakuGlowRadius, value),
             ),
             SettingSwitchRow(
               settingKey: 'noEmoji',

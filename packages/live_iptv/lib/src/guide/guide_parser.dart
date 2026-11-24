@@ -250,9 +250,11 @@ abstract final class JsonGuideParser {
     DateTime? baseDate;
     if (decoded is Map<String, Object?>) {
       baseDate = _parseDate(decoded['date'] ?? decoded['time'] ?? decoded['datetime']);
-      if (baseDate == null && decoded['data'] is Map<String, Object?>) {
-        final dataMap = decoded['data'] as Map<String, Object?>;
-        baseDate = _parseDate(dataMap['date'] ?? dataMap['time'] ?? dataMap['datetime']);
+      if (baseDate == null) {
+        final data = decoded['data'];
+        if (data is Map<String, Object?>) {
+          baseDate = _parseDate(data['date'] ?? data['time'] ?? data['datetime']);
+        }
       }
     }
     if (baseDate == null) {
@@ -306,10 +308,9 @@ abstract final class JsonGuideParser {
       }
 
       parseChannelDictionary(decoded);
-      if (decoded['data'] is Map<String, Object?>) {
-        parseChannelDictionary(decoded['data'] as Map<String, Object?>);
-      } else if (decoded['data'] is List<Object?> && chName == null) {
-        final dataList = decoded['data'] as List<Object?>;
+      if (decoded['data'] case final Map<String, Object?> dataMap) {
+        parseChannelDictionary(dataMap);
+      } else if (decoded['data'] case final List<Object?> dataList when chName == null) {
         for (final item in dataList) {
           if (item is Map<String, Object?>) {
             if (_programme(item, baseDate: baseDate) case final p?) {
@@ -340,10 +341,12 @@ abstract final class JsonGuideParser {
       }
     }
 
-    // Ensure every channel referenced in programmes exists in channels
-    for (final prog in programmes) {
-      if (prog.channelId.isNotEmpty && !channelMap.containsKey(prog.channelId)) {
-        addChannel(GuideChannel(id: prog.channelId, displayNames: [prog.channelId]));
+    // Ensure channels exist if only programmes were provided
+    if (channels.isEmpty) {
+      for (final prog in programmes) {
+        if (prog.channelId.isNotEmpty && !channelMap.containsKey(prog.channelId)) {
+          addChannel(GuideChannel(id: prog.channelId, displayNames: [prog.channelId]));
+        }
       }
     }
 
@@ -396,7 +399,7 @@ abstract final class JsonGuideParser {
         final match = RegExp(r'^(\d{1,2}):(\d{2})').firstMatch(startRaw.trim());
         if (match != null) {
           final hour = int.parse(match.group(1)!);
-          if (lastStartHour != null && hour < lastStartHour! - 12) {
+          if (lastStartHour != null && hour < lastStartHour - 12) {
             dayOffset++;
           }
           lastStartHour = hour;

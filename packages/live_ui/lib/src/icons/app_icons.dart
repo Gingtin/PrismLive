@@ -738,6 +738,9 @@ abstract final class AppIcons {
   /// Paste text: the playlist import, a cookie.
   static const IconData pasteText = Remix.clipboard_line;
 
+  /// Batch or smart extracted live playlist sources.
+  static const IconData batchSources = Remix.stack_line;
+
   /// Sync one source.
   static const IconData syncOne = Remix.download_cloud_2_line;
 
@@ -1119,6 +1122,9 @@ abstract final class AppIcons {
   /// "音量增强": the sound raised above the stream's own level.
   static const IconData settingsVolumeBoost = Remix.sound_module_line;
 
+  /// Player gesture tactile haptic vibration.
+  static const IconData settingsHaptic = Icons.vibration_rounded;
+
   /// The preferred quality.
   static const IconData settingsQuality = Remix.hd_line;
 
@@ -1130,6 +1136,15 @@ abstract final class AppIcons {
 
   /// The picture's fit.
   static const IconData settingsVideoFit = Remix.aspect_ratio_line;
+
+  /// Ambient lighting / cinema glow mode.
+  static const IconData settingsAmbientLighting = Remix.magic_line;
+
+  /// Ambient lighting intensity.
+  static const IconData settingsAmbientIntensity = Icons.brightness_medium_rounded;
+
+  /// Ambient lighting blur radius.
+  static const IconData settingsAmbientBlur = Icons.blur_on_rounded;
 
   /// Full screen on entering a room.
   static const IconData settingsFullscreenDefault = Remix.fullscreen_line;

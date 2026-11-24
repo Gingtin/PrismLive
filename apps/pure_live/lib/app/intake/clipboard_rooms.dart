@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:live_core/live_core.dart';
+import 'package:live_iptv/live_iptv.dart';
 import 'package:live_store/live_store.dart';
 import 'package:pure_live/shared/rooms/room_prompt.dart';
 import 'package:pure_live/shared/rooms/share_code.dart';
@@ -53,6 +54,8 @@ final class ClipboardRoomWatcher {
     required this.settings,
     required this.prompt,
     required this.open,
+    this.iptvPrompt,
+    this.openIptvBatch,
     this.read = readClipboardText,
     this.stamp,
     this.confirm,
@@ -60,7 +63,7 @@ final class ClipboardRoomWatcher {
   });
 
   /// Longest clipboard text looked at.
-  static const int maxText = 4096;
+  static const int maxText = 100000;
 
   /// The settings (`detectClipboardRooms`).
   final SettingsStore settings;
@@ -70,6 +73,12 @@ final class ClipboardRoomWatcher {
 
   /// Opens the room the user chose.
   final Future<void> Function(LiveRoom room) open;
+
+  /// Optional prompt for IPTV sources.
+  final Future<bool> Function(List<ExtractedSource> sources, String text)? iptvPrompt;
+
+  /// Optional callback to open IPTV batch import.
+  final Future<void> Function(String text)? openIptvBatch;
 
   /// Reads the clipboard.
   final Future<String?> Function() read;
@@ -120,6 +129,17 @@ final class ClipboardRoomWatcher {
       final text = (await read())?.trim() ?? '';
       if (_disposed || text.isEmpty || text.length > maxText || text == _lastOffered) return;
       if (OwnClipboardTexts.contains(text)) return;
+
+      final iptvSources = IptvSmartExtractor.extract(text);
+      if (iptvSources.isNotEmpty && iptvPrompt != null) {
+        _lastOffered = text;
+        final shouldImport = await iptvPrompt!(iptvSources, text);
+        if (shouldImport && !_disposed && openIptvBatch != null) {
+          await openIptvBatch!(text);
+        }
+        return;
+      }
+
       final room = decodeRoomShareCode(text);
       if (room == null) return;
       _lastOffered = text;

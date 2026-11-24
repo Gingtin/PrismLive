@@ -41,7 +41,7 @@
   - c5 B-15 已由 A07.12 做（红色“取消关注”、提示条“已取消关注 X · 撤销”）；B-16 开播时长用卡片同一个 `elapsedText`（删掉 `formatOnAir`）；B-17 把手读屏“最低 / 中间 / 最高”；B-18 电量 9 号 → 11 号、框 35×15 → 最少 36×17；B-19 宽屏聊天栏、网络电视节目单的收起把手放进播放器控制层，随控制层显隐、隐藏时不接点击。
   - c6 D04.1 的做法提成共用的 `SavedFileCheck`（构建时用上次的结果，后台 `File.exists()`，同一时间一次，变了才重建），录制面板和录制中心任务卡都用。
   - c7 `chatSegments` 用 `Expando` 把“消息 + 表情表”的解析结果挂在消息上，聊天列表和飞行弹幕层拿到同一个不可改的列表；`EmoteTable.of` 预编译表里代码的正则。
-  - c8 “无法打开画中画”改成提示条（“无法打开画中画：系统设置里关掉了“纯粹直播”的画中画”，带“去设置”和 ✕，不自动消失）；“屏蔽关键词…”改成长按弹幕面板的第二页（左上 ←、单行、预填并全选、字数 40、“屏蔽”）；多做一处：录制面板“查看原因”在状态卡下面展开（可选中、“收起”），录制中心页面里仍是对话框。
+  - c8 “无法打开画中画”改成提示条（“无法打开画中画：系统设置里关掉了“棱镜直播”的画中画”，带“去设置”和 ✕，不自动消失）；“屏蔽关键词…”改成长按弹幕面板的第二页（左上 ←、单行、预填并全选、字数 40、“屏蔽”）；多做一处：录制面板“查看原因”在状态卡下面展开（可选中、“收起”），录制中心页面里仍是对话框。
   - c9 聊天区四个标签用 `TabLabel`（角标、焦点框，窄栏时整个标签缩小）；录制面板清晰度芯片用 `AppChip`（圆角 8、选中带勾）；顶栏头像用可点的 `CommonAvatar`（悬停、按下变暗、焦点框，提示“直播间详情”）。
 - 根因（核对过）：B-8 Flutter 的单击识别器要等双击识别器放弃（`kDoubleTapTimeout` 300 毫秒），3.x 也一样；B-10 角标 `Positioned(left: 12)` 没加 `padding.left`；B-11 两条第二行是 `Row` + `Spacer`，7 个按钮加边距 352，分屏或“显示大小”调大后只有 300 左右；B-12 `_page` 按 `_display` 换整棵树，`ChatPanel`、`ChatList`、`PortraitPanelLayout` 的 State 被销毁；B-16 `formatOnAir` 写 `H:MM`；B-17 `Semantics.value` 是像素；B-18 `fontSize: 9`；B-19 把手是页面里叠在画面右缘的 `Positioned`，一直在；c6 `onPlay` 在 `build` 里调 `existsSync`；c7 飞行层对同一条消息再解析一次、每次现编正则；c8 三个函数都是根导航器上的居中对话框。
 - 提交：2026-10-02，合并提交 `df67f1147`“Merge B09: instant single tap, kept chat and panel state across layouts, no centred dialogs in full screen”；登记表记的是记录提交 `d3272b9b1`。改了任务书可改目录以外的 `features/recorder/recorder_task_card.dart`、`shared/record/`、`shared/danmaku/emotes.dart`（c6、c7 的补充条目要求）；`features/favorite/` 没动；没有改 `packages/live_ui`、没有原生改动。

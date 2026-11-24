@@ -258,6 +258,8 @@ class _RecordSettingsPageState extends ConsumerState<RecordSettingsPage> {
   Widget _content(BuildContext context, AppRecording recording) {
     final settings = _settings;
     final size = _sizeMB;
+    final autoRecord = watchSetting(ref, Settings.autoRecordFollows);
+    final maxAutoStreams = watchSetting(ref, Settings.autoRecordMaxStreams);
     return SettingsPageList(
       key: const ValueKey('record-settings-list'),
       children: [
@@ -323,6 +325,27 @@ class _RecordSettingsPageState extends ConsumerState<RecordSettingsPage> {
               value: settings.recordDanmakuGifts,
               onChanged: (value) => _setNow(Settings.recordDanmakuGifts, value),
             ),
+            SettingsSwitchRow(
+              key: const ValueKey('auto-record-follows'),
+              icon: AppIcons.autoRecord,
+              title: i18n('auto_record_follows'),
+              subtitle: i18n('auto_record_follows_desc'),
+              subtitleMaxLines: null,
+              value: autoRecord,
+              onChanged: (value) => _setNow(Settings.autoRecordFollows, value),
+            ),
+            if (autoRecord)
+              _SliderSetting(
+                key: const ValueKey('auto-record-max-streams'),
+                icon: AppIcons.autoRecord,
+                title: i18n('auto_record_max_streams'),
+                min: 1,
+                max: 5,
+                divisions: 4,
+                value: maxAutoStreams.toDouble(),
+                label: (v) => '${v.round()}',
+                onChanged: (v) => _setNow(Settings.autoRecordMaxStreams, v.round()),
+              ),
           ],
         ),
         SettingsGroup(

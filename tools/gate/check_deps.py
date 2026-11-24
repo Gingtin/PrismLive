@@ -110,6 +110,8 @@ def check(root=ROOT):
         sections = pubspec_dependencies(pubspec)
         for section in ('dependencies', 'dev_dependencies'):
             for name, block in sections.get(section, {}).items():
+                if 'ffmpeg_kit' in name:
+                    errors.append(f'{member}/pubspec.yaml: forbidden dependency {name} (Hard Invariant #2: no ffmpeg_kit redundancy)')
                 if name.startswith('live_') and name not in allowed:
                     errors.append(f'{member}/pubspec.yaml: {section} on {name} is not allowed')
                 if member in PURE_DART and section == 'dependencies' and (name == 'flutter' or 'sdk: flutter' in block):
@@ -120,6 +122,8 @@ def check(root=ROOT):
             for match in IMPORT.finditer(text):
                 package = match.group(1)
                 line = text.count('\n', 0, match.start()) + 1
+                if 'ffmpeg_kit' in package:
+                    errors.append(f'{rel}:{line}: imports forbidden package:{package} (Hard Invariant #2)')
                 if package.startswith('live_') and package != own_name and package not in allowed:
                     errors.append(f'{rel}:{line}: imports package:{package}, not allowed for {member}')
                 if member in PURE_DART and package in {'flutter', 'flutter_test'}:

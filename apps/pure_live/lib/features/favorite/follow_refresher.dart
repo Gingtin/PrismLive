@@ -35,6 +35,7 @@ final class FollowRefresher {
     required this.sites,
     this.timeout = const Duration(seconds: 10),
     this.cooldown = const Duration(minutes: 5),
+    this.platformJitter = const Duration(milliseconds: 50),
     DateTime Function()? now,
   }) : _now = now ?? DateTime.now;
 
@@ -48,8 +49,12 @@ final class FollowRefresher {
   /// `_refreshFailureRetryAfter`).
   final Duration cooldown;
 
+  /// Spacing between requests to the same platform to avoid burst rate limits.
+  final Duration platformJitter;
+
   final DateTime Function() _now;
   final Map<String, DateTime> _failedAt = {};
+  final Map<String, Future<void>> _platformPacing = {};
 
   /// Refreshes [rooms]; [onProgress] is called after each request with the
   /// number done and the total, [cancelled] is checked before each request.
@@ -126,6 +131,27 @@ final class FollowRefresher {
   Future<LiveRoom?> _load(LiveRoom room) async {
     final site = sites.maybeOf(room.platform);
     if (site == null) return null;
+    if (platformJitter > Duration.zero) {
+      final platform = room.platform;
+      final prev = _platformPacing[platform];
+      final completer = Completer<void>();
+      _platformPacing[platform] = completer.future;
+      if (prev != null) {
+        try {
+          await prev;
+          await Future<void>.delayed(platformJitter);
+        } on Object catch (_) {}
+      }
+      try {
+        return await _loadDetail(site, room);
+      } finally {
+        completer.complete();
+      }
+    }
+    return await _loadDetail(site, room);
+  }
+
+  Future<LiveRoom?> _loadDetail(LiveSite site, LiveRoom room) async {
     try {
       final operation = site is LiveSiteRoomRefresher
           ? (site as LiveSiteRoomRefresher).getRoomDetailForRefresh(roomId: room.roomId)

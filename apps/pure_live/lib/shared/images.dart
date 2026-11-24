@@ -16,7 +16,10 @@ const String _browserAgent =
 
 const Map<String, String> _bilibiliHeaders = {'Referer': 'https://live.bilibili.com/', 'User-Agent': _browserAgent};
 
-const Map<String, String> _browserHeaders = {'User-Agent': _browserAgent};
+const Map<String, String> _browserHeaders = {
+  'User-Agent': _browserAgent,
+  'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+};
 
 /// Bumped when the image cache is cleared (3.x `CacheController.imageCacheEpoch`):
 /// the app passes it to `LiveUiConfig.imageCacheEpoch`, so covers and

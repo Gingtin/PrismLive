@@ -395,7 +395,7 @@ def room_behind():
 
 def v4_pip_denied():
     dlg = ('<div class="scrim"></div><div class="dlg" style="top:50%;transform:translateY(-50%);left:24px;right:24px"><div class="h">无法打开画中画</div>'
-           '<div class="b">系统设置里关掉了“纯粹直播”的画中画。打开后再点小窗按钮。</div>'
+           '<div class="b">系统设置里关掉了“棱镜直播”的画中画。打开后再点小窗按钮。</div>'
            '<div class="a"><span style="color:var(--onv)">取消</span><span class="ok">去设置</span></div></div>')
     return page(393, 852, 3, room_behind() + dlg + '<div class="syn">示意图片</div>', root='ph')
 

@@ -470,10 +470,10 @@ void main() {
   });
 
   test('searchRooms and categories deduplicate multi-line channel cards', () async {
-    final harness = _Harness();
-    final importer = harness.importer;
-    final site = harness.site();
-    const m3u = '''#EXTM3U
+    final s = site();
+    const m3u = '''
+
+#EXTM3U
 #EXTINF:-1 tvg-name="CCTV-1" group-title="央视",CCTV-1 (线路1)
 http://stream.example.com/cctv1-1.m3u8
 #EXTINF:-1 tvg-name="CCTV-1" group-title="央视",CCTV-1 (线路2)
@@ -481,10 +481,36 @@ http://stream.example.com/cctv1-2.m3u8
 #EXTINF:-1 tvg-name="湖南卫视" group-title="卫视",湖南卫视
 http://stream.example.com/hunan.m3u8
 ''';
-    await importer.importPlaylist(bytes: utf8.encode(m3u), name: '测试列表', source: '');
-    final searched = await site.searchRooms('CCTV');
+    await importer.importPlaylistText(m3u, '测试列表.m3u');
+    final searched = await s.searchRooms('CCTV');
     expect(searched.length, 1);
     expect(searched.single.title, 'CCTV-1');
+  });
+
+  test('importBatchSources and importAggregatedSources process multiple extracted sources', () async {
+    http.bodies['http://f/source1.m3u'] = utf8.encode('#EXTM3U\n#EXTINF:-1,Ch1\nhttp://f/ch1.m3u8\n');
+    http.bodies['http://f/source2.txt'] = utf8.encode('News,#genre#\nCh2,http://f/ch2.m3u8\n');
+
+    const sources = [
+      ExtractedSource(name: '源1', url: 'http://f/source1.m3u'),
+      ExtractedSource(name: '源2', url: 'http://f/source2.txt'),
+    ];
+
+    // Test batch import
+    final batchResult = await importer.importBatchSources(sources: sources);
+    expect(batchResult.succeeded, 2);
+    expect(batchResult.failed, 0);
+
+    // Test aggregated import
+    final aggResult = await importer.importAggregatedSources(sources: sources, name: '合集');
+    expect(aggResult.status, IptvImportStatus.imported);
+
+    final playlists = await library.playlists();
+    final aggPlaylist = playlists.firstWhere((p) => p.name == '合集');
+    final channels = await library.channels(aggPlaylist.id);
+    expect(channels, hasLength(2));
+    expect(channels.map((c) => c.entry.name).toSet(), {'Ch1', 'Ch2'});
+    expect(channels.map((c) => c.entry.groupTitle).toSet(), {'源1', '源2'});
   });
 }
 

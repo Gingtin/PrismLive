@@ -68,7 +68,7 @@
 | 1. 干净克隆、`fetch.ps1`、`flutter pub get`、`flutter build windows --release` | 构建成功；`build\windows\x64\runner\Release\` 里有 `pure_live.exe`、libmpv、FFmpeg 的 DLL |
 | 2. 运行 `pure_live.exe` | 自绘标题栏、首页；exe 旁边出现 `UserData` |
 | 3. 进一个哔哩哔哩直播间；录制 30 秒再停 | 出画面和声音、有弹幕；录制中心里有文件，能播放 |
-| 4. 运行安装包，装到默认位置 | 不要管理员；开始菜单有“纯粹直播”；启动后数据在用户的应用数据目录（安装目录不可写时） |
+| 4. 运行安装包，装到默认位置 | 不要管理员；开始菜单有“棱镜直播”；启动后数据在用户的应用数据目录（安装目录不可写时） |
 | 5. 卸载 | 程序删掉；问要不要删数据；注册表 `HKCU\…\Run` 里没有 `PureLiveV4`；3.x 的 `pure_live` 还在 |
 | 6. 解压便携 ZIP 到一个新文件夹运行 | 数据在旁边的 `UserData`；ZIP 里本来没有 `UserData` |
 | 7. 装一个版本号更低的 4.x，打开 | 弹“发现新版本”；下载的是 Windows 安装包；点安装后运行安装包，关闭应用、覆盖安装、再启动，数据还在 |

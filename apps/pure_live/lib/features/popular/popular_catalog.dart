@@ -44,9 +44,12 @@ final class PopularCatalog {
   /// Whether rooms that cannot play are shown.
   bool get showUnplayable => _store.get(Settings.showUnplayableInDiscover);
 
+  /// Whether offline rooms are hidden.
+  bool get hideOffline => _store.get(Settings.hideOfflineRooms);
+
   /// Whether [room] is shown.
   bool visible(LiveRoom room) =>
-      showUnplayable || !cannotPlayHere(room, signedIn: signedInOn(services.cookies, room.platform));
+      showUnplayable || !cannotPlayHere(room, signedIn: signedInOn(services.cookies, room.platform), hideOffline: hideOffline);
 
   /// The feed of [platform].
   RoomFeed feedOf(String platform) => _feeds[platform] ??= RoomFeed(
@@ -60,7 +63,9 @@ final class PopularCatalog {
 
   void _settingChanged(Setting<Object> setting) {
     final key = setting.key;
-    if (key == Settings.showUnplayableInDiscover.key) {
+    if (key == Settings.showUnplayableInDiscover.key ||
+        key == Settings.hideOfflineRooms.key ||
+        key == Settings.preferRealtimeCover.key) {
       for (final feed in _feeds.values) {
         feed.visibilityChanged();
       }

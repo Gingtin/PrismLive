@@ -649,7 +649,7 @@ def settings4(maxw=None, n=False):
 OUT['v3-settings-phone'] = page(393, 852, 3, STATUS + APPBAR3 + settings3() + GESTURE, frame='ph')
 OUT['v4-settings-phone'] = page(393, 852, 3, STATUS + appbar4(1) + settings4(n=True) + GESTURE, frame='ph')
 
-WIN_BAR = ('<div style="height:32px;display:flex;align-items:center;padding-left:14px;font-size:12px;color:var(--onv);background:var(--surface)">纯粹直播'
+WIN_BAR = ('<div style="height:32px;display:flex;align-items:center;padding-left:14px;font-size:12px;color:var(--onv);background:var(--surface)">棱镜直播'
            '<span style="margin-left:auto;display:flex">' + ''.join(f'<span style="width:46px;height:32px;display:grid;place-items:center">{mr(i, 16)}</span>' for i in ('remove', 'crop_square', 'close')) + '</span></div>')
 OUT['v3-settings-wide'] = page(1280, 800, 1.5, WIN_BAR + APPBAR3 + settings3(960), frame='win')
 OUT['v4-settings-wide'] = page(1280, 800, 1.5, WIN_BAR + appbar4() + settings4(720), frame='win')

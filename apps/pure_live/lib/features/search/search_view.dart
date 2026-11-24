@@ -114,6 +114,7 @@ class _SearchViewState extends ConsumerState<SearchView> {
         platformEnabled: _realOnline.contains,
       ),
       timeout: widget.timeout,
+      initialIncludeOffline: !settings.get(Settings.hideOfflineRooms),
     )..addListener(_changed);
     _history = SearchHistory(_store.meta)..addListener(_changed);
     unawaited(_history.load());
@@ -136,6 +137,11 @@ class _SearchViewState extends ConsumerState<SearchView> {
         settings.watch(Settings.realOnlinePlatforms).listen((value) {
           _realOnline = value.toSet();
           _model.reorder();
+        }),
+      )
+      ..add(
+        settings.watch(Settings.hideOfflineRooms).listen((value) {
+          _model.setIncludeOffline(value: !value);
         }),
       );
     final initial = widget.initialKeyword?.trim() ?? '';

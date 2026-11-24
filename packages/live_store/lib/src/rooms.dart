@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:live_core/live_core.dart';
 import 'package:live_store/src/database.dart';
+import 'package:live_store/src/local_first.dart';
 import 'package:live_store/src/settings/settings.dart';
 import 'package:live_store/src/settings/settings_store.dart';
 
@@ -83,9 +84,9 @@ final class FollowStore {
   Future<bool> add(LiveRoom room) => _db.write(_tables, () async {
     if (!isStorableRoom(room) || await contains(room)) return false;
     await _db.run(
-      'INSERT INTO follows (identity, position, room) '
-      'VALUES (?, (SELECT COALESCE(MAX(position), -1) + 1 FROM follows), ?)',
-      [room.identityKey, _encodeRoom(room)],
+      'INSERT INTO follows (identity, position, room, sync_id, updated_at, is_deleted) '
+      'VALUES (?, (SELECT COALESCE(MAX(position), -1) + 1 FROM follows), ?, ?, ?, 0)',
+      [room.identityKey, _encodeRoom(room), generateUuidV7(), hybridLogicalClock()],
     );
     return true;
   });
@@ -109,7 +110,11 @@ final class FollowStore {
       final merged = current.mergeFrom(incoming);
       final encoded = _encodeRoom(merged);
       if (encoded == _encodeRoom(current)) continue;
-      await _db.run('UPDATE follows SET room = ? WHERE identity = ?', [encoded, current.identityKey]);
+      await _db.run('UPDATE follows SET room = ?, updated_at = ? WHERE identity = ?', [
+        encoded,
+        hybridLogicalClock(),
+        current.identityKey,
+      ]);
       changed++;
     }
     return changed;
@@ -138,11 +143,16 @@ final class FollowStore {
   Future<void> _insertAll(Iterable<LiveRoom> rooms) async {
     var position = 0;
     for (final room in uniqueRooms(rooms)) {
-      await _db.run('INSERT INTO follows (identity, position, room) VALUES (?, ?, ?)', [
-        room.identityKey,
-        position++,
-        _encodeRoom(room),
-      ]);
+      await _db.run(
+        'INSERT INTO follows (identity, position, room, sync_id, updated_at, is_deleted) VALUES (?, ?, ?, ?, ?, 0)',
+        [
+          room.identityKey,
+          position++,
+          _encodeRoom(room),
+          generateUuidV7(),
+          hybridLogicalClock(),
+        ],
+      );
     }
   }
 }
@@ -175,8 +185,13 @@ final class HistoryStore {
     final watchedAt = (now ?? DateTime.now()).millisecondsSinceEpoch;
     await _db.run('DELETE FROM history WHERE identity = ?', [room.identityKey]);
     await _db.run(
-      'INSERT INTO history (identity, seq, room) VALUES (?, (SELECT COALESCE(MAX(seq), 0) + 1 FROM history), ?)',
-      [room.identityKey, _encodeRoom(room.copyWith(lastWatchedAt: watchedAt))],
+      'INSERT INTO history (identity, seq, room, sync_id, updated_at, is_deleted) VALUES (?, (SELECT COALESCE(MAX(seq), 0) + 1 FROM history), ?, ?, ?, 0)',
+      [
+        room.identityKey,
+        _encodeRoom(room.copyWith(lastWatchedAt: watchedAt)),
+        generateUuidV7(),
+        hybridLogicalClock(),
+      ],
     );
     await _trim();
     return true;
@@ -208,7 +223,11 @@ final class HistoryStore {
       final merged = current
           .mergeFrom(incoming.withAudienceFallbackFrom(current))
           .copyWith(lastWatchedAt: current.lastWatchedAt);
-      await _db.run('UPDATE history SET room = ? WHERE identity = ?', [_encodeRoom(merged), current.identityKey]);
+      await _db.run('UPDATE history SET room = ?, updated_at = ? WHERE identity = ?', [
+        _encodeRoom(merged),
+        hybridLogicalClock(),
+        current.identityKey,
+      ]);
     }
   });
 
@@ -224,11 +243,16 @@ final class HistoryStore {
     await _db.run('DELETE FROM history');
     final unique = uniqueRooms(rooms);
     for (var index = 0; index < unique.length; index++) {
-      await _db.run('INSERT INTO history (identity, seq, room) VALUES (?, ?, ?)', [
-        unique[index].identityKey,
-        unique.length - index,
-        _encodeRoom(unique[index]),
-      ]);
+      await _db.run(
+        'INSERT INTO history (identity, seq, room, sync_id, updated_at, is_deleted) VALUES (?, ?, ?, ?, ?, 0)',
+        [
+          unique[index].identityKey,
+          unique.length - index,
+          _encodeRoom(unique[index]),
+          generateUuidV7(),
+          hybridLogicalClock(),
+        ],
+      );
     }
     await _trim();
   });
@@ -274,9 +298,9 @@ final class FollowAreaStore {
     final key = area.identityKey;
     if (key == null || await contains(area)) return false;
     await _db.run(
-      'INSERT INTO follow_areas (identity, position, area) '
-      'VALUES (?, (SELECT COALESCE(MAX(position), -1) + 1 FROM follow_areas), ?)',
-      [key, jsonEncode(area.toJson())],
+      'INSERT INTO follow_areas (identity, position, area, sync_id, updated_at, is_deleted) '
+      'VALUES (?, (SELECT COALESCE(MAX(position), -1) + 1 FROM follow_areas), ?, ?, ?, 0)',
+      [key, jsonEncode(area.toJson()), generateUuidV7(), hybridLogicalClock()],
     );
     return true;
   });
@@ -297,11 +321,16 @@ final class FollowAreaStore {
     for (final area in areas) {
       final key = area.identityKey;
       if (key == null || !seen.add(key)) continue;
-      await _db.run('INSERT INTO follow_areas (identity, position, area) VALUES (?, ?, ?)', [
-        key,
-        position++,
-        jsonEncode(area.toJson()),
-      ]);
+      await _db.run(
+        'INSERT INTO follow_areas (identity, position, area, sync_id, updated_at, is_deleted) VALUES (?, ?, ?, ?, ?, 0)',
+        [
+          key,
+          position++,
+          jsonEncode(area.toJson()),
+          generateUuidV7(),
+          hybridLogicalClock(),
+        ],
+      );
     }
   });
 }

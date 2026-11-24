@@ -39,8 +39,9 @@ class LiveNetworkImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final config = LiveUiScope.of(context);
+    final effectiveUrl = config.imageCacheEpoch == 0 ? url : _bustCdnCache(url, config.imageCacheEpoch);
     return CachedNetworkImage(
-      imageUrl: url,
+      imageUrl: effectiveUrl,
       cacheKey: config.imageCacheKey(url),
       httpHeaders: config.imageHeaders?.call(url),
       cacheManager: config.imageCacheManager,
@@ -53,5 +54,14 @@ class LiveNetworkImage extends StatelessWidget {
       placeholder: (context, _) => placeholder(context),
       errorWidget: (context, _, _) => error(context),
     );
+  }
+
+  static String _bustCdnCache(String url, int epoch) {
+    if (epoch <= 0 || url.isEmpty) return url;
+    final uri = Uri.tryParse(url);
+    if (uri == null || !uri.hasScheme) return url;
+    final params = Map<String, String>.of(uri.queryParameters);
+    params['_t'] = '$epoch';
+    return uri.replace(queryParameters: params).toString();
   }
 }

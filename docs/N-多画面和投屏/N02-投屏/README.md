@@ -12,7 +12,7 @@ DLNA 设备搜索和投屏控制。
 - 不包括（归哪里）：
   - 投屏列表的样子、取流弹窗（选画质 → 选线路 → 复制或投屏）→ A07.6；直播间菜单和控制栏的入口、会话型的流不能投的判断（`stream_dialogs.dart:111`，`toolbox_session_source`）→ C03。
   - 组播锁的原生部分（`AppChannelsPlugin.kt` 的 `pure_live/multicast_lock`，`:58`）、Android 17 的本地网络权限（`SystemAccess.requestLocalNetwork`）→ O、O04。
-  - 投给“纯粹直播电视版”的同步（不是 DLNA）→ J03 的同步到电视。
+  - 投给“棱镜直播电视版”的同步（不是 DLNA）→ J03 的同步到电视。
 
 ## 现状：做到哪、怎么工作的
 

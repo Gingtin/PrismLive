@@ -86,10 +86,11 @@ final class AppServices {
   /// A new playback session (3.x `GlobalPlayerService.instance.playerManager`;
   /// the live room uses one, multi-view one per cell). [config] carries the
   /// player settings (decoder, output, M9/M13).
-  PlaybackSession newPlaybackSession({MpvEngineConfig? config}) => PlaybackSession(
+  PlaybackSession newPlaybackSession({MpvEngineConfig? config, DecoderFallback? decoders}) => PlaybackSession(
     engine: () =>
         MpvEngine.create(config: config, onBufferingSnapshot: (line) => AppLog.instance.info('playback', line)),
     opener: mediaOpener,
+    decoders: decoders,
   );
 
   /// IPTV imports and syncs; null when IPTV is not set up.

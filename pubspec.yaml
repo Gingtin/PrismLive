@@ -52,10 +52,6 @@ dependency_overrides:
   # this stand-in has no native code, so it does not need WPE WebKit (X02.1).
   flutter_inappwebview_linux:
     path: third_party/flutter_inappwebview_linux_stub
-  # ffmpeg_kit_extended_flutter 0.6.2 (the recorder's FFmpeg) declares
-  # code_assets ^1.2.1 while the media_kit fork needs ^2.1.0; its build hook
-  # only uses APIs unchanged in 2.x (3.x shipped the same override).
-  code_assets: 2.1.0
   # connectivity_plus 7.3.1 (the app's network type, M12.3) declares
   # nm ^0.5.0, whose dbus ^0.7.0 conflicts with wakelock_plus 1.8.1's
   # dbus ^0.8.0. nm 0.6.0 is the same NetworkManager client on dbus 0.8 and
@@ -66,24 +62,3 @@ dependency_overrides:
   # wakelock_plus 1.8.1 needs (3.x shipped the same override). Linux only.
   dbus: 0.8.0
 
-# Native FFmpeg of the recorder (apps/pure_live depends on
-# ffmpeg_kit_extended_flutter 1.0.0, native API FFmpegKit 0.11.2). The
-# plugin's build hook reads this block from the pubspec next to
-# .dart_tool/package_config.json, which in a pub workspace is this one. The
-# bundles are our FFmpeg 9.0.2 builds for that API (release
-# native-ffmpeg-9.0.2-b2, listed with their SHA-256 in
-# tools/ffmpeg_kit/bundles.txt; rebuilt with tools/ffmpeg_kit/rebuild/ and the
-# FFmpegKit Apple workflow). The hook downloads a remote URL on every build,
-# so the paths are local (relative to this file): run
-# tools/ffmpeg_kit/fetch.sh (WSL/Linux) or fetch.ps1 (Windows) once after
-# cloning; it downloads into a cache outside the repository only what is
-# missing and links it into the git-ignored .ffmpeg_kit/. Never committed.
-ffmpeg_kit_extended_config:
-  type: base
-  gpl: false
-  small: false
-  android: .ffmpeg_kit/bundle-base-shared-lgpl-release.aar
-  windows: .ffmpeg_kit/bundle-base-windows-x86_64-shared-lgpl.zip
-  linux: .ffmpeg_kit/bundle-base-linux-x86_64-shared-lgpl.zip
-  ios: .ffmpeg_kit/bundle-base-ios-universal-lgpl.xcframework.zip
-  macos: .ffmpeg_kit/bundle-base-macos-universal-lgpl.xcframework.zip

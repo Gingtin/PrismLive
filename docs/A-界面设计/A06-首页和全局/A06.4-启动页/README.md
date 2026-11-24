@@ -124,7 +124,7 @@
 
 | 编号 | 做到 | 现在的代码和说明 |
 |---|---|---|
-| c1 | ✅ | `apps/pure_live/lib/features/splash/splash_page.dart`：起点 `splashInitialLocation`（`:16-17`）；1 秒 `duration`（`:33`）；离开时等 `AppStartup.followCheck` 最多 `splashFollowWait`（`app/startup.dart:21`，350 毫秒；`splash_page.dart:72-82`）；去掉了 v4 原来多加的一行“纯粹直播”（v3 没有）；图标 150（v4 原来 132） |
+| c1 | ✅ | `apps/pure_live/lib/features/splash/splash_page.dart`：起点 `splashInitialLocation`（`:16-17`）；1 秒 `duration`（`:33`）；离开时等 `AppStartup.followCheck` 最多 `splashFollowWait`（`app/startup.dart:21`，350 毫秒；`splash_page.dart:72-82`）；去掉了 v4 原来多加的一行“棱镜直播”（v3 没有）；图标 150（v4 原来 132） |
 | c2 | ✅ | `SplashPage.animation` 400 毫秒（`:42`），`Curves.decelerate`，0.9→1（`:49-55`） |
 | c3 | ✅ | 渐变 表面色 → 表面色（45%）→ 主色容器（浅色 70%、深色 45%，叠在表面色上），方向照效果图的 160°（`:109-124`） |
 | c4 | ✅ | 宽 200、高 4、主色、底轨主色 15%（`:156-165`） |
@@ -139,6 +139,6 @@
 
 **验证**
 
-- 自动测试：`apps/pure_live/test/features/splash/splash_page_test.dart` 3 → 7 个（现在）：起点按设置；1 秒后进首页；点按跳过；电脑按任意键跳过；0.4 秒内透明度只增、放大不超过 1、0.4 秒时完整；图标 150、文字在图标下 16、进度条 200 宽在文字下 32、主色和 15% 底轨、没有“纯粹直播”；浅色和深色的背景都取主题颜色（没有 3.x 的青色）。`apps/pure_live/test/shared/app_prompts_test.dart` 的排队部分 2 个（第二个提示等第一个关掉、口令导入插到新版本前面；没到时机的提示在页面变化后才弹）；`update_dialogs_test.dart` 里“另一个页面在上面时新版本不弹，回到首页才弹”1 个。
+- 自动测试：`apps/pure_live/test/features/splash/splash_page_test.dart` 3 → 7 个（现在）：起点按设置；1 秒后进首页；点按跳过；电脑按任意键跳过；0.4 秒内透明度只增、放大不超过 1、0.4 秒时完整；图标 150、文字在图标下 16、进度条 200 宽在文字下 32、主色和 15% 底轨、没有“棱镜直播”；浅色和深色的背景都取主题颜色（没有 3.x 的青色）。`apps/pure_live/test/shared/app_prompts_test.dart` 的排队部分 2 个（第二个提示等第一个关掉、口令导入插到新版本前面；没到时机的提示在页面变化后才弹）；`update_dialogs_test.dart` 里“另一个页面在上面时新版本不弹，回到首页才弹”1 个。
 - 真机：[S02.2](../../../S-质量和验证/S02-真机验证/S02.2-K90冒烟/record.md) 记了冷启动 `am start -W` 198 毫秒、没有错误日志；启动页的样子（主题背景、动画、进度条）和两个提示的排队没有在真机上逐项看。
 - 留下的问题和去向：系统启动画面同底色 → A14.1；启动页带进来的黑色导航栏和浅色导航栏图标 → [A06.5](../A06.5-首页状态栏和导航栏颜色/README.md)；剪贴板口令和新版本先后的真机验证 → S02.6（[CHECKLIST](../../../S-质量和验证/S02-真机验证/CHECKLIST.md) 第 4 节第 11 条）。

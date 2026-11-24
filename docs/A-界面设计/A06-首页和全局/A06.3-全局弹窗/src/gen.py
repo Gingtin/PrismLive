@@ -283,7 +283,7 @@ def build():
     out['v3-dir'] = page(*P, home_v3() + ov(v3_dir()))
     out['v4-dir'] = page(*P, home_v4() + ov(v4_dir(n=True)))
     # download
-    out['v3-download'] = page(*P, home_v3() + ov(v3_download('run')) + '<div class="toast" style="bottom:120px">正在下载 纯粹直播v3.2.11...</div>')
+    out['v3-download'] = page(*P, home_v3() + ov(v3_download('run')) + '<div class="toast" style="bottom:120px">正在下载 棱镜直播v3.2.11...</div>')
     out['v4-download'] = page(*P, home_v4() + ov(v4_download('run')))
     out['v3-download-states'] = states_sheet(False)
     out['v4-download-states'] = states_sheet(True)

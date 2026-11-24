@@ -16,6 +16,7 @@ import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_args.dart';
 import 'package:pure_live/routes/route_path.dart';
+import 'package:pure_live/shared/images.dart';
 import 'package:pure_live/shared/rooms/paging.dart';
 import 'package:pure_live/shared/rooms/room_cards.dart';
 import 'package:pure_live/shared/rooms/room_grid.dart';
@@ -141,6 +142,8 @@ class _FavoritePageState extends ConsumerState<FavoritePage> with TickerProvider
   }
 
   Future<void> _refresh() async {
+    imageCacheEpoch.value++;
+    RealtimeCoverCache.clear();
     await _controller.refreshVisible();
     final failed = _controller.lastFailed;
     if (failed > 0) AppNavigator.toast(i18n('favorite_refresh_failed', args: {'count': '$failed'}));

@@ -147,6 +147,12 @@ abstract final class Settings {
   /// be played; on shows them. Follows and search always show them.
   static const showUnplayableInDiscover = BoolSetting('showUnplayableInDiscover', section: 'app', defaultValue: false);
 
+  /// Filter out rooms that are offline or off-air from listings.
+  static const hideOfflineRooms = BoolSetting('hideOfflineRooms', section: 'app', defaultValue: false);
+
+  /// Prefer real-time live keyframes / captured stream frames as card covers.
+  static const preferRealtimeCover = BoolSetting('preferRealtimeCover', section: 'app', defaultValue: true);
+
   /// New (F.0a): on start and one second after the app comes back, a share
   /// code on the clipboard is offered as "enter the room" (3.x always
   /// looked and had no switch).
@@ -549,6 +555,174 @@ abstract final class Settings {
   /// Per-room portrait layout, `{"platform:roomId": "<layout>"}`.
   static const portraitRoomOverrides = JsonSetting('portraitRoomOverrides', section: 'player', defaultValue: {});
 
+  /// Enable ambient lighting / cinema glow around the player.
+  static const enableAmbientLighting = BoolSetting(
+    'enableAmbientLighting',
+    section: 'player',
+    defaultValue: true,
+  );
+
+  /// Intensity of ambient lighting glow (0.1 to 1.0).
+  static const ambientLightingIntensity = DoubleSetting(
+    'ambientLightingIntensity',
+    section: 'player',
+    defaultValue: 0.65,
+    min: 0.1,
+    max: 1,
+  );
+
+  /// Diffusion / blur radius of ambient lighting (10 to 80).
+  static const ambientLightingBlurRadius = DoubleSetting(
+    'ambientLightingBlurRadius',
+    section: 'player',
+    defaultValue: 40,
+    min: 10,
+    max: 80,
+  );
+
+  /// Whether to automatically fail over to an alternate stream line when buffering stalls.
+  static const autoLineFailover = BoolSetting(
+    'autoLineFailover',
+    section: 'player',
+    defaultValue: true,
+  );
+
+  /// Buffering stall duration in seconds before automatic line failover triggers (2 to 10s).
+  static const autoLineFailoverDelay = IntSetting(
+    'autoLineFailoverDelay',
+    section: 'player',
+    defaultValue: 4,
+    min: 2,
+    max: 10,
+  );
+
+  /// Whether to automatically degrade resolution to a lower quality if all lines stall.
+  static const autoQualityFallback = BoolSetting(
+    'autoQualityFallback',
+    section: 'player',
+    defaultValue: false,
+  );
+
+  /// Whether to enable dynamic loudness normalization (loudnorm / night hearing protection).
+  static const audioLoudnorm = BoolSetting(
+    'audioLoudnorm',
+    section: 'player',
+    defaultValue: false,
+  );
+
+  /// Target integrated loudness in LUFS (-24 to -12, default -16).
+  static const audioLoudnormTarget = IntSetting(
+    'audioLoudnormTarget',
+    section: 'player',
+    defaultValue: -16,
+    min: -24,
+    max: -12,
+  );
+
+  /// Whether player gestures (volume, brightness, seek) trigger haptic feedback.
+  static const playerHapticFeedback = BoolSetting(
+    'playerHapticFeedback',
+    section: 'player',
+    defaultValue: true,
+  );
+
+  /// Video contrast-adaptive sharpening strength (0.0 = off, 0.1 to 1.0).
+  static const videoSharpen = DoubleSetting(
+    'videoSharpen',
+    section: 'player',
+    defaultValue: 0,
+    min: 0,
+    max: 1,
+  );
+
+  /// Whether to enable display-resampled smooth motion interpolation.
+  static const smoothMotion = BoolSetting(
+    'smoothMotion',
+    section: 'player',
+    defaultValue: false,
+  );
+
+  /// Audio equalizer preset ('off', 'vocal', 'bass_boost', 'treble_boost', 'cinema', 'custom').
+  static const audioEqualizerPreset = StringSetting(
+    'audioEqualizerPreset',
+    section: 'player',
+    defaultValue: 'off',
+    allowed: {'off', 'vocal', 'bass_boost', 'treble_boost', 'cinema', 'custom'},
+  );
+
+  /// 10-band audio equalizer gains in dB (-12dB to +12dB).
+  static const audioEqualizerBands = JsonSetting(
+    'audioEqualizerBands',
+    section: 'player',
+    defaultValue: {},
+  );
+
+  /// Whether to automatically catch up to the live edge when latency accumulates.
+  static const liveLowLatencyChase = BoolSetting(
+    'liveLowLatencyChase',
+    section: 'player',
+    defaultValue: false,
+  );
+
+  /// Whether long-pressing the video view triggers 2.0x playback speed.
+  static const longPressSpeedup = BoolSetting(
+    'longPressSpeedup',
+    section: 'player',
+    defaultValue: true,
+  );
+
+  /// Video picture brightness adjustment (-50 to +50).
+  static const videoBrightness = IntSetting(
+    'videoBrightness',
+    section: 'player',
+    defaultValue: 0,
+    min: -50,
+    max: 50,
+  );
+
+  /// Video picture contrast adjustment (-50 to +50).
+  static const videoContrast = IntSetting(
+    'videoContrast',
+    section: 'player',
+    defaultValue: 0,
+    min: -50,
+    max: 50,
+  );
+
+  /// Video picture saturation adjustment (-50 to +50).
+  static const videoSaturation = IntSetting(
+    'videoSaturation',
+    section: 'player',
+    defaultValue: 0,
+    min: -50,
+    max: 50,
+  );
+
+  /// Video picture gamma adjustment (-50 to +50).
+  static const videoGamma = IntSetting(
+    'videoGamma',
+    section: 'player',
+    defaultValue: 0,
+    min: -50,
+    max: 50,
+  );
+
+  /// Audio channel balance / mono repair mode ('stereo', 'left_to_both', 'right_to_both', 'mono').
+  static const audioChannelMode = StringSetting(
+    'audioChannelMode',
+    section: 'player',
+    defaultValue: 'stereo',
+    allowed: {'stereo', 'left_to_both', 'right_to_both', 'mono'},
+  );
+
+  /// Dynamic live buffer profile ('ultra_low', 'balanced', 'anti_stall').
+  static const liveBufferProfile = StringSetting(
+    'liveBufferProfile',
+    section: 'player',
+    defaultValue: 'balanced',
+    allowed: {'ultra_low', 'balanced', 'anti_stall'},
+  );
+
   /// The wide room's chat column is folded away (docs/A-界面设计/A07-直播间界面/A07.5-宽屏左右分栏
   /// change 7; new in v4, remembered for the next room).
   static const livePlayChatCollapsed = BoolSetting('livePlayChatCollapsed', section: 'player', defaultValue: false);
@@ -637,6 +811,31 @@ abstract final class Settings {
 
   /// Stroke.
   static const enableDanmakuStroke = BoolSetting('enableDanmakuStroke', section: 'danmaku', defaultValue: true);
+
+  /// Glow diffusion radius for danmaku text (0.0 to 4.0, 0 is off).
+  static const danmakuGlowRadius = DoubleSetting(
+    'danmakuGlowRadius',
+    section: 'danmaku',
+    defaultValue: 0,
+    min: 0,
+    max: 4,
+  );
+
+  /// Outline thickness multiplier for danmaku text (0.5 to 3.0, default 1.0).
+  static const danmakuOutlineThickness = DoubleSetting(
+    'danmakuOutlineThickness',
+    section: 'danmaku',
+    defaultValue: 1,
+    min: 0.5,
+    max: 3,
+  );
+
+  /// Whether to display high-energy danmaku burst alert pill badge when message frequency surges.
+  static const danmakuBurstAlert = BoolSetting(
+    'danmakuBurstAlert',
+    section: 'danmaku',
+    defaultValue: true,
+  );
 
   /// The chat list's look in the room (U.2a): `compact` lines ("用户名：" in
   /// a secondary colour, then the message) or 3.x's `card` per message.
@@ -1497,6 +1696,22 @@ abstract final class Settings {
   /// chat.
   static const recordDanmakuGifts = BoolSetting('recordDanmakuGifts', section: 'recorder', defaultValue: false);
 
+  /// Automatically start recording followed streamers when they go live.
+  static const autoRecordFollows = BoolSetting(
+    'autoRecordFollows',
+    section: 'recorder',
+    defaultValue: false,
+  );
+
+  /// Maximum number of concurrent auto-record streams (1 to 5).
+  static const autoRecordMaxStreams = IntSetting(
+    'autoRecordMaxStreams',
+    section: 'recorder',
+    defaultValue: 2,
+    min: 1,
+    max: 5,
+  );
+
   /// The recorder's settings, in 3.x's key order, then v4's.
   static const List<Setting<Object>> recorder = [
     recordSegmentTime,
@@ -1519,6 +1734,8 @@ abstract final class Settings {
     recordPinyinFolders,
     recordDanmaku,
     recordDanmakuGifts,
+    autoRecordFollows,
+    autoRecordMaxStreams,
   ];
 
   // ---- local interaction (modules/live_play/widgets/local_interaction/
@@ -2103,6 +2320,8 @@ abstract final class Settings {
     enableNewWindowPlay,
     showMenuBarIcon,
     showUnplayableInDiscover,
+    hideOfflineRooms,
+    preferRealtimeCover,
     detectClipboardRooms,
     douyuForceRenew,
     twitchLanguages,
@@ -2170,6 +2389,27 @@ abstract final class Settings {
     portraitFullscreenSwipeSwitch,
     showPortraitDiagnostics,
     portraitRoomOverrides,
+    enableAmbientLighting,
+    ambientLightingIntensity,
+    ambientLightingBlurRadius,
+    autoLineFailover,
+    autoLineFailoverDelay,
+    autoQualityFallback,
+    audioLoudnorm,
+    audioLoudnormTarget,
+    playerHapticFeedback,
+    videoSharpen,
+    smoothMotion,
+    audioEqualizerPreset,
+    audioEqualizerBands,
+    liveLowLatencyChase,
+    longPressSpeedup,
+    videoBrightness,
+    videoContrast,
+    videoSaturation,
+    videoGamma,
+    audioChannelMode,
+    liveBufferProfile,
     livePlayChatCollapsed,
     livePlayWideFooter,
     roomSwitcherLayout,
@@ -2185,6 +2425,9 @@ abstract final class Settings {
     danmakuOpacity,
     enableDanmakuDisplay,
     enableDanmakuStroke,
+    danmakuGlowRadius,
+    danmakuOutlineThickness,
+    danmakuBurstAlert,
     danmakuListStyle,
     danmakuListFontSize,
     danmakuListLineSpacing,

@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'dart:ui' as ui;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_player/live_player.dart';
@@ -225,6 +227,31 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
   bool _secondaryAllowed = false;
   bool _middleAllowed = false;
 
+  /// Long press 2.0X speedup.
+  bool _isSpeedingUp = false;
+  double _preSpeedupRate = 1;
+
+  void _startSpeedup() {
+    if (_isSpeedingUp || _locked) return;
+    _preSpeedupRate = _room.session.rate;
+    _isSpeedingUp = true;
+    if (ref.read(storeProvider).settings.get(Settings.playerHapticFeedback)) {
+      unawaited(HapticFeedback.mediumImpact());
+    }
+    unawaited(_room.session.setRate(2));
+    setState(() {});
+  }
+
+  void _stopSpeedup() {
+    if (!_isSpeedingUp) return;
+    _isSpeedingUp = false;
+    if (ref.read(storeProvider).settings.get(Settings.playerHapticFeedback)) {
+      unawaited(HapticFeedback.lightImpact());
+    }
+    unawaited(_room.session.setRate(_preSpeedupRate));
+    setState(() {});
+  }
+
   /// Where the last tap went down.
   Offset? _tapAt;
 
@@ -263,6 +290,24 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
 
   /// The platform's bundled emoticons, flown as pictures (U.2h c1).
   EmoteTable _emotes = EmoteTable.empty;
+
+  Timer? _coverCaptureTimer;
+
+  void _scheduleCoverCapture() {
+    _coverCaptureTimer?.cancel();
+    _coverCaptureTimer = Timer(const Duration(seconds: 3), () async {
+      if (!mounted) return;
+      final engine = _room.session.engine;
+      if (engine case final FrameCaptureControl capture when _room.session.state.status == PlaybackStatus.playing) {
+        try {
+          final bytes = await capture.captureFrame();
+          if (bytes != null && bytes.isNotEmpty) {
+            RealtimeCoverCache.put(_room.room.identityKey, bytes);
+          }
+        } on Object catch (_) {}
+      }
+    });
+  }
 
   LiveRoomController get _room => widget.controller;
 
@@ -333,9 +378,24 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
 
   @override
   void dispose() {
+    if (_isSpeedingUp) {
+      unawaited(_room.session.setRate(_preSpeedupRate));
+    }
     _hide?.cancel();
     _doubleTapWindow?.cancel();
     _holdTimer?.cancel();
+    _coverCaptureTimer?.cancel();
+    final engine = _room.session.engine;
+    if (engine case final FrameCaptureControl capture when _room.session.state.status == PlaybackStatus.playing) {
+      unawaited(() async {
+        try {
+          final bytes = await capture.captureFrame();
+          if (bytes != null && bytes.isNotEmpty) {
+            RealtimeCoverCache.put(_room.room.identityKey, bytes);
+          }
+        } on Object catch (_) {}
+      }());
+    }
     unawaited(_playback?.cancel());
     _panels?.removeListener(_scheduleHide);
     super.dispose();
@@ -353,6 +413,9 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
       if (mounted && !widget.platform.mobile && !widget.pip) _touch();
     }
     final paused = state.status == PlaybackStatus.paused;
+    if (state.status == PlaybackStatus.playing) {
+      _scheduleCoverCapture();
+    }
     if (paused == _paused || !mounted) return;
     _paused = paused;
     if (widget.pip) return;
@@ -747,13 +810,33 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
     final presentation = widget.presentation;
     // F.1a: the screen stays on while it plays only with "屏幕常亮" on.
     final keepOn = watchSetting(ref, Settings.enableScreenKeepOn);
+    final enableAmbient = watchSetting(ref, Settings.enableAmbientLighting);
+    final ambientIntensity = watchSetting(ref, Settings.ambientLightingIntensity);
+    final ambientBlur = watchSetting(ref, Settings.ambientLightingBlurRadius);
+
     if (presentation == PicturePresentation.plain) {
-      return LiveVideoView(
+      final video = LiveVideoView(
         key: _video,
         session: _room.session,
         fit: fit,
+        fill: enableAmbient ? OnVideoColors.clear : const Color(0xFF000000),
         keepScreenOn: keepOn,
         alignment: widget.alignment,
+      );
+      if (!enableAmbient) {
+        return video;
+      }
+      return Stack(
+        key: const ValueKey('live-play-picture-ambient-glow'),
+        fit: StackFit.expand,
+        children: [
+          AmbientLightingLayer(
+            cover: _cover,
+            intensity: ambientIntensity,
+            blurRadius: ambientBlur,
+          ),
+          video,
+        ],
       );
     }
     final mode = presentation == PicturePresentation.ambient
@@ -772,7 +855,11 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
       key: ValueKey('live-play-picture-${mode.name}'),
       fit: StackFit.expand,
       children: [
-        if (mode == PortraitDisplayMode.ambient || mode == PortraitDisplayMode.balanced) AmbientBackdrop(cover: _cover),
+        if (mode == PortraitDisplayMode.ambient || mode == PortraitDisplayMode.balanced)
+          if (enableAmbient)
+            AmbientLightingLayer(cover: _cover, intensity: ambientIntensity, blurRadius: ambientBlur)
+          else
+            AmbientBackdrop(cover: _cover),
         if (mode == PortraitDisplayMode.balanced)
           LayoutBuilder(
             builder: (context, constraints) => ClipRect(
@@ -808,6 +895,7 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
       mode: watchSetting(ref, Settings.refreshRateMode),
     );
     final longPress = showDanmaku && watchSetting(ref, Settings.enableDanmakuLongPressInteraction);
+    final speedupEnabled = watchSetting(ref, Settings.longPressSpeedup);
     final diagnostics = watchSetting(ref, Settings.showPortraitDiagnostics);
     final pausedBehavior = watchSetting(ref, Settings.danmakuPausedBehavior);
     final maxVisible = watchSetting(ref, Settings.danmakuMaxVisibleCount);
@@ -932,13 +1020,21 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
                     onTertiaryTapUp: widget.platform.platform == TargetPlatform.windows ? _onMiddleTap : null,
                     onTertiaryTapCancel: widget.platform.platform == TargetPlatform.windows ? _cancelMiddle : null,
                     // F.2b: only with its switch on, so it never holds a drag back.
-                    onLongPressStart: longPress
+                    onLongPressStart: (longPress || speedupEnabled)
                         ? (details) {
-                            if (_danmakuAt(details.globalPosition, longPress: true) case final hit?) {
-                              unawaited(_openMessage(hit));
+                            if (longPress) {
+                              if (_danmakuAt(details.globalPosition, longPress: true) case final hit?) {
+                                unawaited(_openMessage(hit));
+                                return;
+                              }
+                            }
+                            if (speedupEnabled) {
+                              _startSpeedup();
                             }
                           }
                         : null,
+                    onLongPressEnd: speedupEnabled ? (_) => _stopSpeedup() : null,
+                    onLongPressCancel: speedupEnabled ? _stopSpeedup : null,
                     child: Stack(
                       fit: StackFit.expand,
                       children: [
@@ -1046,6 +1142,7 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
               ),
             ),
           ),
+        _DanmakuBurstBadge(room: _room, inline: _inline, padding: padding),
         RepaintBoundary(
           child: AnimatedOpacity(
             opacity: _controls ? 1 : 0,
@@ -1113,6 +1210,55 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
             ),
           ),
         ),
+        if (_isSpeedingUp)
+          Positioned(
+            top: padding.top + (portraitRows ? 48 : 28),
+            left: 0,
+            right: 0,
+            child: IgnorePointer(
+              child: Center(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: BackdropFilter(
+                    filter: ui.ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.65),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.25),
+                          width: 0.8,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.35),
+                            blurRadius: 12,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.fast_forward_rounded, color: Colors.amber, size: 20),
+                          const SizedBox(width: 8),
+                          Text(
+                            i18n('live_play_long_press_speedup_hud'),
+                            style: Theme.of(context).textTheme.titleSmall?.emphasis.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
         if (portraitRows && widget.entryHint && _hintEpoch > 0)
           PortraitEntryHint(key: ValueKey('hint-$_hintEpoch'), bottom: padding.bottom + 8 + portraitRowHeight * 2 + 16),
       ],
@@ -1190,5 +1336,61 @@ class _SwipeUpRegionState extends State<_SwipeUpRegion> {
       if (restore) widget.onSwipeUp();
     },
     child: widget.child,
+  );
+}
+
+class _DanmakuBurstBadge extends StatelessWidget {
+  const new({
+    required this.room,
+    required this.inline,
+    required this.padding,
+  });
+
+  final LiveRoomController room;
+  final bool inline;
+  final EdgeInsets padding;
+
+  @override
+  Widget build(BuildContext context) => ValueListenableBuilder<DanmakuBurstState>(
+    valueListenable: room.danmakuBurst,
+    builder: (context, burst, _) {
+      if (!burst.isActive) return const SizedBox.shrink();
+      return Positioned(
+        right: 16 + (inline ? 0 : padding.right),
+        top: 12 + (inline ? 0 : padding.top),
+        child: IgnorePointer(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: Colors.redAccent.withValues(alpha: 0.88),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.redAccent.withValues(alpha: 0.5),
+                  blurRadius: 8,
+                  spreadRadius: 1,
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('🔥', style: TextStyle(fontSize: 12)),
+                const SizedBox(width: 4),
+                Text(
+                  '${i18n('danmaku_burst_alert')} (${burst.velocity}/s)',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.2,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    },
   );
 }

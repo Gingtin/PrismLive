@@ -16,6 +16,9 @@ enum AppMenuItem {
   /// Settings.
   settings(AppIcons.settings, 'settings_title'),
 
+  /// IPTV / Network TV.
+  iptv(AppIcons.batchSources, 'iptv_settings'),
+
   /// About.
   about(AppIcons.about, 'about'),
 
@@ -39,6 +42,7 @@ enum AppMenuItem {
 /// the setting "新建独立播放窗口" is on (U.13 c12).
 List<AppMenuItem> appMenuItems({required bool newWindow}) => [
   AppMenuItem.settings,
+  AppMenuItem.iptv,
   AppMenuItem.about,
   AppMenuItem.backup,
   if (newWindow) AppMenuItem.newWindow,
@@ -75,6 +79,8 @@ class MenuButton extends ConsumerWidget {
     switch (item) {
       case AppMenuItem.settings:
         await AppNavigator.toNamed<void>(RoutePath.kSettings);
+      case AppMenuItem.iptv:
+        await AppNavigator.toNamed<void>(RoutePath.kIptv);
       case AppMenuItem.about:
         await AppNavigator.toNamed<void>(RoutePath.kAbout);
       case AppMenuItem.backup:

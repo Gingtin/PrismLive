@@ -143,6 +143,41 @@ final class SessionTimings {
 
   /// Longest wait for one look at the network.
   final Duration networkProbeTimeout;
+
+  /// Returns a copy of [SessionTimings] with the given values replaced.
+  SessionTimings copyWith({
+    Duration? sourceOpen,
+    Duration? sourceRefresh,
+    Duration? unexpectedPauseGrace,
+    Duration? unexpectedPauseFailure,
+    Duration? bufferingStall,
+    Duration? stallNotice,
+    Duration? frameStall,
+    Duration? recoveryBudgetReset,
+    List<Duration>? liveRetryDelays,
+    Duration? idleRelease,
+    Duration? engineRelease,
+    Duration? refreshRetry,
+    Duration? offlineGrace,
+    Duration? networkProbe,
+    Duration? networkProbeTimeout,
+  }) => SessionTimings(
+    sourceOpen: sourceOpen ?? this.sourceOpen,
+    sourceRefresh: sourceRefresh ?? this.sourceRefresh,
+    unexpectedPauseGrace: unexpectedPauseGrace ?? this.unexpectedPauseGrace,
+    unexpectedPauseFailure: unexpectedPauseFailure ?? this.unexpectedPauseFailure,
+    bufferingStall: bufferingStall ?? this.bufferingStall,
+    stallNotice: stallNotice ?? this.stallNotice,
+    frameStall: frameStall ?? this.frameStall,
+    recoveryBudgetReset: recoveryBudgetReset ?? this.recoveryBudgetReset,
+    liveRetryDelays: liveRetryDelays ?? this.liveRetryDelays,
+    idleRelease: idleRelease ?? this.idleRelease,
+    engineRelease: engineRelease ?? this.engineRelease,
+    refreshRetry: refreshRetry ?? this.refreshRetry,
+    offlineGrace: offlineGrace ?? this.offlineGrace,
+    networkProbe: networkProbe ?? this.networkProbe,
+    networkProbeTimeout: networkProbeTimeout ?? this.networkProbeTimeout,
+  );
 }
 
 final class _EngineCreation {
@@ -215,7 +250,7 @@ final class PlaybackSession {
        _decoders = decoders ?? DecoderFallback();
 
   /// Deadlines.
-  final SessionTimings timings;
+  SessionTimings timings;
 
   /// How far the position has to move to end a buffering (G02.2).
   static const bufferingProgress = Duration(seconds: 1);
@@ -255,6 +290,16 @@ final class PlaybackSession {
   bool _wantPlaying = false;
   bool _playing = false;
   int? _volumeGainDb;
+  bool _audioLoudnorm = false;
+  int _audioLoudnormTarget = -16;
+  double _videoSharpen = 0;
+  bool _smoothMotion = false;
+  int _videoBrightness = 0;
+  int _videoContrast = 0;
+  int _videoSaturation = 0;
+  int _videoGamma = 0;
+  String _audioChannelMode = 'stereo';
+  Map<String, double> _audioEqualizerBands = const {};
   bool _buffering = false;
   PlayerException? _openingError;
 
@@ -530,11 +575,16 @@ final class PlaybackSession {
     }
   }
 
-  /// Plays an on-demand source at [rate] (1 = normal) where the engine can
-  /// (V01.8); false when it cannot or the source is live.
+  /// The playback rate (1 = normal speed).
+  double get rate => _rate;
+  double _rate = 1;
+
+  /// Plays at [rate] (1 = normal) where the engine can (V01.8); false when it
+  /// cannot.
   Future<bool> setRate(double rate) async {
     final engine = _engine;
-    if (_disposed || engine is! PlaybackRate || !(_plan?.onDemand ?? false)) return false;
+    if (_disposed || engine is! PlaybackRate) return false;
+    _rate = rate;
     await (engine! as PlaybackRate).setRate(rate);
     return true;
   }
@@ -567,6 +617,74 @@ final class PlaybackSession {
     _checkAlive();
     _volumeGainDb = decibels?.clamp(-12, 12);
     if (_engine case final VolumeGainControl gain) await gain.setVolumeGainDb(_volumeGainDb);
+  }
+
+  /// Updates dynamic audio loudness normalization (loudnorm filter).
+  Future<void> setAudioLoudnorm({required bool enabled, int target = -16}) async {
+    _checkAlive();
+    _audioLoudnorm = enabled;
+    _audioLoudnormTarget = target;
+    if (_engine case final AudioLoudnormControl loudnorm) {
+      await loudnorm.setAudioLoudnorm(enabled: enabled, target: target);
+    }
+  }
+
+  /// Updates video sharpening (0.0 to 1.0) and display-resampled smooth motion.
+  Future<void> setVideoEnhancements({double sharpen = 0.0, bool smoothMotion = false}) async {
+    _checkAlive();
+    _videoSharpen = sharpen.clamp(0.0, 1.0);
+    _smoothMotion = smoothMotion;
+    if (_engine case final VideoEnhancementControl ctrl) {
+      await ctrl.setVideoEnhancements(sharpen: _videoSharpen, smoothMotion: _smoothMotion);
+    }
+  }
+
+  /// Updates 10-band audio equalizer gains in dB.
+  Future<void> setAudioEqualizer(Map<String, double> bandGains) async {
+    _checkAlive();
+    _audioEqualizerBands = Map.unmodifiable(bandGains);
+    if (_engine case final AudioEqualizerControl ctrl) {
+      await ctrl.setAudioEqualizer(_audioEqualizerBands);
+    }
+  }
+
+  /// Updates audio channel mode ('stereo', 'left_to_both', 'right_to_both', 'mono').
+  Future<void> setAudioChannelMode(String mode) async {
+    _checkAlive();
+    _audioChannelMode = mode;
+    if (_engine case final AudioEqualizerControl ctrl) {
+      await ctrl.setAudioChannelMode(_audioChannelMode);
+    }
+  }
+
+  /// Updates video picture color adjustments (brightness, contrast, saturation, gamma).
+  Future<void> setPictureColor({
+    int brightness = 0,
+    int contrast = 0,
+    int saturation = 0,
+    int gamma = 0,
+  }) async {
+    _checkAlive();
+    _videoBrightness = brightness.clamp(-50, 50);
+    _videoContrast = contrast.clamp(-50, 50);
+    _videoSaturation = saturation.clamp(-50, 50);
+    _videoGamma = gamma.clamp(-50, 50);
+    if (_engine case final VideoEnhancementControl ctrl) {
+      await ctrl.setPictureColor(
+        brightness: _videoBrightness,
+        contrast: _videoContrast,
+        saturation: _videoSaturation,
+        gamma: _videoGamma,
+      );
+    }
+  }
+
+  /// Updates the live buffer profile ('ultra_low', 'balanced', 'anti_stall').
+  Future<void> setLiveBufferProfile(String profile) async {
+    _checkAlive();
+    if (_engine case final LiveBufferControl ctrl) {
+      await ctrl.setLiveBufferProfile(profile);
+    }
   }
 
   /// Sets the volume, 0 to 1.
@@ -709,7 +827,7 @@ final class PlaybackSession {
           timings.engineRelease,
           onTimeout: () => null,
         );
-      } catch (_) {}
+      } on Object catch (_) {}
       _checkAlive();
     }
     if (_retiringEngines.length >= 2) {
@@ -743,6 +861,30 @@ final class PlaybackSession {
       if (_engine == null) {
         _engine = created;
         _events = created.events.listen(_onEvent);
+        if (_audioLoudnorm && created is AudioLoudnormControl) {
+          unawaited((created as AudioLoudnormControl).setAudioLoudnorm(enabled: true, target: _audioLoudnormTarget));
+        }
+        if ((_videoSharpen > 0 || _smoothMotion) && created is VideoEnhancementControl) {
+          unawaited((created as VideoEnhancementControl).setVideoEnhancements(sharpen: _videoSharpen, smoothMotion: _smoothMotion));
+        }
+        if (_audioEqualizerBands.isNotEmpty && created is AudioEqualizerControl) {
+          unawaited((created as AudioEqualizerControl).setAudioEqualizer(_audioEqualizerBands));
+        }
+        if (_audioChannelMode != 'stereo' && created is AudioEqualizerControl) {
+          unawaited((created as AudioEqualizerControl).setAudioChannelMode(_audioChannelMode));
+        }
+        if (_rate != 1.0 && created is PlaybackRate) {
+          unawaited((created as PlaybackRate).setRate(_rate));
+        }
+        if ((_videoBrightness != 0 || _videoContrast != 0 || _videoSaturation != 0 || _videoGamma != 0) &&
+            created is VideoEnhancementControl) {
+          unawaited((created as VideoEnhancementControl).setPictureColor(
+            brightness: _videoBrightness,
+            contrast: _videoContrast,
+            saturation: _videoSaturation,
+            gamma: _videoGamma,
+          ));
+        }
       }
       return _engine!;
     } on PlayerException {
@@ -774,28 +916,20 @@ final class PlaybackSession {
     return releasing;
   }
 
+  void _forgetRetirement(Object owner) {
+    final _ = _retiringEngines.remove(owner);
+  }
+
   void _trackRetirement(Object owner, Future<void> releasing) {
     _retiringEngines[owner] = releasing;
     unawaited(
-      releasing
-          .then<void>(
-            (_) => _retiringEngines.remove(owner),
-            onError: (Object _, StackTrace _) {
-              // A failed disposal cannot prove native resources were freed.
-              // Retain it until the release deadline so waitForResourceRelease
-              // observes the failure, but ensure it does not permanently poison
-              // future sessions if the app stays running.
-              final timer = Timer(timings.engineRelease, () {
-                _retiringEngines.remove(owner);
-              });
-              _retirementTimers.add(timer);
-            },
-          )
-          .timeout(timings.engineRelease * 2, onTimeout: () {
-            // Safety timeout: if releasing hangs indefinitely, ensure owner
-            // is eventually purged from the allocation guard.
-            _retiringEngines.remove(owner);
-          }),
+      releasing.then<void>(
+        (_) => _forgetRetirement(owner),
+        onError: (Object _, StackTrace _) {
+          // A failed disposal is not proof that native resources were freed.
+          // Keep the allocation guard until a release is actually confirmed.
+        },
+      ),
     );
   }
 
@@ -1492,7 +1626,9 @@ final class PlaybackSession {
     }
     _recoveryCause = error.code ?? error.type.name;
     _emit(_state.copyWith(status: PlaybackStatus.buffering, recovery: _recoveries, recoveryCause: _recoveryCause));
-    final transport = error.type == PlayerErrorType.network || error.type == PlayerErrorType.source;
+    final transport = error.type == PlayerErrorType.network ||
+        error.type == PlayerErrorType.source ||
+        error.code == 'buffering_stall_timeout';
 
     final unfinishedOpen = error.code == 'source_open_timeout' && !_engineRecreated && source != null;
     if (unfinishedOpen) {

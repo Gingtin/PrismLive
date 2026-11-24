@@ -16,7 +16,7 @@
 ## 现状：做到哪、怎么工作的
 
 - **一次上机怎么做**（S02.2、S02.3 的实际做法，S02.5 任务书补了断网的做法）：
-  1. 构建：WSL 里 `source ~/tools/purelive-env.sh`，`cd apps/pure_live`，`flutter build apk --profile --target-platform android-arm64`（S02.2、S02.3 用的是 `288fec0ec` 的 arm64 profile 包；只看界面时 `--debug` 也行，看手感、动画节奏用 profile）。debug 和 profile 构建的包名是 `com.mystyle.purelive.v4dev`、应用名“纯粹直播 v4dev”（`apps/pure_live/android/app/build.gradle.kts:80-89`），和用户的 3.x 并存。
+  1. 构建：WSL 里 `source ~/tools/purelive-env.sh`，`cd apps/pure_live`，`flutter build apk --profile --target-platform android-arm64`（S02.2、S02.3 用的是 `288fec0ec` 的 arm64 profile 包；只看界面时 `--debug` 也行，看手感、动画节奏用 profile）。debug 和 profile 构建的包名是 `com.mystyle.purelive.v4dev`、应用名“棱镜直播 v4dev”（`apps/pure_live/android/app/build.gradle.kts:80-89`），和用户的 3.x 并存。
   2. 安装：`adb connect 192.168.1.2:5555`（端口会变，连不上先问维护者），`adb -s 192.168.1.2:5555 install -r build/app/outputs/flutter-apk/app-profile.apk`。
   3. 上机前：`adb -s 192.168.1.2:5555 logcat -d | grep "adbd service requested"` 看有没有别的自动化程序在操作手机；`export PL_APP=com.mystyle.purelive.v4dev; source ~/tools/pl-adb.sh`（脚本第 7 行默认的 `.next` 是旧包名）；用 `adb shell am start -n com.mystyle.purelive.v4dev/com.mystyle.purelive.MainActivity` 把测试包调到前台。
   4. 操作：只用 `tap`、`key`、`text`、`swipe`、`tapl`（每次先 `need_pl` 检查前台是测试包），不用裸的 `adb shell input`；返回键之后不连着点，先重新检查前台。

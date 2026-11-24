@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_record/live_record.dart';
 import 'package:live_store/live_store.dart';
+import 'package:pure_live/app/recording.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/favorite/favorite_rules.dart';
 import 'package:pure_live/features/favorite/follow_refresher.dart';
@@ -28,6 +29,7 @@ final Provider<FavoriteController> favoriteControllerProvider = Provider((ref) {
     followsReady: services.followsReady,
     postLiveAlert: ref.watch(liveAlertPosterProvider),
     liveAlertBackground: ref.watch(liveAlertBackgroundProvider),
+    recording: services.recording,
   );
   final recorderChecks = services.recorder?.changes.listen(controller.recorderChanged);
   ref.onDispose(() {
@@ -63,6 +65,7 @@ final class FavoriteController extends ChangeNotifier {
   new({
     required this.store,
     required this.refresher,
+    this.recording,
     Future<void>? followsReady,
     DateTime Function()? now,
     LiveAlertPoster? postLiveAlert,
@@ -77,6 +80,9 @@ final class FavoriteController extends ChangeNotifier {
 
   /// Runs the requests.
   final FollowRefresher refresher;
+
+  /// Optional recording engine for auto-recording follows.
+  final AppRecording? recording;
 
   /// "开播提醒"; null where nothing can be posted.
   final LiveAlerts? liveAlerts;
@@ -251,6 +257,7 @@ final class FavoriteController extends ChangeNotifier {
     final checked = alerts.recorderChecks(tasks);
     if (checked.isEmpty) return;
     alerts.observe(checked, covered: _covered());
+    _track(_checkAutoRecord(checked));
   }
 
   Set<String> _covered() => {for (final room in liveAlertTargets) room.identityKey};
@@ -330,6 +337,7 @@ final class FavoriteController extends ChangeNotifier {
       if (_disposed) return;
       liveAlerts?.observe(result.rooms, covered: _covered(), quiet: !alert);
       if (_backgroundOn) _track(_writeWatch());
+      _track(_checkAutoRecord(result.rooms));
       lastFailed = result.failed;
       if (result.rooms.isNotEmpty) await store.follows.update(result.rooms);
       if (full) lastFullRefreshAt = _now();
@@ -467,6 +475,21 @@ final class FavoriteController extends ChangeNotifier {
       );
     } on Object catch (error, stack) {
       _logError(error, stack);
+    }
+  }
+
+  Future<void> _checkAutoRecord(Iterable<LiveRoom> rooms) async {
+    final recording = this.recording;
+    if (recording == null || !store.settings.get(Settings.autoRecordFollows)) return;
+    final maxStreams = store.settings.get(Settings.autoRecordMaxStreams);
+    for (final room in rooms) {
+      if (room.effectiveLiveStatus != LiveStatus.live) continue;
+      if (recording.activeCount >= maxStreams) break;
+      final existing = recording.taskFor(room);
+      if (existing == null) {
+        log('Auto-record started for live room: ${room.identityKey}', name: 'Favorite');
+        await recording.addTask(room);
+      }
     }
   }
 

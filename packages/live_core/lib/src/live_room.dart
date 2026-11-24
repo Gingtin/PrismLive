@@ -166,6 +166,7 @@ final class LiveRoom {
     String nick = '',
     this.avatar = '',
     this.cover = '',
+    this.keyframe,
     this.area,
     this.watching = '0',
     this.audienceMetricType,
@@ -234,6 +235,7 @@ final class LiveRoom {
       nick: text('nick') ?? '',
       avatar: text('avatar') ?? '',
       cover: text('cover') ?? '',
+      keyframe: text('keyframe'),
       area: text('area') ?? '',
       watching: watching,
       audienceMetricType: metric ?? AudienceMetricType.unknown,
@@ -288,6 +290,9 @@ final class LiveRoom {
 
   /// Cover URL.
   final String cover;
+
+  /// Dynamic live keyframe screenshot URL (if supported by the platform).
+  final String? keyframe;
 
   /// Area (category) name.
   final String? area;
@@ -418,6 +423,15 @@ final class LiveRoom {
 
   /// Whether the platform gave a streamer name.
   bool get hasNick => nick.trim().isNotEmpty;
+
+  /// Returns the most suitable cover URL: real-time dynamic keyframe if [preferRealtime]
+  /// is true and keyframe is available, falling back to [cover].
+  String effectiveCover({bool preferRealtime = false}) {
+    if (preferRealtime && (keyframe?.isNotEmpty ?? false)) {
+      return keyframe!;
+    }
+    return cover.isNotEmpty ? cover : (keyframe ?? '');
+  }
 
   /// The streamer name to show: [nick], or [platformName] when it is empty.
   /// The platform's display name is localized by the UI (3.x's
@@ -608,6 +622,7 @@ final class LiveRoom {
       nick: prefer(incoming.nick, nick),
       avatar: prefer(incoming.avatar, avatar),
       cover: prefer(incoming.cover, cover),
+      keyframe: preferNullable(incoming.keyframe, keyframe),
       area: preferNullable(incoming.area, area),
       watching: prefer(incoming.watching, watching),
       audienceMetricType: given != null && given != AudienceMetricType.unknown ? given : audienceMetricType,
@@ -666,6 +681,7 @@ final class LiveRoom {
       nick: nick.trim().isEmpty ? detail.nick : nick,
       avatar: avatar.trim().isEmpty ? detail.avatar : avatar,
       cover: cover.trim().isEmpty ? detail.cover : cover,
+      keyframe: (keyframe ?? '').isEmpty ? detail.keyframe : keyframe,
     );
   }
 
@@ -677,6 +693,7 @@ final class LiveRoom {
     String? nick,
     String? avatar,
     String? cover,
+    String? keyframe,
     String? area,
     String? watching,
     AudienceMetricType? audienceMetricType,
@@ -708,6 +725,7 @@ final class LiveRoom {
     nick: nick ?? this.nick,
     avatar: avatar ?? this.avatar,
     cover: cover ?? this.cover,
+    keyframe: keyframe ?? this.keyframe,
     area: area ?? this.area,
     watching: watching ?? this.watching,
     audienceMetricType: audienceMetricType ?? this.audienceMetricType,
@@ -746,6 +764,7 @@ final class LiveRoom {
     'nick': nick,
     'avatar': avatar,
     'cover': cover,
+    'keyframe': ?keyframe,
     'area': area,
     'watching': watching,
     'audienceMetricType': effectiveAudienceMetricType.name,

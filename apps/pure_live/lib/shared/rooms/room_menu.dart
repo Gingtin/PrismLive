@@ -9,6 +9,7 @@ import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
+import 'package:pure_live/shared/images.dart';
 import 'package:pure_live/shared/rooms/room_tags_dialog.dart';
 import 'package:pure_live/shared/rooms/room_texts.dart';
 import 'package:pure_live/shared/rooms/share_code.dart';
@@ -41,7 +42,7 @@ final class RoomMenuAction {
   final bool danger;
 }
 
-enum _Choice { follow, unfollow, tags, share }
+enum _Choice { follow, unfollow, tags, share, refreshCover }
 
 /// The dialog of a room card, the same on every card page and client
 /// (3.x `RoomCard.onLongPress`, also on right click; docs/A-界面设计/A09-浏览界面/A09.1-房间卡片,
@@ -79,6 +80,10 @@ Future<void> showRoomMenu(
       await editRoomTags(context, store: store, room: room);
     case _Choice.share:
       await shareRoom(room, origin: shareOrigin(context));
+    case _Choice.refreshCover:
+      RealtimeCoverCache.remove(room.identityKey);
+      imageCacheEpoch.value++;
+      AppNavigator.toast(i18n('refresh_cover_success'));
     case final RoomMenuAction action:
       action.onSelected();
   }
@@ -123,6 +128,12 @@ class _RoomMenu extends StatelessWidget {
             icon: AppIcons.tag,
             label: i18n('room_menu_set_tags'),
             onPressed: () => pick(_Choice.tags),
+          ),
+          CardDialogAction(
+            key: const ValueKey('room-menu-refresh-cover'),
+            icon: Icons.refresh_rounded,
+            label: i18n('refresh_cover'),
+            onPressed: () => pick(_Choice.refreshCover),
           ),
         ],
         for (final action in actions)

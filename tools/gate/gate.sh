@@ -113,12 +113,8 @@ if [[ $stale == 1 && ${#selected[@]} -gt 0 ]]; then
   fi
 fi
 
-# The recorder's FFmpeg bundles: the app's build hook (flutter test builds
-# the Linux one) reads them from .ffmpeg_kit/ (M8.1); cached outside the
-# repository, downloaded only when missing.
-if [[ " ${selected[*]} " == *" apps/pure_live "* ]]; then
-  step "ffmpeg bundles" tools/ffmpeg_kit/fetch.sh linux
-fi
+# FFmpegKit has been completely removed in PureLive 4.x NextGen
+# Native HTTP/HLS streaming is used instead.
 
 step "flutter sdk semantics patch" python3 tools/flutter_sdk/prepare.py --test
 step "dependency direction" python3 tools/gate/check_deps.py

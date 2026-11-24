@@ -45,12 +45,21 @@ extensions.configure<com.android.build.api.dsl.ApplicationExtension> {
     defaultConfig {
         // 3.x's id: the release build installs over 3.x and keeps its data (M15).
         applicationId = "com.mystyle.purelive"
-        // 3.x's floor (its FFmpeg bundle needs API 26; M8 keeps that engine).
+        // 3.x's floor.
         minSdk = 26
         targetSdk = 37
         versionCode = flutter.versionCode
         versionName = flutter.versionName
         manifestPlaceholders["appLabel"] = "棱镜直播"
+    }
+
+    splits {
+        abi {
+            isEnable = providers.gradleProperty("pureLive.splitPerAbi").orNull.toBoolean()
+            reset()
+            include("arm64-v8a", "x86_64", "armeabi-v7a")
+            isUniversalApk = true
+        }
     }
 
     signingConfigs {

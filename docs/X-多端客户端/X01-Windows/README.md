@@ -55,7 +55,7 @@
 | `apps/pure_live/windows/runner/main.cpp`（147 行） | 单实例、新窗口进程、主窗口属性 |
 | `apps/pure_live/windows/runner/flutter_window.cpp`（242 行） | Flutter 视图、`pure_live/display_mode` 通道 |
 | `apps/pure_live/windows/runner/win32_window.cpp`（295 行）、`utils.cpp` | 窗口、命令行参数 |
-| `apps/pure_live/windows/runner/Runner.rc` | 版本信息（公司 `com.mystyle`、产品“纯粹直播 Pure Live”、版权写着 2025） |
+| `apps/pure_live/windows/runner/Runner.rc` | 版本信息（公司 `com.mystyle`、产品“棱镜直播 Pure Live”、版权写着 2025） |
 | `apps/pure_live/lib/app/desktop/desktop_window.dart`（599） | `DesktopWindow`（页面要的全屏、小窗、新窗口）、`DesktopShell`（启动、几何、关闭、退出） |
 | `apps/pure_live/lib/app/desktop/title_bar.dart`（345）、`tray.dart`（169）、`close_dialog.dart`（357）、`startup_entry.dart`（55）、`mini_window.dart`（244）、`shared_data.dart`（67） | 见上 |
 | `apps/pure_live/lib/app/launch_args.dart`（115） | 命令行（`--instance`、`--open-room`）、`startWindowProcess` |

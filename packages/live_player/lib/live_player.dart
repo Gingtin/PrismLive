@@ -3,9 +3,11 @@
 /// the media_kit fork in `third_party/`, and the video view.
 library;
 
+export 'src/decoder_budget_manager.dart';
 export 'src/diagnostics.dart';
 export 'src/engine.dart';
 export 'src/engine_profile.dart';
+export 'src/equalizer_presets.dart';
 export 'src/frame_rate.dart';
 export 'src/mpv_engine.dart';
 export 'src/mpv_options.dart';

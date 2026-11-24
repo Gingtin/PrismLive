@@ -27,6 +27,7 @@ final class DanmakuLook {
     this.bottomMargin = 0,
     this.stroke = true,
     this.strokeWidth = 1.5,
+    this.glowRadius = 0.0,
     this.laneHeight,
     this.fontFamily,
     this.textOnly = false,
@@ -59,6 +60,9 @@ final class DanmakuLook {
   /// Outline width.
   final double strokeWidth;
 
+  /// Danmaku glow aura radius (0: disabled).
+  final double glowRadius;
+
   /// The height of a lane the mini windows give (U.2j); null is 3.x's
   /// ([lane]).
   final double? laneHeight;
@@ -87,6 +91,7 @@ final class DanmakuLook {
     bottomMargin: bottomMargin,
     stroke: stroke,
     strokeWidth: strokeWidth,
+    glowRadius: glowRadius,
     laneHeight: laneHeight,
     fontFamily: fontFamily,
     textOnly: textOnly,
@@ -104,6 +109,7 @@ final class DanmakuLook {
       other.bottomMargin == bottomMargin &&
       other.stroke == stroke &&
       other.strokeWidth == strokeWidth &&
+      other.glowRadius == glowRadius &&
       other.laneHeight == laneHeight &&
       other.fontFamily == fontFamily &&
       other.textOnly == textOnly;
@@ -119,6 +125,7 @@ final class DanmakuLook {
     bottomMargin,
     stroke,
     strokeWidth,
+    glowRadius,
     laneHeight,
     fontFamily,
     textOnly,
@@ -989,6 +996,10 @@ final class _Ink {
           ? LivePalettes.danmakuStroke.withValues(alpha: math.sqrt(opacity)).toARGB32()
           : null,
       strokeWidth: look.stroke ? look.strokeWidth : 0,
+      shadowColor: look.glowRadius > 0
+          ? LivePalettes.danmakuStroke.withValues(alpha: (opacity * 0.85).clamp(0.0, 1.0)).toARGB32()
+          : null,
+      shadowBlur: look.glowRadius * 3.5,
       emoteAlpha: opacity,
     );
   }

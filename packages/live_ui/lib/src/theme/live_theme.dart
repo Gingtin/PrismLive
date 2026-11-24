@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:live_ui/src/theme/live_colors.dart';
 import 'package:live_ui/src/theme/metrics.dart';
 import 'package:live_ui/src/theme/page_transitions.dart';
+import 'package:live_ui/src/theme/pure_live_tokens.dart';
 import 'package:live_ui/src/widgets/app_chip.dart';
 import 'package:live_ui/src/widgets/focus_ring.dart';
 
@@ -268,7 +269,11 @@ final class LiveTheme {
       primaryTextTheme: textTheme,
     );
     final colors = base.colorScheme;
+    final tokens = isDark
+        ? (pureBlack ? PureLiveTokens.oledBlack : PureLiveTokens.darkCinema)
+        : PureLiveTokens.cleanLight;
     return base.copyWith(
+      extensions: <ThemeExtension<dynamic>>[tokens],
       splashFactory: NoSplash.splashFactory,
       // 3.x's main.dart (:162-169) replaced MyTheme's app bar theme (flat,
       // centred title, theme.dart:119) with this one, so app bars keep the

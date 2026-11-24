@@ -415,7 +415,7 @@ def new_outside1():
 def new_outside2():
     w, h = 220, 124
     win = window(W - M - w, TOP + 4, w, h, inner=buttons(w, h, grip='br', grip_style='corner'))
-    note = ('<div class="cap big" style="left:16px;right:16px;top:470px">在别的应用里也能拖到最上面。点“回到直播间”打开纯粹直播的这个直播间；'
+    note = ('<div class="cap big" style="left:16px;right:16px;top:470px">在别的应用里也能拖到最上面。点“回到直播间”打开棱镜直播的这个直播间；'
             '✕ 停止播放并关掉小窗</div>')
     return page(W, H, 3, other_app() + win + note + syn(), root='ph')
 

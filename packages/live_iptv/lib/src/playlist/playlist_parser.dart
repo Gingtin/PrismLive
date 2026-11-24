@@ -20,9 +20,8 @@ IptvPlaylistFormat? detectPlaylistFormat(String content, {String path = ''}) {
   if (text.startsWith('\uFEFF')) text = text.substring(1).trim();
   final byPath = IptvPlaylistFormat.fromPath(path);
   if (text.startsWith('#EXTM3U')) return IptvPlaylistFormat.m3u;
-  if (text.contains(',#genre#') || byPath == IptvPlaylistFormat.txt) return IptvPlaylistFormat.txt;
-  if (text.startsWith('{') || text.startsWith('[') || byPath == IptvPlaylistFormat.json) {
-    return IptvPlaylistFormat.json;
-  }
-  return byPath;
+  if (text.startsWith('{') || text.startsWith('[')) return IptvPlaylistFormat.json;
+  if (text.contains(',#genre#')) return IptvPlaylistFormat.txt;
+  if (byPath != null) return byPath;
+  return null;
 }

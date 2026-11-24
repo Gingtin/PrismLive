@@ -65,7 +65,7 @@
 
 | 步骤 | 期望 |
 |---|---|
-| 1. WSL：`flutter build linux --release`，运行 `build/linux/x64/release/bundle/pure_live` | 自绘标题栏“纯粹直播”，首页 |
+| 1. WSL：`flutter build linux --release`，运行 `build/linux/x64/release/bundle/pure_live` | 自绘标题栏“棱镜直播”，首页 |
 | 2. 再运行一次 | 不开第二个主窗口，已有窗口到前面 |
 | 3. 进哔哩哔哩直播间，录制 30 秒 | 播放、弹幕、录制都正常；`~/.local/share/com.mystyle.purelive` 里有数据库 |
 | 4. 设置 → 账号 粘一个 Cookie，退出再开 | 还在；`~/.config/com.mystyle.purelive/secret.key` 权限 600 |

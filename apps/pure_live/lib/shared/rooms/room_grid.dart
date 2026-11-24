@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_core/live_core.dart';
+import 'package:live_iptv/live_iptv.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/network.dart';
@@ -12,12 +13,14 @@ import 'package:pure_live/app/services.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_path.dart';
+import 'package:pure_live/shared/images.dart';
 import 'package:pure_live/shared/rooms/paging.dart';
 import 'package:pure_live/shared/rooms/room_cards.dart';
 import 'package:pure_live/shared/rooms/room_feed.dart';
 import 'package:pure_live/shared/rooms/room_live_alert.dart';
 import 'package:pure_live/shared/rooms/room_menu.dart';
 import 'package:pure_live/shared/rooms/room_texts.dart';
+import 'package:pure_live/shared/rooms/stream_frame_sniffer.dart';
 
 // The room grids of the browsing pages (docs/A-界面设计/A09-浏览界面/A09.1-房间卡片–U.4e): the
 // card, the columns, the skeleton, the jump buttons and a whole feed page
@@ -183,6 +186,18 @@ class RoomGridCard extends ConsumerWidget {
         watchSetting(ref, Settings.liveAlertEnabled) &&
         watchSetting(ref, Settings.liveAlertRoomKeys).contains(room.identityKey);
     final store = ref.read(storeProvider);
+    final preferRealtime = watchSetting(ref, Settings.preferRealtimeCover);
+    final rawData = room.data;
+    final hasStreamUrl = rawData is String && rawData.trim().isNotEmpty;
+    if (preferRealtime &&
+        room.platform == SiteIds.iptv &&
+        room.liveStatus == LiveStatus.live &&
+        hasStreamUrl &&
+        RealtimeCoverCache.get(room.identityKey) == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        StreamFrameSniffer.instance.request(room);
+      });
+    }
     final card = LiveRoomCard(
       data: policy.cardOf(room, now: now ?? ref.read(roomClockProvider)()),
       // Issue #10: on every other page a followed room has its heart.
@@ -569,11 +584,24 @@ class _RoomFeedViewState extends ConsumerState<RoomFeedView> {
 
   int get _firstCount => _desktop ? _currentPageSize : phonePageSize;
 
-  Future<void> _refresh() => _feed.refresh(count: _firstCount);
+  Future<void> _refresh() {
+    imageCacheEpoch.value++;
+    RealtimeCoverCache.clear();
+    return _feed.refresh(count: _firstCount);
+  }
 
   /// A pull's refresh: "刷新失败" with the reason in the header when it
   /// failed (the banner above the cards says so too).
   Future<Object?> _pullRefresh() async {
+    imageCacheEpoch.value++;
+    RealtimeCoverCache.clear();
+    StreamFrameSniffer.instance.clearFailures();
+    if (_feed.platform == SiteIds.iptv) {
+      final site = ref.read(sitesProvider).of(SiteIds.iptv);
+      if (site is IptvSite) {
+        await site.syncCurrentPlaylist();
+      }
+    }
     await _refresh();
     final error = _feed.error;
     return error == null ? null : AppRefreshFailure(describeLoadError(error));

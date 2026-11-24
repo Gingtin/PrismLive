@@ -54,7 +54,7 @@
 - 3.x 进房：`git show v3.2.11:lib/modules/live_play/controllers/live_play_controller.dart:249`（取详情、合并卡片信息、`:753` 更新关注快照）→ `lib/modules/live_play/controllers/player_controller.dart:594`、`:613`（默认清晰度）→ `lib/player/core/player_manager.dart` 的 `playSource`（打开期限 `:297`、`:2296-2301`）。播放器是全局编排器（`lib/player/global_player_service.dart`，`main.dart:91` 初始化），原生解码器第一次播放时才建。
 - mpv 属性和 4.x 相同：`lib/player/adapters/media_kit_adapter.dart:84`、`:89`、`:98`；`lib/player/utils/live_buffer_policy.dart`。
 - 3.x 没有起播打点；换房同样先关后开。
-- 3.x 安装在 K90 上的是用户的正式包 `com.mystyle.purelive`，**不能用来测**（不碰 3.x 安装和数据，D-019）。要 3.x 基线只能自己构建一个改包名的 v3.2.11：在独立工作区 `git worktree add <路径> v3.2.11`，把 `android/app/build.gradle` 的 `applicationId` 改成 `com.mystyle.purelive.v3bench`、应用名改成“纯粹直播 v3bench”，本机构建 profile 包装到 K90；测完卸载。这一步可选。
+- 3.x 安装在 K90 上的是用户的正式包 `com.mystyle.purelive`，**不能用来测**（不碰 3.x 安装和数据，D-019）。要 3.x 基线只能自己构建一个改包名的 v3.2.11：在独立工作区 `git worktree add <路径> v3.2.11`，把 `android/app/build.gradle` 的 `applicationId` 改成 `com.mystyle.purelive.v3bench`、应用名改成“棱镜直播 v3bench”，本机构建 profile 包装到 K90；测完卸载。这一步可选。
 
 ## 先读
 

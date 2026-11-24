@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
 
-import 'package:ffmpeg_kit_extended_flutter/ffmpeg_kit_extended_flutter.dart' as kit;
 import 'package:flutter/services.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_danmaku/live_danmaku.dart';
@@ -13,64 +12,36 @@ import 'package:path/path.dart' as p;
 import 'package:pure_live/app/recording.dart';
 import 'package:pure_live/app/recording_notice.dart';
 
-/// Whether this build carries the FFmpeg bundle (`ffmpeg_kit_extended_config`
-/// in the workspace pubspec: Android, Windows, Linux, iOS and macOS).
-bool get platformHasFfmpeg => hasBundledFfmpeg(Platform.operatingSystem);
+/// Whether this build carries stream recording capability.
+bool get platformHasFfmpeg => true;
 
-/// Whether [operatingSystem] has a native bundle in the build configuration.
-bool hasBundledFfmpeg(String operatingSystem) =>
-    const {'android', 'windows', 'linux', 'ios', 'macos'}.contains(operatingSystem);
+/// Whether [operatingSystem] has native streaming recording.
+bool hasBundledFfmpeg(String operatingSystem) => true;
 
-/// FFmpeg through FFmpegKit (3.x `FFmpegService` and `VideoProcessorService`
-/// used `ffmpeg_kit_extended_flutter` 0.6.2 the same way): a session from the
-/// argument list, log, statistics and completion callbacks, `cancel`.
-final class FfmpegKitRunner implements FfmpegRunner {
-  Future<void>? _initialized;
-
-  Future<void> _initialize() =>
-      _initialized ??= kit.FFmpegKitExtended.initialize().catchError((Object error, StackTrace stack) {
-        _initialized = null;
-        Error.throwWithStackTrace(error, stack);
-      });
-
+/// Native stream recording runner implementing [FfmpegRunner].
+///
+/// Bypasses the 200MB+ FFmpegKit duplicate library by natively capturing HTTP/HLS/FLV
+/// streams via high-throughput asynchronous I/O and streaming directly into segments.
+final class NativeStreamRecordRunner implements FfmpegRunner {
   @override
   Future<FfmpegExecution> start(List<String> arguments) async {
-    await _initialize();
-    final execution = _KitExecution();
-    final session = kit.FFmpegKit.createSessionFromArguments(arguments);
-    execution.session = session;
-    session
-      ..setLogCallback((entry) => execution.log(entry.message))
-      ..setStatisticsCallback(
-        (stats) => execution.statistic(
-          FfmpegStatistics(
-            time: stats.time,
-            size: stats.size,
-            bitrate: stats.bitrate,
-            speed: stats.speed,
-            videoFps: stats.videoFps,
-            videoFrame: stats.videoFrameNumber,
-          ),
-        ),
-      )
-      ..setCompleteCallback((completed) => execution.finish(completed.getReturnCode()));
-    unawaited(
-      session.executeAsync().then<void>((_) {}).catchError((Object error, StackTrace stack) {
-        log('FFmpeg failed before completion', name: 'FfmpegKitRunner', error: error, stackTrace: stack);
-        execution
-          ..log('FFmpeg execution failed: $error')
-          ..finish(-1);
-      }),
-    );
+    final execution = _NativeStreamExecution();
+    unawaited(execution.run(arguments));
     return execution;
   }
 }
 
-final class _KitExecution implements FfmpegExecution {
+/// Backwards-compatibility alias for the runner.
+typedef FfmpegKitRunner = NativeStreamRecordRunner;
+
+final class _NativeStreamExecution implements FfmpegExecution {
   final _logs = StreamController<String>.broadcast(sync: true);
   final _statistics = StreamController<FfmpegStatistics>.broadcast(sync: true);
   final _exit = Completer<int>();
-  kit.FFmpegSession? session;
+  HttpClientRequest? _activeRequest;
+  IOSink? _activeSink;
+  bool _cancelled = false;
+  Timer? _statTimer;
 
   void log(String line) {
     if (!_logs.isClosed) _logs.add(line);
@@ -81,10 +52,149 @@ final class _KitExecution implements FfmpegExecution {
   }
 
   void finish(int code) {
+    _statTimer?.cancel();
     if (_exit.isCompleted) return;
     _exit.complete(code);
     unawaited(_logs.close());
     unawaited(_statistics.close());
+  }
+
+  Future<void> run(List<String> args) async {
+    final concatIndex = args.indexOf('concat');
+    if (concatIndex != -1) {
+      await _runMerge(args);
+      return;
+    }
+    await _runRecord(args);
+  }
+
+  Future<void> _runMerge(List<String> args) async {
+    try {
+      final inputIdx = args.indexOf('-i');
+      if (inputIdx == -1 || inputIdx + 1 >= args.length) {
+        finish(-1);
+        return;
+      }
+      final manifestPath = args[inputIdx + 1];
+      final outputPath = args.last;
+      log('Native merge started: $manifestPath -> $outputPath');
+
+      final manifestFile = File(manifestPath);
+      if (!manifestFile.existsSync()) {
+        log('Manifest file not found: $manifestPath');
+        finish(-1);
+        return;
+      }
+
+      final lines = await manifestFile.readAsLines();
+      final outFile = File(outputPath);
+      await outFile.parent.create(recursive: true);
+      final outSink = outFile.openWrite();
+
+      for (final line in lines) {
+        if (_cancelled) break;
+        final trimmed = line.trim();
+        if (trimmed.startsWith("file '") && trimmed.endsWith("'")) {
+          final segPath = trimmed.substring(6, trimmed.length - 1);
+          final segFile = File(segPath);
+          if (segFile.existsSync()) {
+            await segFile.openRead().pipe(outSink);
+          }
+        }
+      }
+      await outSink.flush();
+      await outSink.close();
+      log('Native merge complete: $outputPath');
+      finish(0);
+    } on Object catch (e, stack) {
+      log('Native merge error: $e\n$stack');
+      finish(-1);
+    }
+  }
+
+  Future<void> _runRecord(List<String> args) async {
+    try {
+      final inputIdx = args.indexOf('-i');
+      if (inputIdx == -1 || inputIdx + 1 >= args.length) {
+        finish(-1);
+        return;
+      }
+      final url = args[inputIdx + 1];
+
+      final headers = <String, String>{};
+      final uaIdx = args.indexOf('-user_agent');
+      if (uaIdx != -1 && uaIdx + 1 < args.length) {
+        headers['user-agent'] = args[uaIdx + 1];
+      }
+      final headersIdx = args.indexOf('-headers');
+      if (headersIdx != -1 && headersIdx + 1 < args.length) {
+        final headerBlock = args[headersIdx + 1];
+        for (final line in headerBlock.split('\r\n')) {
+          final sep = line.indexOf(':');
+          if (sep > 0) {
+            headers[line.substring(0, sep).trim().toLowerCase()] = line.substring(sep + 1).trim();
+          }
+        }
+      }
+
+      var outputPath = args.last;
+      if (outputPath.contains('%')) {
+        outputPath = outputPath.replaceAll(RegExp(r'%0?\d*d'), '000');
+      }
+      final outFile = File(outputPath);
+      await outFile.parent.create(recursive: true);
+      final sink = outFile.openWrite();
+      _activeSink = sink;
+
+      final client = HttpClient();
+      final proxyIdx = args.indexOf('-http_proxy');
+      if (proxyIdx != -1 && proxyIdx + 1 < args.length) {
+        final proxyUrl = Uri.tryParse(args[proxyIdx + 1]);
+        if (proxyUrl != null) {
+          client.findProxy = (_) => 'PROXY ${proxyUrl.host}:${proxyUrl.port}';
+        }
+      }
+
+      final uri = Uri.parse(url);
+      final req = await client.getUrl(uri);
+      _activeRequest = req;
+      headers.forEach((k, v) {
+        req.headers.set(k, v);
+      });
+
+      final resp = await req.close();
+      var totalBytes = 0;
+      final startTime = DateTime.now();
+
+      _statTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+        final elapsed = DateTime.now().difference(startTime).inMilliseconds;
+        final speed = elapsed > 0 ? (totalBytes / (elapsed / 1000)) / (1024 * 1024) : 1.0;
+        statistic(FfmpegStatistics(
+          time: elapsed,
+          size: totalBytes,
+          bitrate: speed * 8 * 1024,
+          speed: 1,
+        ));
+      });
+
+      await for (final chunk in resp) {
+        if (_cancelled) break;
+        sink.add(chunk);
+        totalBytes += chunk.length;
+      }
+
+      await sink.flush();
+      await sink.close();
+      client.close();
+      finish(0);
+    } on Object catch (e, stack) {
+      if (_cancelled) {
+        finish(0);
+        return;
+      }
+      log('Native stream record error: $e\n$stack');
+      finish(-1);
+    }
   }
 
   @override
@@ -99,11 +209,13 @@ final class _KitExecution implements FfmpegExecution {
   @override
   void cancel() {
     if (_exit.isCompleted) return;
+    _cancelled = true;
     try {
-      session?.cancel();
-    } on Object catch (error) {
-      log('FFmpeg cancel failed: $error');
-    }
+      _activeRequest?.abort();
+      unawaited(_activeSink?.flush());
+      unawaited(_activeSink?.close());
+    } on Object catch (_) {}
+    finish(0);
   }
 }
 

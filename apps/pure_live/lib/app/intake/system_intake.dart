@@ -8,7 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_store/live_store.dart';
-import 'package:live_ui/live_ui.dart' show AppToast;
+import 'package:live_ui/live_ui.dart' show AppToast, showAppConfirmDialog;
 import 'package:pure_live/app/intake/clipboard_rooms.dart';
 import 'package:pure_live/app/intake/share_intake.dart';
 import 'package:pure_live/app/services.dart';
@@ -43,6 +43,25 @@ abstract final class SystemIntake {
         return await showRoomPrompt(context, room: room);
       },
       open: (room) => AppNavigator.toLiveRoomDetail(liveRoom: room),
+      iptvPrompt: (sources, text) async {
+        final context = await appNavigatorReady();
+        if (context == null || !context.mounted) return false;
+        final count = sources.length;
+        final sample = sources.take(2).map((s) => s.name).join('、');
+        final message = count == 1
+            ? '剪贴板中检测到直播源【$sample】，是否立即导入？'
+            : '剪贴板中检测到 $count 个直播源（如：$sample 等），是否立即批量导入？';
+        return await showAppConfirmDialog(
+          context: context,
+          title: '识别到直播源',
+          message: message,
+          confirmLabel: '立即导入',
+          cancelLabel: '忽略',
+        );
+      },
+      openIptvBatch: (text) async {
+        await AppNavigator.toNamed<void>(RoutePath.kIptv, arguments: text);
+      },
       stamp: defaultTargetPlatform == TargetPlatform.iOS ? iosClipboardStamp : native.clipboardStamp,
       confirm: defaultTargetPlatform == TargetPlatform.iOS ? askToReadClipboard : null,
     )..start();

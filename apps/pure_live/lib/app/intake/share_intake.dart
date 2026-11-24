@@ -72,7 +72,7 @@ final class ShareIntake {
   /// and "录制中心" (U.14 c15; the recording notification opens the latter).
   /// The open intent is exported with the launcher activity, so another app
   /// could name any route; the rest are ignored.
-  static const Set<String> openableRoutes = {RoutePath.kSearch, RoutePath.kRecordPage};
+  static const Set<String> openableRoutes = {RoutePath.kSearch, RoutePath.kRecordPage, RoutePath.kIptv};
 
   /// Finds rooms in shared text.
   final LinkParser links;
@@ -148,6 +148,15 @@ final class ShareIntake {
         if (iptvExtension(text) != null) (location: _isHttp(text) ? text : _localPath(text), local: !_isHttp(text)),
       ];
       if (files.isNotEmpty) return await _importAll(files);
+
+      final extractedSources = IptvSmartExtractor.extract(text);
+      if (extractedSources.isNotEmpty) {
+        final context = await navigator();
+        if (context != null) {
+          unawaited(openRoute(RoutePath.kIptv, text).catchError((Object _) {}));
+          return ShareOutcome.opened;
+        }
+      }
 
       if (text.isNotEmpty && (SiteIds.isRetiredLink(text) || links.containsSupportedLink(text))) {
         return await _openLink(text);

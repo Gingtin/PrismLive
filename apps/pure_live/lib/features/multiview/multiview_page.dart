@@ -141,6 +141,7 @@ class _MultiviewPageState extends ConsumerState<MultiviewPage> {
     _controller = MultiviewController(
       siteOf: sites.maybeOf,
       newSession: () => sessions(config: config),
+      sessionBuilder: ({decoders}) => services.newPlaybackSession(config: config, decoders: decoders),
       danmakuFor: danmaku.connectionFor,
       danmakuSupports: danmaku.supports,
       store: store,
@@ -191,6 +192,7 @@ class _MultiviewPageState extends ConsumerState<MultiviewPage> {
     androidCompatibility: settings.get(Settings.playerCompatMode),
     rtxVideoSuperResolution: settings.get(Settings.enableRtxVsr),
     volumeGainDb: settings.get(Settings.volumeBoostDb),
+    liveBufferProfile: settings.get(Settings.liveBufferProfile),
   );
 
   void _onControllerChanged() {

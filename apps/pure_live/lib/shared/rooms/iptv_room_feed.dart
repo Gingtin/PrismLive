@@ -36,13 +36,18 @@ class _IptvRoomsViewState extends ConsumerState<IptvRoomsView> with WidgetsBindi
       source: popularSourceFor(ref.read(sitesProvider).of(SiteIds.iptv)),
       visible: (room) =>
           ref.read(storeProvider).settings.get(Settings.showUnplayableInDiscover) ||
-          !cannotPlayHere(room, signedIn: false),
+          !cannotPlayHere(
+            room,
+            signedIn: false,
+            hideOffline: ref.read(storeProvider).settings.get(Settings.hideOfflineRooms),
+          ),
       precheck: () => MobileDataNotice.precheck(ref.read(networkProbeProvider)),
     );
     for (final key in <Setting<Object>>[
       Settings.iptvPopularPlaylist,
       Settings.iptvHotRemoved,
       Settings.selectedSourceId,
+      Settings.hideOfflineRooms,
     ]) {
       _settings.add(
         ref.read(storeProvider).settings.watch(key).skip(1).listen((_) {

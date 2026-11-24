@@ -9,6 +9,7 @@ import 'package:live_iptv/live_iptv.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/services.dart';
+import 'package:pure_live/features/iptv/iptv_batch_import_dialog.dart';
 import 'package:pure_live/features/iptv/iptv_cards.dart';
 import 'package:pure_live/features/iptv/iptv_data.dart';
 import 'package:pure_live/features/iptv/iptv_import.dart';
@@ -57,6 +58,35 @@ class _IptvPageState extends ConsumerState<IptvPage> {
   bool _defaultGuideChecked = false;
   bool _defaultGuideLoading = false;
   bool _defaultGuideFailed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final args = widget.route.arguments;
+    if (args is String && args.trim().isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        unawaited(_openBatchImport(initialText: args.trim()));
+      });
+    }
+  }
+
+  Future<void> _openBatchImport({String initialText = ''}) async {
+    final importer = _importer;
+    if (importer == null) return;
+    final result = await showAppDialog<IptvImportResult>(
+      context: context,
+      dismissible: false,
+      builder: (_) => IptvBatchImportDialog(
+        importer: importer,
+        initialText: initialText,
+        onConfirmReplace: _confirmFor(IptvImportKind.playlist),
+      ),
+    );
+    if (result != null && mounted) {
+      await _announce(IptvImportKind.playlist, result);
+    }
+  }
 
   IptvImporter? get _importer => ref.read(iptvImporterProvider);
 
@@ -215,6 +245,62 @@ class _IptvPageState extends ConsumerState<IptvPage> {
     _toast(result.isImported ? i18n('iptv_default_guide_done') : null);
   }
 
+  Future<void> _chooseAndImportPreset() async {
+    final chosen = await showAppDialog<({String name, String url, String desc})>(
+      context: context,
+      builder: (dialogContext) {
+        final scheme = Theme.of(dialogContext).colorScheme;
+        return AppDialog(
+          title: '精选预设源',
+          icon: AppIcons.settingsPreferPlatform,
+          contentPadding: EdgeInsets.zero,
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                for (final preset in IptvImporter.curatedPresets)
+                  InkWell(
+                    onTap: () => Navigator.pop(dialogContext, preset),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      child: Row(
+                        children: [
+                          Icon(AppIcons.playlist, size: 22, color: scheme.primary),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(preset.name, style: dialogContext.textStyles.t15.emphasis),
+                                const SizedBox(height: 2),
+                                Text(preset.desc, style: dialogContext.textStyles.t12.copyWith(color: scheme.onSurfaceVariant)),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+    if (chosen == null || !mounted) return;
+    final importer = _importer;
+    if (importer == null) return;
+    final result = await _guarded(
+      () => importer.importPlaylistFromUrl(
+        chosen.url,
+        name: chosen.name,
+        confirmReplace: _confirmFor(IptvImportKind.playlist),
+      ),
+    );
+    await _announce(IptvImportKind.playlist, result);
+  }
+
   // Imports -------------------------------------------------------------------
 
   Future<IptvImportResult> _guarded(Future<IptvImportResult> Function() run) async {
@@ -245,6 +331,10 @@ class _IptvPageState extends ConsumerState<IptvPage> {
     switch (origin) {
       case IptvImportOrigin.defaultGuide:
         await _loadDefaultGuide();
+      case IptvImportOrigin.presets:
+        await _chooseAndImportPreset();
+      case IptvImportOrigin.batch:
+        await _openBatchImport();
       case IptvImportOrigin.file:
         final file = await ref.read(iptvFilePickerProvider)(context, kind);
         if (file == null || !mounted) return;
@@ -276,7 +366,11 @@ class _IptvPageState extends ConsumerState<IptvPage> {
           dismissible: false,
           builder: (_) => origin == IptvImportOrigin.text
               ? IptvTextImportDialog(run: run)
-              : IptvNetworkImportDialog(kind: kind, run: run),
+              : IptvNetworkImportDialog(
+                  kind: kind,
+                  run: run,
+                  onSwitchToBatch: (text) => unawaited(_openBatchImport(initialText: text)),
+                ),
         );
         open = false;
         if (result != null) await _announce(kind, result);

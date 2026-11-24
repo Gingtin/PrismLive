@@ -383,6 +383,16 @@ class _Buttons extends StatelessWidget {
         ),
         button('change', AppIcons.changeRoom, i18n('multiview_change_room'), onChangeRoom),
         button('room', AppIcons.enterRoom, i18n('multiview_open_room'), onEnterRoom),
+        if (controller.cells.length > 1 && index != (controller.layout == MultiviewLayout.focus ? controller.focusedIndex : 0))
+          button(
+            'swap',
+            Icons.swap_horiz_rounded,
+            i18n('multiview_swap_focus'),
+            () => unawaited(controller.swapCells(
+              index,
+              controller.layout == MultiviewLayout.focus ? controller.focusedIndex : 0,
+            )),
+          ),
         RecordButton(key: const ValueKey('multiview-control-record'), room: cell.room!, compact: true),
         button(
           'close',

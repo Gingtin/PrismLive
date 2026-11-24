@@ -51,7 +51,7 @@
 | 条 | 做了什么 |
 |---|---|
 | c5 后台和锁屏 | iOS 也用播放会话（`audio_session` 的音乐会话，后台、锁屏有声音）和“正在播放”（`audio_service`，锁屏和控制中心显示房间、主播、暂停）；以前只在 Android 上开。`media_kit_video` 的 iOS 画面用 OpenGL ES，系统会结束在后台调用 GL 的应用，所以退到后台时停止画面、只放声音，回前台接着画（补丁见 `third_party/media_kit_video/PURELIVE_PATCH.md`） |
-| c8 分享扩展 | 新的 `ShareExtension`（系统分享面板里的“纯粹直播”）：收网址和文字，拼成 `purelive-share://share?text=…` 打开应用，应用收到后和 Android 的分享一样识别房间。文件（图片里的口令）要 App Group，没做 |
+| c8 分享扩展 | 新的 `ShareExtension`（系统分享面板里的“棱镜直播”）：收网址和文字，拼成 `purelive-share://share?text=…` 打开应用，应用收到后和 Android 的分享一样识别房间。文件（图片里的口令）要 App Group，没做 |
 | c4 画中画 | 没做：`media_kit` 的 iOS 画面是 GL 纹理，系统画中画要 `AVSampleBufferDisplayLayer` 一路的帧，工作量大，没有真机也看不了效果 |
 | c11 台前调度 | 没做：窗口左上角按钮的让位要 iPadOS 26 真机或模拟器的窗口模式才能看 |
 
@@ -65,7 +65,7 @@
 
 - 第一次构建（39086959261）编译失败：`AppDelegate` 里存命令表的属性叫 `keyCommands`，和 `UIResponder` 自带的属性重名；改名 `pureLiveKeys` 后通过。
 - 包里有 `PlugIns/ShareExtension.appex`（`com.mystyle.purelive.liu.ShareExtension`，`com.apple.share-services`，5.4.2），应用的 URL 方案是 `purelive-share`；TrollStore 包连扩展一起签，`codesign --verify --deep --strict` 通过。
-- 模拟器里 `simctl openurl purelive-share://share?text=…`：系统弹出“在‘纯粹直播’中打开？”（从外面打开别的应用的链接系统都会问），说明方案已注册、指向这个应用；构建机点不了这个按钮，之后进应用的部分靠 `test/intake_test.dart`。从分享扩展打开时会不会也问、⌘ 列表、锁屏“正在播放”、后台不画画面，都要真机看。
+- 模拟器里 `simctl openurl purelive-share://share?text=…`：系统弹出“在‘棱镜直播’中打开？”（从外面打开别的应用的链接系统都会问），说明方案已注册、指向这个应用；构建机点不了这个按钮，之后进应用的部分靠 `test/intake_test.dart`。从分享扩展打开时会不会也问、⌘ 列表、锁屏“正在播放”、后台不画画面，都要真机看。
 
 ## 2026-11-02 功能冻结（D-088）
 

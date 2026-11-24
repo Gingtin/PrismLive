@@ -45,6 +45,12 @@ enum RoomPanelKind {
   /// "房间音量" (U.2n c1, c2): the room menu.
   volume,
 
+  /// "音频均衡器": the 10-band equalizer.
+  equalizer,
+
+  /// "画面色彩调节": brightness, contrast, saturation, gamma.
+  pictureColor,
+
   /// "获取直链" (U.2n c1, c4): the room menu.
   streamLink,
 

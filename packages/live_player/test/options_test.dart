@@ -99,4 +99,12 @@ void main() {
     expect(volume(room: '1', mobile: true), 0.5);
     expect(volume(room: '1'), 1);
   });
+
+  test('liveBufferProfile configures cache, readahead and buffer caps', () {
+    expect(const MpvEngineConfig(liveBufferProfile: 'ultra_low').liveProperties['cache-secs'], '1');
+    expect(const MpvEngineConfig(liveBufferProfile: 'ultra_low').liveProperties['demuxer-readahead-secs'], '0.5');
+    expect(const MpvEngineConfig().liveProperties['cache-secs'], '6');
+    expect(const MpvEngineConfig(liveBufferProfile: 'anti_stall').liveProperties['cache-secs'], '15');
+    expect(const MpvEngineConfig(liveBufferProfile: 'anti_stall').liveProperties['demuxer-readahead-secs'], '6');
+  });
 }

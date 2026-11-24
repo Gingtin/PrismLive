@@ -85,7 +85,7 @@ def mode4(n=True):
 
 # ---------------- exit ----------------
 def exit3():
-    body = ('<div style="font:400 11px/1.5 Noto Sans SC;text-align:center">感谢使用纯粹直播 TV，期待下次再见。</div>'
+    body = ('<div style="font:400 11px/1.5 Noto Sans SC;text-align:center">感谢使用棱镜直播 TV，期待下次再见。</div>'
             f'<div style="display:flex;justify-content:center;margin-top:12px"><div style="background:#fff;border-radius:8px;padding:6px">{qr(118)}</div></div>'
             f'<div style="display:flex;justify-content:center;align-items:center;gap:4px;margin-top:10px;font:700 11px Noto Sans SC"><span style="color:#00A1FF">{mr("favorite", 12)}</span>捐赠支持</div>'
             '<div style="font:400 10px/1.5 Noto Sans SC;text-align:center;margin-top:6px">项目全程开源免费，无任何付费门槛。若是本应用给您带来便利，欢迎微信扫码请开发者喝瓶牛奶，支持后续更新维护。</div>')
@@ -95,7 +95,7 @@ def exit3():
 def exit4(n=True):
     N = (lambda k: k + 30) if n else (lambda k: None)
     body = ('<div style="display:flex;gap:24px;margin-top:14px;align-items:flex-start">'
-            '<div style="flex:1"><div style="font:400 16px/1.6 Noto Sans SC;color:var(--onv)">感谢使用纯粹直播 TV，期待下次再见。</div>'
+            '<div style="flex:1"><div style="font:400 16px/1.6 Noto Sans SC;color:var(--onv)">感谢使用棱镜直播 TV，期待下次再见。</div>'
             f'<div style="display:flex;align-items:center;gap:6px;margin-top:16px;font:600 16px Noto Sans SC"><span style="color:#FF5C7A">{mr("favorite", 20)}</span>捐赠支持</div>'
             '<div style="font:400 14px/1.6 Noto Sans SC;color:var(--onv);margin-top:6px">项目全程开源免费，无任何付费门槛。若是本应用给您带来便利，欢迎微信扫码请开发者喝瓶牛奶，支持后续更新维护。</div></div>'
             f'<div style="background:#fff;border-radius:12px;padding:8px;flex:none">{qr(132)}</div></div>')
@@ -153,7 +153,7 @@ def agree3():
     items = ''.join(f'<div style="font:400 16px/1.25 Noto Sans SC;margin-bottom:8px">{t}</div>' for t in AGREE)
     body = ('<div class="pw" style="padding:24px 48px"><div style="width:600px">'
             '<div style="font:700 20px Noto Sans SC;text-align:center">使用须知</div><div style="height:20px"></div>'
-            '<div style="font:700 14px Noto Sans SC">欢迎使用纯粹直播 TV，请在使用前仔细阅读以下内容：</div><div style="height:12px"></div>'
+            '<div style="font:700 14px Noto Sans SC">欢迎使用棱镜直播 TV，请在使用前仔细阅读以下内容：</div><div style="height:12px"></div>'
             f'<div style="padding-left:14px;padding-right:4px">{items}</div><div style="height:8px"></div>'
             '<div style="font:700 14px Noto Sans SC">您继续使用本软件，即视为已阅读并同意上述全部内容。</div><div style="height:24px"></div>'
             f'<div style="display:flex;justify-content:center;gap:16px">{btn3("已阅读并同意", size="m", kind="f fmk fb")}{btn3("确定退出吗?", size="m", kind="sec")}</div>'
@@ -167,7 +167,7 @@ def agree4(n=True):
                     for i, t in enumerate(AGREE))
     body = ('<div class="pw" style="padding:28px 48px"><div style="width:720px">'
             '<div style="font:600 28px Noto Sans SC;text-align:center">使用须知</div>'
-            '<div style="font:400 16px/1.6 Noto Sans SC;color:var(--onv);text-align:center;margin-top:8px">欢迎使用纯粹直播 TV，请在使用前仔细阅读以下内容：</div>'
+            '<div style="font:400 16px/1.6 Noto Sans SC;color:var(--onv);text-align:center;margin-top:8px">欢迎使用棱镜直播 TV，请在使用前仔细阅读以下内容：</div>'
             f'<div style="margin-top:14px;border-radius:16px;background:var(--scl);padding:14px 22px 18px;font:400 18px/1.6 Noto Sans SC">{items}</div>'
             '<div style="font:400 16px/1.6 Noto Sans SC;color:var(--onv);text-align:center;margin-top:14px">您继续使用本软件，即视为已阅读并同意上述全部内容。</div>'
             f'<div style="display:flex;justify-content:center;gap:16px;margin-top:22px">{btn4("已阅读并同意", kind="pri", focused=True, nn=N(1))}{btn4("退出", nn=N(2), tag="chg")}</div>'

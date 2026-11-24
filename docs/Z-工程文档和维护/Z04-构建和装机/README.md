@@ -21,9 +21,9 @@
 
 | 类型 | 包名 | 应用名 | 签名 | 压缩 | 用途 |
 |---|---|---|---|---|---|
-| debug | `com.mystyle.purelive.v4dev`（`applicationIdSuffix = ".v4dev"`） | 纯粹直播 v4dev | 调试密钥 | 关 | 开发 |
-| profile | 同上 | 纯粹直播 v4dev | 调试密钥 | 照 release | 真机验证、基准测试 |
-| release | `com.mystyle.purelive`（覆盖安装 3.x） | 纯粹直播 | 有完整的 `android/key.properties` 用它，否则用调试密钥并打警告；`-PpureLive.requireReleaseSigning=true` 时缺了直接失败（`:9-25`、`:66-71`） | `isMinifyEnabled`、`isShrinkResources`，ProGuard 规则 `proguard-rules.pro` | 发布 |
+| debug | `com.mystyle.purelive.v4dev`（`applicationIdSuffix = ".v4dev"`） | 棱镜直播 v4dev | 调试密钥 | 关 | 开发 |
+| profile | 同上 | 棱镜直播 v4dev | 调试密钥 | 照 release | 真机验证、基准测试 |
+| release | `com.mystyle.purelive`（覆盖安装 3.x） | 棱镜直播 | 有完整的 `android/key.properties` 用它，否则用调试密钥并打警告；`-PpureLive.requireReleaseSigning=true` 时缺了直接失败（`:9-25`、`:66-71`） | `isMinifyEnabled`、`isShrinkResources`，ProGuard 规则 `proguard-rules.pro` | 发布 |
 
   测试包和正式包并存，不碰用户的 3.x（D-019）。`minSdk = 26`、`targetSdk = 37`、`compileSdk = 37`；versionCode 由 Flutter 按 ABI 算：`--split-per-abi` 时 armeabi-v7a、arm64-v8a、x86_64 分别是 `1000、2000、4000 + 构建号`（构建号 5001 → 6001、7001、9001，PROCESS 第 11 节）。
 - 调试密钥：环境脚本设 `ANDROID_USER_HOME=~/.android-purelive`，Gradle 用其中的 `debug.keystore`；这把密钥和 Windows 主机共用，也是 3.2.11 正式包的签名密钥，所以本机构建的正式包能覆盖安装 3.x（D-006，细节在 Y01）。

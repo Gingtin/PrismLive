@@ -658,9 +658,9 @@ def v4_notify():
             f'<div class="sbar"><span>21:36</span>{notif_icon("new", 16)}<span class="ntag new">新</span>'
             f'<span class="r"><span class="mi">wifi</span><span class="mi">battery_full</span></span></div>'
             '<div class="shade">'
-            f'<div class="ntf"><div class="h">{notif_icon("new", 16, "#e8eaf0")}纯粹直播 · 12:34</div><div class="t">正在录制 · 晚风</div>'
+            f'<div class="ntf"><div class="h">{notif_icon("new", 16, "#e8eaf0")}棱镜直播 · 12:34</div><div class="t">正在录制 · 晚风</div>'
             '<div class="s">深夜电台 · 点歌接龙到天亮 · 原画</div><div class="a"><span>全部停止</span><span>录制中心</span></div></div>'
-            f'<div class="ntf"><div class="h">{notif_icon("new", 16, "#e8eaf0")}纯粹直播<span class="ntag prop">建议换成右下图形</span></div><div class="t">录制已停止 · 晚风</div>'
+            f'<div class="ntf"><div class="h">{notif_icon("new", 16, "#e8eaf0")}棱镜直播<span class="ntag prop">建议换成右下图形</span></div><div class="t">录制已停止 · 晚风</div>'
             '<div class="s">后台被系统结束。已保存 12:34 的录像。</div><div class="a"><span>打开录制中心</span></div></div>'
             f'<div class="bigicons">{big}</div>'
             '</div></div>')

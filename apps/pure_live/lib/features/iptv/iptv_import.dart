@@ -25,8 +25,14 @@ enum IptvImportOrigin {
   /// An http(s) address.
   network,
 
+  /// Curated public high-availability presets (playlists only).
+  presets,
+
   /// Pasted text (playlists only).
   text,
+
+  /// Smart extraction & batch import (playlists only).
+  batch,
 
   /// The built-in default guide (guides only).
   defaultGuide,
@@ -135,14 +141,26 @@ Future<IptvImportOrigin?> chooseImportOrigin(BuildContext context, IptvImportKin
                 i18n('network_import'),
                 i18n(playlist ? 'iptv_origin_network_playlist' : 'iptv_origin_network_guide'),
               ),
-              if (playlist)
+              if (playlist) ...[
+                option(
+                  IptvImportOrigin.presets,
+                  AppIcons.settingsPreferPlatform,
+                  '精选预设源',
+                  '央视与各大卫视（每日测速）、赛事与精选源',
+                ),
+                option(
+                  IptvImportOrigin.batch,
+                  AppIcons.batchSources,
+                  i18n('iptv_origin_batch'),
+                  i18n('iptv_origin_batch_desc'),
+                ),
                 option(
                   IptvImportOrigin.text,
                   AppIcons.pasteText,
                   i18n('iptv_origin_text'),
                   i18n('iptv_origin_text_desc'),
-                )
-              else
+                ),
+              ] else
                 option(
                   IptvImportOrigin.defaultGuide,
                   AppIcons.guide,
@@ -272,13 +290,16 @@ InputDecoration iptvFieldDecoration(
 /// button becomes "重试"; it closes with the result when it succeeds.
 class IptvNetworkImportDialog extends StatefulWidget {
   /// Creates the dialog.
-  const new({required this.kind, required this.run, super.key});
+  const new({required this.kind, required this.run, this.onSwitchToBatch, super.key});
 
   /// What is imported.
   final IptvImportKind kind;
 
   /// The import.
   final IptvImportRun run;
+
+  /// Optional callback to open batch import when multi-source text is detected.
+  final void Function(String text)? onSwitchToBatch;
 
   @override
   State<IptvNetworkImportDialog> createState() => _NetworkImportDialogState();
@@ -289,13 +310,35 @@ class _NetworkImportDialogState extends State<IptvNetworkImportDialog> {
   final _name = TextEditingController();
   bool _running = false;
   bool _failed = false;
+  int _detectedBatchCount = 0;
   String? _urlError;
   String? _message;
 
   @override
   void initState() {
     super.initState();
-    _url.addListener(() => setState(() {}));
+    _url.addListener(_onUrlChanged);
+  }
+
+  void _onUrlChanged() {
+    final text = _url.text.trim();
+    if (widget.kind == IptvImportKind.playlist && text.isNotEmpty) {
+      final sources = IptvSmartExtractor.extract(text);
+      if (sources.length == 1) {
+        final first = sources.first;
+        if (first.name.isNotEmpty && _name.text.isEmpty) {
+          _name.text = first.name;
+        }
+        if (first.url != text && (text.contains('::') || text.contains('，') || text.contains(','))) {
+          _url.text = first.url;
+          _url.selection = TextSelection.collapsed(offset: first.url.length);
+        }
+      }
+      _detectedBatchCount = sources.length;
+    } else {
+      _detectedBatchCount = 0;
+    }
+    setState(() {});
   }
 
   @override
@@ -380,6 +423,36 @@ class _NetworkImportDialogState extends State<IptvNetworkImportDialog> {
             ),
             onSubmitted: (_) => unawaited(_submit()),
           ),
+          if (_detectedBatchCount > 1 && widget.onSwitchToBatch != null) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: scheme.primaryContainer.withValues(alpha: 0.5),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  Icon(AppIcons.batchSources, size: 20, color: scheme.primary),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      i18n('iptv_batch_detected_helper', args: {'count': '$_detectedBatchCount'}),
+                      style: context.textStyles.t12.copyWith(color: scheme.onPrimaryContainer),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      final text = _url.text;
+                      Navigator.pop(context);
+                      widget.onSwitchToBatch?.call(text);
+                    },
+                    child: Text(i18n('iptv_open_batch_dialog')),
+                  ),
+                ],
+              ),
+            ),
+          ],
           if (!_running) ...[
             const SizedBox(height: 16),
             TextField(

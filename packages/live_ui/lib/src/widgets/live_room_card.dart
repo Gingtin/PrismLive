@@ -10,6 +10,7 @@ import 'package:live_ui/src/theme/text_styles.dart';
 import 'package:live_ui/src/theme/tv_colors.dart';
 import 'package:live_ui/src/widgets/avatar.dart';
 import 'package:live_ui/src/widgets/network_image.dart';
+import 'package:live_ui/src/widgets/realtime_cover_cache.dart';
 import 'package:live_ui/src/widgets/room_card.dart';
 import 'package:live_ui/src/widgets/room_card_appearance.dart';
 
@@ -246,27 +247,59 @@ final class _Parts {
   bool get showReplay => appearance.showReplayBadge && data.isReplay;
   String? get restriction => (data.restrictionLabel?.isEmpty ?? true) ? null : data.restrictionLabel;
 
-  Widget coverPlaceholder() => ColoredBox(
-    key: const ValueKey('room-card-cover-placeholder'),
-    color: scheme.surfaceContainer,
-    child: Center(child: Icon(AppIcons.coverPlaceholder, size: 24, color: scheme.outline)),
-  );
+  Widget coverPlaceholder() {
+    final avatar = data.avatarUrl?.trim() ?? '';
+    final hasAvatar = avatar.isNotEmpty;
+    return ColoredBox(
+      key: const ValueKey('room-card-cover-placeholder'),
+      color: scheme.surfaceContainer,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          if (hasAvatar)
+            Opacity(
+              opacity: 0.25,
+              child: LiveNetworkImage(
+                url: avatar,
+                placeholder: (_) => const SizedBox.shrink(),
+                error: (_) => const SizedBox.shrink(),
+              ),
+            ),
+          Center(
+            child: hasAvatar
+                ? CommonAvatar(avatarUrl: avatar, fallbackName: data.anchorName, radius: 22)
+                : Icon(AppIcons.coverPlaceholder, size: 28, color: scheme.outline),
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget coverImage() {
-    final url = data.coverUrl?.trim() ?? '';
-    if (url.isEmpty) return coverPlaceholder();
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final width = constraints.maxWidth.isFinite ? constraints.maxWidth : 240.0;
-        final cacheWidth = (width * MediaQuery.devicePixelRatioOf(context)).round().clamp(240, 720);
-        return LiveNetworkImage(
-          url: url,
-          memCacheWidth: cacheWidth,
-          placeholder: (_) => coverPlaceholder(),
-          error: (_) => coverPlaceholder(),
-        );
-      },
-    );
+    final effectiveUrl = (data.keyframeUrl?.trim().isNotEmpty ?? false)
+        ? data.keyframeUrl!.trim()
+        : (data.coverUrl?.trim() ?? '');
+    final fallback = effectiveUrl.isEmpty
+        ? coverPlaceholder()
+        : LayoutBuilder(
+            builder: (context, constraints) {
+              final width = constraints.maxWidth.isFinite ? constraints.maxWidth : 240.0;
+              final cacheWidth = (width * MediaQuery.devicePixelRatioOf(context)).round().clamp(240, 720);
+              return LiveNetworkImage(
+                url: effectiveUrl,
+                memCacheWidth: cacheWidth,
+                placeholder: (_) => coverPlaceholder(),
+                error: (_) => coverPlaceholder(),
+              );
+            },
+          );
+    if (data.identityKey != null && data.identityKey!.isNotEmpty) {
+      return RealtimeCoverView(
+        identityKey: data.identityKey,
+        fallback: fallback,
+      );
+    }
+    return fallback;
   }
 
   Widget audienceChip() {

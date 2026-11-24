@@ -26,7 +26,7 @@
 
 ## v3 的样子
 
-- **关于**（`modules/about/about_page.dart`）：顶栏只有返回、没有标题；图标 80（桌面 96）圆角 24、浅主色描边和阴影，进场 1 秒 `Curves.elasticOut` 弹跳（`:31-55`）；“纯粹直播”20 号粗；版本小标签 11 号（`:57-77`）。组“关于”：在线更新（`Remix.download_cloud_2_line`，右边主色容器小标签写当前版本）→ 历史记录（`Remix.history_line`，“历史版本更新记录”）→ 开源许可证（`Remix.shield_user_line`）。组“项目”：项目主页（`Remix.code_s_slash_line`，副标题是地址）→ 项目声明（`Remix.error_warning_line` 错误色，副标题是整段声明，不能点）（`:82-128`）。
+- **关于**（`modules/about/about_page.dart`）：顶栏只有返回、没有标题；图标 80（桌面 96）圆角 24、浅主色描边和阴影，进场 1 秒 `Curves.elasticOut` 弹跳（`:31-55`）；“棱镜直播”20 号粗；版本小标签 11 号（`:57-77`）。组“关于”：在线更新（`Remix.download_cloud_2_line`，右边主色容器小标签写当前版本）→ 历史记录（`Remix.history_line`，“历史版本更新记录”）→ 开源许可证（`Remix.shield_user_line`）。组“项目”：项目主页（`Remix.code_s_slash_line`，副标题是地址）→ 项目声明（`Remix.error_warning_line` 错误色，副标题是整段声明，不能点）（`:82-128`）。
 - **版本更新**（`modules/version/version_page.dart`）：标题“版本更新”；本平台一张卡片（Android：`Remix.android_line` +“适用于 Android 移动端系统”；Windows、macOS 各自的卡片）；每种包一个小标题（ARM64 (64位)、ARM32 (通用)、x86_64 (Arch)；EXE 安装包、MSIX 安装包、便携 ZIP；macOS 通用 ZIP），下面两列（桌面 2–4 列）“下载源 1…19”按钮（`Remix.link_m`，开了“只用 GitHub 官方源”时只有一个“GitHub 官方源”）；然后“更新日志”卡片（Markdown）。失败：`Icons.cloud_off_rounded` 48 +“更新信息获取失败”+“请检查网络和更新源后重试。”+“重试”。
 - **下载源对话框**（`:343-438`）：圆形 `Remix.download_cloud_2_line` + 架构名 + “下载源 N”；地址（可选中）；实心“点击下载”、描边“复制链接”；“取消”。
 - **版本历史**（`modules/about/version_history.dart`）：标题“历史版本更新记录”，右边刷新（`Remix.refresh_line`）。屏宽 ≤760：卡片列表（版本小标签 + 日期 +“文件大小: …”+ 箭头），点开大对话框（圆角 28，最高 640）：头像、版本、“发布于 …”、打开发布页面（`Remix.link`）→ 更新日志 →“下载文件”→ 每个文件（`Remix.box_3_line`、文件名、“大小 · 已被下载 N 次”、复制 `Remix.file_copy_2_fill`、下载 `Remix.download_2_line`）→ 最后“关闭”。屏宽 >760：左边 320 的列表（圆点、版本、日期、箭头，选中主色描边），右边详情。
@@ -138,7 +138,7 @@
 | Android 手机 | 竖屏如图；版本历史横屏左右分栏 |
 | 宽屏（平板、Windows、Linux、iPad、macOS） | 关于、版本更新最宽 720；版本历史左右分栏；Windows 的“本机”标在 EXE 安装包 |
 | 电视 | A17.9：pure_live_TV 的关于、应用更新、更新历史，内容和顺序对齐这里 |
-| 苹果平台差异 | iOS 没有安装包，显示“打开发布页面”；macOS 菜单栏有“关于纯粹直播”（A18.2） |
+| 苹果平台差异 | iOS 没有安装包，显示“打开发布页面”；macOS 菜单栏有“关于棱镜直播”（A18.2） |
 
 ## 待选（A 是建议）
 

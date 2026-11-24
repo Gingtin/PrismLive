@@ -23,10 +23,12 @@ import 'package:pure_live/features/live_play/danmaku/chat_panel.dart';
 import 'package:pure_live/features/live_play/danmaku/danmaku_settings_panel.dart';
 import 'package:pure_live/features/live_play/danmaku/message_panel.dart';
 import 'package:pure_live/features/live_play/danmaku/super_chat_panel.dart';
+import 'package:pure_live/features/live_play/dialogs/audio_equalizer_sheet.dart';
 import 'package:pure_live/features/live_play/dialogs/iptv_guide.dart';
 import 'package:pure_live/features/live_play/dialogs/playback_info_panel.dart';
 import 'package:pure_live/features/live_play/dialogs/room_dialogs.dart';
 import 'package:pure_live/features/live_play/dialogs/stream_dialogs.dart';
+import 'package:pure_live/features/live_play/dialogs/video_picture_sheet.dart';
 import 'package:pure_live/features/live_play/layout/edge_swipe_back.dart';
 import 'package:pure_live/features/live_play/layout/portrait_panel.dart';
 import 'package:pure_live/features/live_play/layout/room_details.dart';
@@ -72,6 +74,7 @@ import 'package:pure_live/shared/rooms/archive/archive_rate_dialog.dart';
 import 'package:pure_live/shared/rooms/archive/archive_recording.dart';
 import 'package:pure_live/shared/rooms/archive/bilibili_archive_controller.dart';
 import 'package:pure_live/shared/rooms/auto_room_switch.dart';
+import 'package:pure_live/shared/rooms/stream_frame_sniffer.dart';
 
 /// The room's clock: the danmaku filter, the gift lines' limit and combo
 /// window go by it (tests replace it with their simulated time).
@@ -233,6 +236,7 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> with SingleTickerPr
   @override
   void initState() {
     super.initState();
+    StreamFrameSniffer.instance.pause();
     RoomCommands.current.value = _commands;
     DesktopWindow.fullScreen.addListener(_windowFullScreenChanged);
     OverlayWindow.active.addListener(_overlayShown);
@@ -605,6 +609,7 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> with SingleTickerPr
     androidCompatibility: settings.get(Settings.playerCompatMode),
     rtxVideoSuperResolution: settings.get(Settings.enableRtxVsr),
     volumeGainDb: settings.get(Settings.volumeBoostDb),
+    liveBufferProfile: settings.get(Settings.liveBufferProfile),
   );
 
   /// What decides whether a kept player fits ([PlayerStandby]): every field
@@ -619,6 +624,7 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> with SingleTickerPr
     config.androidCompatibility,
     config.rtxVideoSuperResolution,
     config.volumeGainDb,
+    config.liveBufferProfile,
   );
 
   /// Picture-in-picture or the desktop mini window began or ended.
@@ -649,6 +655,7 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> with SingleTickerPr
 
   @override
   void dispose() {
+    StreamFrameSniffer.instance.resume();
     if (_remoteTarget case final target?) _remote?.unregister(target);
     _autoRoomSwitch?.dispose();
     liveRouteObserver.currentRoute.removeListener(_syncAutoRoomSwitch);
@@ -1260,6 +1267,18 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> with SingleTickerPr
     ),
     RoomPanelKind.volume => RoomVolumePanel(
       key: const ValueKey('panel-volume'),
+      controller: controller,
+      onClose: _panels.close,
+      dragToClose: portrait,
+    ),
+    RoomPanelKind.equalizer => AudioEqualizerSheet(
+      key: const ValueKey('panel-equalizer'),
+      controller: controller,
+      onClose: _panels.close,
+      dragToClose: portrait,
+    ),
+    RoomPanelKind.pictureColor => VideoPictureSheet(
+      key: const ValueKey('panel-picture-color'),
       controller: controller,
       onClose: _panels.close,
       dragToClose: portrait,
