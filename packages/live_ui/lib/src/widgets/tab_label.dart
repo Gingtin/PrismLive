@@ -11,7 +11,7 @@ import 'package:live_ui/src/widgets/scrollable_tab_bar.dart';
 /// (U.1c c21; the theme only tints the tab).
 class TabLabel extends StatelessWidget {
   /// Creates the content.
-  const new({required this.label, this.count, this.badge, this.countKey, this.leading, super.key});
+  const new({required this.label, this.count, this.badge, this.countKey, this.leading, this.trailing, super.key});
 
   /// The words.
   final String label;
@@ -27,6 +27,9 @@ class TabLabel extends StatelessWidget {
 
   /// A decorative platform logo before the label; the words name the tab.
   final Widget? leading;
+
+  /// An optional trailing widget after the label (e.g. proxy badge).
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -65,6 +68,10 @@ class TabLabel extends StatelessWidget {
               ).tabular,
             ),
           ),
+        ],
+        if (trailing != null) ...[
+          const SizedBox(width: 4),
+          trailing!,
         ],
       ],
     );

@@ -54,9 +54,9 @@ void main() {
       final manager = DecoderBudgetManager(maxHardwareDecoders: 2)
         ..focusedCellId = 10
         ..allocateDecoderForCell(1)
-        ..allocateDecoderForCell(2);
+        ..allocateDecoderForCell(2)
+        ..reset();
 
-      manager.reset();
       expect(manager.focusedCellId, isNull);
     });
   });

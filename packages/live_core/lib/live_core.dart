@@ -97,4 +97,5 @@ export 'src/sites/youtube/youtube_api.dart';
 export 'src/sites/youtube/youtube_site.dart';
 export 'src/sites/yy/yy_api.dart';
 export 'src/sites/yy/yy_site.dart';
+export 'src/source_descriptor.dart';
 export 'src/tars.dart';

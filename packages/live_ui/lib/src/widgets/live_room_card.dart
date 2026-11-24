@@ -10,6 +10,7 @@ import 'package:live_ui/src/theme/text_styles.dart';
 import 'package:live_ui/src/theme/tv_colors.dart';
 import 'package:live_ui/src/widgets/avatar.dart';
 import 'package:live_ui/src/widgets/network_image.dart';
+import 'package:live_ui/src/widgets/proxy_badge.dart';
 import 'package:live_ui/src/widgets/realtime_cover_cache.dart';
 import 'package:live_ui/src/widgets/room_card.dart';
 import 'package:live_ui/src/widgets/room_card_appearance.dart';
@@ -443,7 +444,12 @@ final class _Parts {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     spacing: 4,
-                    children: [if (showPlatform) platformChip(), if (card.followed) followedMark()],
+                    children: [
+                      if (showPlatform) platformChip(),
+                      if (card.followed) followedMark(),
+                      if (data.proxyMode != null && data.proxyMode != ProxyBadgeMode.direct)
+                        ProxyBadge(mode: data.proxyMode!, compact: true),
+                    ],
                   ),
                 ),
               if (showReplay)

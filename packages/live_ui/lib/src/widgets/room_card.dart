@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:live_ui/src/widgets/proxy_badge.dart';
 
 /// What an audience figure counts (3.x `AudienceMetricType`).
 enum RoomAudienceKind {
@@ -58,6 +59,7 @@ final class RoomCardData {
     this.platformName,
     this.isOffline = false,
     this.introLine,
+    this.proxyMode,
   });
 
   /// Platform id; the badge shows it in capitals (3.x).
@@ -108,6 +110,9 @@ final class RoomCardData {
   /// The platform says the streamer is off (offline, banned, carousel): the
   /// cover is dimmed and marked (`LiveRoomCard`, U.4a c4).
   final bool isOffline;
+
+  /// Network proxy requirement mode for this room's platform.
+  final ProxyBadgeMode? proxyMode;
 
   @override
   bool operator ==(Object other) =>

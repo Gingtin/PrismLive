@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:live_core/live_core.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/services.dart';
@@ -11,12 +12,13 @@ import 'package:pure_live/features/home/home_menu.dart';
 import 'package:pure_live/features/home/menu_button.dart';
 import 'package:pure_live/features/popular/popular_catalog.dart';
 import 'package:pure_live/features/popular/popular_grid.dart';
+import 'package:pure_live/features/popular/widgets/pinned_dock.dart';
+import 'package:pure_live/features/popular/widgets/source_picker_sheet.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_args.dart';
 import 'package:pure_live/routes/route_path.dart';
 import 'package:pure_live/shared/rooms/paging.dart';
-import 'package:pure_live/shared/rooms/platform_picker.dart';
 import 'package:pure_live/shared/rooms/room_feed.dart';
 import 'package:pure_live/shared/rooms/room_texts.dart';
 
@@ -179,21 +181,17 @@ class _PopularPageState extends ConsumerState<PopularPage> with TickerProviderSt
   Future<void> _pickPlatform() async {
     final tabs = _tabs;
     if (tabs == null) return;
-    final screen = MediaQuery.sizeOf(context);
-    final side = screen.width >= 600;
-    // A09.12 c3: a long list opens at the design's height (half the screen
-    // and a bit) and drags up to the full height; a short one fits itself.
-    final tall =
-        !side &&
-        PlatformPicker.heightOf(_ids.length, width: screen.width, textScaler: MediaQuery.textScalerOf(context)) >
-            screen.height * platformPickerOpenHeight;
-    final picked = await showAdaptivePanel<int>(
-      context,
-      side: side,
-      openHeight: tall ? platformPickerOpenHeight : null,
-      builder: (context) => PlatformPicker(ids: _ids, current: tabs.index),
+    await SourcePickerSheet.show(
+      context: context,
+      selectedPlatform: _current ?? (_ids.isNotEmpty ? _ids.first : ''),
+      pinnedIds: _ids.take(8).toList(),
+      onSelect: (id) {
+        final index = _ids.indexOf(id);
+        if (index >= 0 && mounted && _tabs == tabs) {
+          tabs.animateTo(index);
+        }
+      },
     );
-    if (picked != null && mounted && _tabs == tabs) tabs.animateTo(picked);
   }
 
   @override
@@ -203,6 +201,24 @@ class _PopularPageState extends ConsumerState<PopularPage> with TickerProviderSt
     _syncTabs(ids);
     final phoneTab = showsHomeBarButtons(context, inHome: widget.route.inHome);
     final tabs = _tabs;
+
+    const defaultPinned = [
+      SiteIds.bilibili,
+      SiteIds.douyu,
+      SiteIds.huya,
+      SiteIds.douyin,
+      SiteIds.twitch,
+      SiteIds.youtube,
+      SiteIds.iptv,
+    ];
+    final pinnedIds = <String>[
+      for (final p in defaultPinned) if (ids.contains(p)) p,
+    ];
+    for (final id in ids) {
+      if (pinnedIds.length >= 7) break;
+      if (!pinnedIds.contains(id)) pinnedIds.add(id);
+    }
+
     return Scaffold(
       appBar: hidesHomeBar(context, inHome: widget.route.inHome)
           ? null
@@ -232,6 +248,17 @@ class _PopularPageState extends ConsumerState<PopularPage> with TickerProviderSt
                                 TabLabel(
                                   leading: PlatformLogo(id, size: 20),
                                   label: platformName(id, fallback: sites.of(id).name),
+                                  trailing: switch (SiteIds.descriptorOf(id).networkMode) {
+                                    NetworkMode.proxyRequired => const ProxyBadge(
+                                        mode: ProxyBadgeMode.proxyRequired,
+                                        compact: true,
+                                      ),
+                                    NetworkMode.proxyRecommended => const ProxyBadge(
+                                        mode: ProxyBadgeMode.proxyRecommended,
+                                        compact: true,
+                                      ),
+                                    NetworkMode.direct => null,
+                                  },
                                 ),
                             ],
                           ),
@@ -255,10 +282,25 @@ class _PopularPageState extends ConsumerState<PopularPage> with TickerProviderSt
               buttonIcon: AppIcons.platformSettings,
               onButtonPressed: () => unawaited(AppNavigator.toNamed<void>(RoutePath.kSettingsHotAreas)),
             )
-          : TabBarView(
-              controller: tabs,
-              physics: const PureLivePageScrollPhysics(),
-              children: [for (final id in ids) PopularPlatformView(key: ValueKey('popular-$id'), platform: id)],
+          : Column(
+              children: [
+                PinnedDock(
+                  pinnedIds: pinnedIds,
+                  selectedId: _current ?? (ids.isNotEmpty ? ids.first : ''),
+                  onSelect: (id) {
+                    final index = ids.indexOf(id);
+                    if (index >= 0) tabs.animateTo(index);
+                  },
+                  onOpenPicker: _pickPlatform,
+                ),
+                Expanded(
+                  child: TabBarView(
+                    controller: tabs,
+                    physics: const PureLivePageScrollPhysics(),
+                    children: [for (final id in ids) PopularPlatformView(key: ValueKey('popular-$id'), platform: id)],
+                  ),
+                ),
+              ],
             ),
     );
   }

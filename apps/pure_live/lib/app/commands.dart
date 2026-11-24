@@ -3,7 +3,9 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:pure_live/features/command_palette/command_palette.dart';
 import 'package:pure_live/features/home/home_menu.dart';
+import 'package:pure_live/features/privacy/boss_key.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_path.dart';
@@ -49,6 +51,9 @@ enum AppCommand {
 
   /// ⌘ and [key].
   SingleActivator get activator => SingleActivator(key, meta: true);
+
+  /// Ctrl and [key].
+  SingleActivator get controlActivator => SingleActivator(key, control: true);
 
   /// The home destination this command shows, if any.
   HomeMenu? get homeMenu => switch (this) {
@@ -129,6 +134,25 @@ abstract interface class RoomCommands {
 /// ⌘R, the room's refresh.
 const SingleActivator refreshActivator = SingleActivator(LogicalKeyboardKey.keyR, meta: true);
 
+/// ⌘K, Command Palette on macOS.
+const SingleActivator commandPaletteActivatorMac = SingleActivator(LogicalKeyboardKey.keyK, meta: true);
+
+/// Ctrl+K, Command Palette on Windows/Linux.
+const SingleActivator commandPaletteActivatorWin = SingleActivator(LogicalKeyboardKey.keyK, control: true);
+
+/// ⌘⇧H, Boss Key on macOS.
+const SingleActivator bossKeyActivatorMac = SingleActivator(LogicalKeyboardKey.keyH, meta: true, shift: true);
+
+/// Ctrl+Shift+H, Boss Key on Windows/Linux.
+const SingleActivator bossKeyActivatorWin = SingleActivator(LogicalKeyboardKey.keyH, control: true, shift: true);
+
+void _openCommandPalette() {
+  final ctx = AppNavigator.navigatorContext;
+  if (ctx != null) {
+    unawaited(CommandPalette.show(ctx));
+  }
+}
+
 /// The [AppCommand]s as keyboard shortcuts over [child] on an iPad (A18.1
 /// c10); elsewhere [child] alone (the Mac has them in its menu bar). The
 /// iPad also gets them as the system's key commands ([IosKeyCommands]):
@@ -162,18 +186,49 @@ class _AppCommandShortcutsState extends State<AppCommandShortcuts> {
 
   @override
   Widget build(BuildContext context) {
-    if (defaultTargetPlatform != TargetPlatform.iOS) return widget.child;
-    // The titles follow the language: sent again on every build (only when
-    // they changed).
-    IosKeyCommands.sync();
-    if (IosKeyCommands.active.value) return widget.child;
-    return CallbackShortcuts(
-      bindings: {
-        for (final command in AppCommand.values) command.activator: command.run,
-        refreshActivator: () => unawaited(RoomCommands.current.value?.refresh()),
-      },
-      child: widget.child,
-    );
+    final isApple = defaultTargetPlatform == TargetPlatform.macOS || defaultTargetPlatform == TargetPlatform.iOS;
+    final isDesktop = const {
+      TargetPlatform.windows,
+      TargetPlatform.linux,
+      TargetPlatform.macOS,
+    }.contains(defaultTargetPlatform);
+
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      // The titles follow the language: sent again on every build (only when
+      // they changed).
+      IosKeyCommands.sync();
+      if (IosKeyCommands.active.value) return widget.child;
+      return CallbackShortcuts(
+        bindings: {
+          for (final command in AppCommand.values) command.activator: command.run,
+          commandPaletteActivatorMac: _openCommandPalette,
+          bossKeyActivatorMac: BossKey.trigger,
+          refreshActivator: () => unawaited(RoomCommands.current.value?.refresh()),
+        },
+        child: widget.child,
+      );
+    }
+
+    if (isDesktop) {
+      return CallbackShortcuts(
+        bindings: {
+          commandPaletteActivatorMac: _openCommandPalette,
+          commandPaletteActivatorWin: _openCommandPalette,
+          bossKeyActivatorMac: BossKey.trigger,
+          bossKeyActivatorWin: BossKey.trigger,
+          for (final command in AppCommand.values)
+            if (isApple) command.activator: command.run else command.controlActivator: command.run,
+          if (isApple)
+            refreshActivator: () => unawaited(RoomCommands.current.value?.refresh())
+          else
+            const SingleActivator(LogicalKeyboardKey.keyR, control: true): () =>
+                unawaited(RoomCommands.current.value?.refresh()),
+        },
+        child: widget.child,
+      );
+    }
+
+    return widget.child;
   }
 }
 

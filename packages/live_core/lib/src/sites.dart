@@ -1,4 +1,5 @@
 import 'package:live_core/src/live_site.dart';
+import 'package:live_core/src/source_descriptor.dart';
 
 /// Platform ids, in the order 3.x listed its platforms (`Sites`).
 abstract final class SiteIds {
@@ -104,6 +105,78 @@ abstract final class SiteIds {
   /// 17LIVE.
   static const String seventeenLive = '17live';
 
+  /// Huajiao (花椒直播).
+  static const String huajiao = 'huajiao';
+
+  /// OPENREC.tv.
+  static const String openrec = 'openrec';
+
+  /// Nimo TV.
+  static const String nimotv = 'nimotv';
+
+  /// Rumble.
+  static const String rumble = 'rumble';
+
+  /// Dailymotion.
+  static const String dailymotion = 'dailymotion';
+
+  /// Facebook Live.
+  static const String facebook = 'facebook';
+
+  /// DLive.
+  static const String dlive = 'dlive';
+
+  /// Vimeo Live.
+  static const String vimeo = 'vimeo';
+
+  /// Mirrativ.
+  static const String mirrativ = 'mirrativ';
+
+  /// Penguin Sports (企鹅体育).
+  static const String qqSports = 'qqsports';
+
+  /// CCTV / Migu public streams (央视频/咪咕公开流).
+  static const String cctvLive = 'cctv_live';
+
+  /// Wave Live (浪Live).
+  static const String waveLive = 'wave_live';
+
+  /// Pluto TV (FAST TV).
+  static const String plutoTv = 'plutotv';
+
+  /// Mixcloud Live.
+  static const String mixcloud = 'mixcloud';
+
+  /// Radiko.
+  static const String radiko = 'radiko';
+
+  /// ARD/ZDF Mediathek.
+  static const String ardZdf = 'ard_zdf';
+
+  /// NHK World.
+  static const String nhkWorld = 'nhkworld';
+
+  /// France 24.
+  static const String france24 = 'france24';
+
+  /// Al Jazeera.
+  static const String alJazeera = 'aljazeera';
+
+  /// Chaturbate (NSFW).
+  static const String chaturbate = 'chaturbate';
+
+  /// Stripchat (NSFW).
+  static const String stripchat = 'stripchat';
+
+  /// Bongacams (NSFW).
+  static const String bongacams = 'bongacams';
+
+  /// Cam4 (NSFW).
+  static const String cam4 = 'cam4';
+
+  /// MyFreeCams (NSFW).
+  static const String myfreecams = 'myfreecams';
+
   /// Custom IPTV sources.
   static const String iptv = 'iptv';
 
@@ -160,15 +233,10 @@ abstract final class SiteIds {
   /// (Cloudflare refuses dart:io's TLS), is supported again (UPGRADES X-1,
   /// M4.34): its API goes through Android's system TLS.
   static const Set<String> retired = {
-    'huajiao',
-    'openrec',
     'ttinglive',
     'popkontv',
     'shopeelive',
     'vkvideolive',
-    'nimotv',
-    'dailymotion',
-    'rumble',
     'goodgame',
     'taobaolive',
   };
@@ -176,18 +244,12 @@ abstract final class SiteIds {
   /// Web hosts of the retired platforms, so a shared link is answered with
   /// "retired" instead of being ignored as unrecognised text.
   static const Set<String> retiredHosts = {
-    'huajiao.com',
-    'openrec.tv',
     'flextv.co.kr',
     'ttinglive.com',
     'popkontv.com',
     'goodgame.ru',
     'vkvideo.ru',
     'vkplay.live',
-    'dailymotion.com',
-    'dai.ly',
-    'rumble.com',
-    'nimo.tv',
     'shopee.co.id',
     'taobao.com',
     'm.tb.cn',
@@ -257,6 +319,499 @@ abstract final class SiteIds {
       if (retiredHosts.any((root) => host == root || host.endsWith('.$root'))) return true;
     }
     return false;
+  }
+
+  /// Master metadata descriptors for all 55+ platforms according to Spec 2.0.
+  static const Map<String, SourceDescriptor> descriptors = {
+    // 1. 国内综合 / 游戏直播 (11)
+    bilibili: SourceDescriptor(
+      id: bilibili,
+      name: '哔哩哔哩',
+      region: SourceRegion.domestic,
+      categories: {SourceCategory.game, SourceCategory.entertainment, SourceCategory.lifestyle},
+      networkMode: NetworkMode.direct,
+      isNative: true,
+      websiteUrl: 'https://live.bilibili.com',
+      aliases: ['b站', 'bz', 'bili', 'bilibili'],
+    ),
+    douyu: SourceDescriptor(
+      id: douyu,
+      name: '斗鱼',
+      region: SourceRegion.domestic,
+      categories: {SourceCategory.game, SourceCategory.entertainment},
+      networkMode: NetworkMode.direct,
+      isNative: true,
+      websiteUrl: 'https://www.douyu.com',
+      aliases: ['dy', 'douyu'],
+    ),
+    huya: SourceDescriptor(
+      id: huya,
+      name: '虎牙',
+      region: SourceRegion.domestic,
+      categories: {SourceCategory.game, SourceCategory.entertainment},
+      networkMode: NetworkMode.direct,
+      isNative: true,
+      websiteUrl: 'https://www.huya.com',
+      aliases: ['hy', 'huya'],
+    ),
+    douyin: SourceDescriptor(
+      id: douyin,
+      name: '抖音',
+      region: SourceRegion.domestic,
+      categories: {SourceCategory.entertainment, SourceCategory.lifestyle},
+      networkMode: NetworkMode.direct,
+      isNative: true,
+      websiteUrl: 'https://live.douyin.com',
+      aliases: ['dy', 'douyin'],
+    ),
+    kuaishou: SourceDescriptor(
+      id: kuaishou,
+      name: '快手',
+      region: SourceRegion.domestic,
+      categories: {SourceCategory.entertainment, SourceCategory.lifestyle},
+      networkMode: NetworkMode.direct,
+      websiteUrl: 'https://live.kuaishou.com',
+      aliases: ['ks', 'kuaishou'],
+    ),
+    cc: SourceDescriptor(
+      id: cc,
+      name: '网易CC',
+      region: SourceRegion.domestic,
+      categories: {SourceCategory.game, SourceCategory.entertainment},
+      networkMode: NetworkMode.direct,
+      websiteUrl: 'https://cc.163.com',
+      aliases: ['cc', '163', 'netease'],
+    ),
+    yy: SourceDescriptor(
+      id: yy,
+      name: 'YY直播',
+      region: SourceRegion.domestic,
+      categories: {SourceCategory.entertainment, SourceCategory.audio},
+      networkMode: NetworkMode.direct,
+      websiteUrl: 'https://www.yy.com',
+      aliases: ['yy'],
+    ),
+    xiaohongshu: SourceDescriptor(
+      id: xiaohongshu,
+      name: '小红书',
+      region: SourceRegion.domestic,
+      categories: {SourceCategory.lifestyle, SourceCategory.entertainment},
+      networkMode: NetworkMode.direct,
+      websiteUrl: 'https://www.xiaohongshu.com',
+      aliases: ['xhs', 'red'],
+    ),
+    weibo: SourceDescriptor(
+      id: weibo,
+      name: '微博直播',
+      region: SourceRegion.domestic,
+      categories: {SourceCategory.news, SourceCategory.entertainment},
+      networkMode: NetworkMode.direct,
+      websiteUrl: 'https://weibo.com',
+      aliases: ['wb', 'weibo'],
+    ),
+    baiduLive: SourceDescriptor(
+      id: baiduLive,
+      name: '百度直播',
+      region: SourceRegion.domestic,
+      categories: {SourceCategory.lifestyle, SourceCategory.news},
+      networkMode: NetworkMode.direct,
+      websiteUrl: 'https://live.baidu.com',
+      aliases: ['bd', 'baidu'],
+    ),
+    jdLive: SourceDescriptor(
+      id: jdLive,
+      name: '京东直播',
+      region: SourceRegion.domestic,
+      categories: {SourceCategory.lifestyle},
+      networkMode: NetworkMode.direct,
+      websiteUrl: 'https://jvod.300.cn',
+      aliases: ['jd', 'jingdong'],
+    ),
+
+    // 2. 国内泛娱乐 / 语音 / 体育 (10)
+    kugouLive: SourceDescriptor(
+      id: kugouLive,
+      name: '酷狗繁星',
+      region: SourceRegion.domestic,
+      categories: {SourceCategory.audio, SourceCategory.entertainment},
+      networkMode: NetworkMode.direct,
+      aliases: ['kg', 'kugou', 'fanxing'],
+    ),
+    sixRoom: SourceDescriptor(
+      id: sixRoom,
+      name: '六间房',
+      region: SourceRegion.domestic,
+      categories: {SourceCategory.entertainment},
+      networkMode: NetworkMode.direct,
+      aliases: ['6room', 'sixroom'],
+    ),
+    huajiao: SourceDescriptor(
+      id: huajiao,
+      name: '花椒直播',
+      region: SourceRegion.domestic,
+      categories: {SourceCategory.entertainment},
+      networkMode: NetworkMode.direct,
+      aliases: ['hj', 'huajiao'],
+    ),
+    inke: SourceDescriptor(
+      id: inke,
+      name: '映客直播',
+      region: SourceRegion.domestic,
+      categories: {SourceCategory.entertainment},
+      networkMode: NetworkMode.direct,
+      aliases: ['yk', 'inke'],
+    ),
+    missevan: SourceDescriptor(
+      id: missevan,
+      name: '猫耳FM',
+      region: SourceRegion.domestic,
+      categories: {SourceCategory.audio},
+      networkMode: NetworkMode.direct,
+      aliases: ['missevan', 'maoer'],
+    ),
+    kilakila: SourceDescriptor(
+      id: kilakila,
+      name: '克拉克拉',
+      region: SourceRegion.domestic,
+      categories: {SourceCategory.audio, SourceCategory.entertainment},
+      networkMode: NetworkMode.direct,
+      aliases: ['kila', 'hongdou'],
+    ),
+    qqSports: SourceDescriptor(
+      id: qqSports,
+      name: '企鹅体育',
+      region: SourceRegion.domestic,
+      categories: {SourceCategory.sports},
+      networkMode: NetworkMode.direct,
+      aliases: ['qqsports', 'penguin', 'qie'],
+    ),
+    cctvLive: SourceDescriptor(
+      id: cctvLive,
+      name: '央视频/咪咕公开流',
+      region: SourceRegion.domestic,
+      categories: {SourceCategory.sports, SourceCategory.news, SourceCategory.fastTv},
+      networkMode: NetworkMode.direct,
+      aliases: ['cctv', 'migu', 'yangshipin'],
+    ),
+    acfun: SourceDescriptor(
+      id: acfun,
+      name: 'AcFun',
+      region: SourceRegion.domestic,
+      categories: {SourceCategory.game, SourceCategory.entertainment},
+      networkMode: NetworkMode.direct,
+      aliases: ['ac', 'acfun', 'a站'],
+    ),
+    lookLive: SourceDescriptor(
+      id: lookLive,
+      name: 'LOOK直播',
+      region: SourceRegion.domestic,
+      categories: {SourceCategory.audio, SourceCategory.entertainment},
+      networkMode: NetworkMode.direct,
+      aliases: ['look', '163look'],
+    ),
+
+    // 3. 国际综合 / 电竞头部 (10)
+    twitch: SourceDescriptor(
+      id: twitch,
+      name: 'Twitch',
+      region: SourceRegion.international,
+      categories: {SourceCategory.game, SourceCategory.entertainment},
+      networkMode: NetworkMode.proxyRequired,
+      isNative: true,
+      aliases: ['tw', 'twitch'],
+    ),
+    youtube: SourceDescriptor(
+      id: youtube,
+      name: 'YouTube Live',
+      region: SourceRegion.international,
+      categories: {SourceCategory.game, SourceCategory.news, SourceCategory.entertainment},
+      networkMode: NetworkMode.proxyRequired,
+      isNative: true,
+      aliases: ['yt', 'youtube', '油管'],
+    ),
+    kick: SourceDescriptor(
+      id: kick,
+      name: 'Kick',
+      region: SourceRegion.international,
+      categories: {SourceCategory.game, SourceCategory.entertainment},
+      networkMode: NetworkMode.proxyRequired,
+      aliases: ['kick'],
+    ),
+    tiktok: SourceDescriptor(
+      id: tiktok,
+      name: 'TikTok Live',
+      region: SourceRegion.international,
+      categories: {SourceCategory.entertainment, SourceCategory.lifestyle},
+      networkMode: NetworkMode.proxyRequired,
+      aliases: ['tt', 'tiktok'],
+    ),
+    facebook: SourceDescriptor(
+      id: facebook,
+      name: 'Facebook Live',
+      region: SourceRegion.international,
+      categories: {SourceCategory.lifestyle, SourceCategory.news},
+      networkMode: NetworkMode.proxyRequired,
+      aliases: ['fb', 'facebook'],
+    ),
+    rumble: SourceDescriptor(
+      id: rumble,
+      name: 'Rumble',
+      region: SourceRegion.international,
+      categories: {SourceCategory.news, SourceCategory.entertainment},
+      networkMode: NetworkMode.proxyRequired,
+      aliases: ['rumble'],
+    ),
+    dlive: SourceDescriptor(
+      id: dlive,
+      name: 'DLive',
+      region: SourceRegion.international,
+      categories: {SourceCategory.game, SourceCategory.entertainment},
+      networkMode: NetworkMode.proxyRequired,
+      aliases: ['dlive'],
+    ),
+    vimeo: SourceDescriptor(
+      id: vimeo,
+      name: 'Vimeo Live',
+      region: SourceRegion.international,
+      categories: {SourceCategory.entertainment},
+      networkMode: NetworkMode.proxyRequired,
+      aliases: ['vimeo'],
+    ),
+    steamBroadcast: SourceDescriptor(
+      id: steamBroadcast,
+      name: 'Steam.tv',
+      region: SourceRegion.international,
+      categories: {SourceCategory.game},
+      networkMode: NetworkMode.proxyRecommended,
+      aliases: ['steam', 'steamtv'],
+    ),
+    dailymotion: SourceDescriptor(
+      id: dailymotion,
+      name: 'Dailymotion',
+      region: SourceRegion.international,
+      categories: {SourceCategory.news, SourceCategory.entertainment},
+      networkMode: NetworkMode.proxyRequired,
+      aliases: ['dm', 'dailymotion'],
+    ),
+
+    // 4. 日韩 / 东南亚主流 (12)
+    chzzk: SourceDescriptor(
+      id: chzzk,
+      name: 'CHZZK (Naver)',
+      region: SourceRegion.eastAsia,
+      categories: {SourceCategory.game, SourceCategory.entertainment},
+      networkMode: NetworkMode.proxyRequired,
+      aliases: ['cz', 'chzzk', 'naver'],
+    ),
+    soop: SourceDescriptor(
+      id: soop,
+      name: 'SOOP (AfreecaTV)',
+      region: SourceRegion.eastAsia,
+      categories: {SourceCategory.game, SourceCategory.entertainment},
+      networkMode: NetworkMode.proxyRequired,
+      aliases: ['soop', 'afreeca'],
+    ),
+    niconico: SourceDescriptor(
+      id: niconico,
+      name: 'Niconico Live',
+      region: SourceRegion.eastAsia,
+      categories: {SourceCategory.game, SourceCategory.entertainment},
+      networkMode: NetworkMode.proxyRequired,
+      aliases: ['nico', 'niconico', 'n站'],
+    ),
+    twitcasting: SourceDescriptor(
+      id: twitcasting,
+      name: 'TwitCasting',
+      region: SourceRegion.eastAsia,
+      categories: {SourceCategory.audio, SourceCategory.entertainment},
+      networkMode: NetworkMode.proxyRequired,
+      aliases: ['twitcasting', 'cas'],
+    ),
+    showroom: SourceDescriptor(
+      id: showroom,
+      name: 'SHOWROOM',
+      region: SourceRegion.eastAsia,
+      categories: {SourceCategory.entertainment},
+      networkMode: NetworkMode.proxyRequired,
+      aliases: ['sr', 'showroom'],
+    ),
+    openrec: SourceDescriptor(
+      id: openrec,
+      name: 'OPENREC.tv',
+      region: SourceRegion.eastAsia,
+      categories: {SourceCategory.game},
+      networkMode: NetworkMode.proxyRequired,
+      aliases: ['openrec'],
+    ),
+    mirrativ: SourceDescriptor(
+      id: mirrativ,
+      name: 'Mirrativ',
+      region: SourceRegion.eastAsia,
+      categories: {SourceCategory.game},
+      networkMode: NetworkMode.proxyRequired,
+      aliases: ['mirrativ'],
+    ),
+    fc2Live: SourceDescriptor(
+      id: fc2Live,
+      name: 'FC2 Live',
+      region: SourceRegion.eastAsia,
+      categories: {SourceCategory.entertainment},
+      networkMode: NetworkMode.proxyRequired,
+      aliases: ['fc2'],
+    ),
+    bigo: SourceDescriptor(
+      id: bigo,
+      name: 'Bigo Live',
+      region: SourceRegion.southeastAsia,
+      categories: {SourceCategory.entertainment},
+      networkMode: NetworkMode.proxyRecommended,
+      aliases: ['bigo'],
+    ),
+    nimotv: SourceDescriptor(
+      id: nimotv,
+      name: 'NimoTV',
+      region: SourceRegion.southeastAsia,
+      categories: {SourceCategory.game, SourceCategory.entertainment},
+      networkMode: NetworkMode.proxyRecommended,
+      aliases: ['nimo'],
+    ),
+    waveLive: SourceDescriptor(
+      id: waveLive,
+      name: '浪Live',
+      region: SourceRegion.eastAsia,
+      categories: {SourceCategory.entertainment},
+      networkMode: NetworkMode.proxyRecommended,
+      aliases: ['lang', 'wavelive'],
+    ),
+    seventeenLive: SourceDescriptor(
+      id: seventeenLive,
+      name: '17LIVE',
+      region: SourceRegion.eastAsia,
+      categories: {SourceCategory.entertainment},
+      networkMode: NetworkMode.proxyRecommended,
+      aliases: ['17', '17live'],
+    ),
+
+    // 5. 海外公开电台 / 免费 FAST TV (7)
+    plutoTv: SourceDescriptor(
+      id: plutoTv,
+      name: 'Pluto TV',
+      region: SourceRegion.international,
+      categories: {SourceCategory.fastTv, SourceCategory.news},
+      networkMode: NetworkMode.proxyRequired,
+      aliases: ['pluto', 'plutotv'],
+    ),
+    mixcloud: SourceDescriptor(
+      id: mixcloud,
+      name: 'Mixcloud Live',
+      region: SourceRegion.international,
+      categories: {SourceCategory.audio},
+      networkMode: NetworkMode.proxyRecommended,
+      aliases: ['mixcloud'],
+    ),
+    radiko: SourceDescriptor(
+      id: radiko,
+      name: 'Radiko',
+      region: SourceRegion.eastAsia,
+      categories: {SourceCategory.audio},
+      networkMode: NetworkMode.proxyRequired,
+      aliases: ['radiko'],
+    ),
+    ardZdf: SourceDescriptor(
+      id: ardZdf,
+      name: 'ARD/ZDF Mediathek',
+      region: SourceRegion.international,
+      categories: {SourceCategory.fastTv, SourceCategory.news},
+      networkMode: NetworkMode.proxyRequired,
+      aliases: ['ard', 'zdf'],
+    ),
+    nhkWorld: SourceDescriptor(
+      id: nhkWorld,
+      name: 'NHK World',
+      region: SourceRegion.eastAsia,
+      categories: {SourceCategory.fastTv, SourceCategory.news},
+      networkMode: NetworkMode.proxyRecommended,
+      aliases: ['nhk'],
+    ),
+    france24: SourceDescriptor(
+      id: france24,
+      name: 'France 24',
+      region: SourceRegion.international,
+      categories: {SourceCategory.fastTv, SourceCategory.news},
+      networkMode: NetworkMode.proxyRecommended,
+      aliases: ['france24'],
+    ),
+    alJazeera: SourceDescriptor(
+      id: alJazeera,
+      name: 'Al Jazeera',
+      region: SourceRegion.international,
+      categories: {SourceCategory.fastTv, SourceCategory.news},
+      networkMode: NetworkMode.proxyRecommended,
+      aliases: ['aljazeera'],
+    ),
+
+    // 6. IPTV 电视 (1)
+    iptv: SourceDescriptor(
+      id: iptv,
+      name: 'IPTV 网络电视',
+      region: SourceRegion.domestic,
+      categories: {SourceCategory.fastTv, SourceCategory.news, SourceCategory.sports},
+      networkMode: NetworkMode.direct,
+      aliases: ['iptv', 'tv', 'cctv', 'dianshi'],
+    ),
+
+    // 7. 成人独立扩展源 (仅通过外部签名插件加载)
+    chaturbate: SourceDescriptor(
+      id: chaturbate,
+      name: 'Chaturbate',
+      region: SourceRegion.international,
+      categories: {SourceCategory.adult},
+      networkMode: NetworkMode.proxyRequired,
+      isNsfw: true,
+      aliases: ['cb', 'chaturbate'],
+    ),
+    stripchat: SourceDescriptor(
+      id: stripchat,
+      name: 'Stripchat',
+      region: SourceRegion.international,
+      categories: {SourceCategory.adult},
+      networkMode: NetworkMode.proxyRequired,
+      isNsfw: true,
+      aliases: ['stripchat'],
+    ),
+    bongacams: SourceDescriptor(
+      id: bongacams,
+      name: 'BongaCams',
+      region: SourceRegion.international,
+      categories: {SourceCategory.adult},
+      networkMode: NetworkMode.proxyRequired,
+      isNsfw: true,
+      aliases: ['bongacams'],
+    ),
+    cam4: SourceDescriptor(
+      id: cam4,
+      name: 'Cam4',
+      region: SourceRegion.international,
+      categories: {SourceCategory.adult},
+      networkMode: NetworkMode.proxyRequired,
+      isNsfw: true,
+      aliases: ['cam4'],
+    ),
+    myfreecams: SourceDescriptor(
+      id: myfreecams,
+      name: 'MyFreeCams',
+      region: SourceRegion.international,
+      categories: {SourceCategory.adult},
+      networkMode: NetworkMode.proxyRequired,
+      isNsfw: true,
+      aliases: ['mfc', 'myfreecams'],
+    ),
+  };
+
+  /// Returns the descriptor of [platformId], or a generated fallback if undefined.
+  static SourceDescriptor descriptorOf(String platformId) {
+    final key = platformId.trim().toLowerCase();
+    return descriptors[key] ?? SourceDescriptor.fallback(id: key, name: platformId);
   }
 }
 

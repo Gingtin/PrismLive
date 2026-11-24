@@ -44,7 +44,6 @@ jobs:
           python3 tools/flutter_sdk/prepare.py --apply
           flutter --version
           flutter pub get --enforce-lockfile
-          bash tools/ffmpeg_kit/fetch.sh android
 
       - name: Build Android APK
         working-directory: apps/pure_live

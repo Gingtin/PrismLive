@@ -52,6 +52,7 @@ export 'src/widgets/loading_styles.dart';
 export 'src/widgets/network_image.dart';
 export 'src/widgets/page_title.dart';
 export 'src/widgets/pip_danmaku_preview.dart';
+export 'src/widgets/proxy_badge.dart';
 export 'src/widgets/qr_code_widget.dart';
 export 'src/widgets/realtime_cover_cache.dart';
 export 'src/widgets/record_glyph.dart';

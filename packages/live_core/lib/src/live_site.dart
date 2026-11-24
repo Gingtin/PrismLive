@@ -10,6 +10,7 @@ import 'package:live_core/src/live_room.dart';
 import 'package:live_core/src/play_line.dart';
 import 'package:live_core/src/quality_label.dart';
 import 'package:live_core/src/sites.dart';
+import 'package:live_core/src/source_descriptor.dart';
 import 'package:live_net/live_net.dart';
 import 'package:meta/meta.dart';
 
@@ -25,6 +26,9 @@ abstract class LiveSite {
 
   /// Display name (`斗鱼`).
   String get name;
+
+  /// Metadata descriptor for this source (region, categories, proxy network mode, nsfw).
+  SourceDescriptor get descriptor => SiteIds.descriptorOf(id);
 
   /// Categories with their areas.
   Future<List<LiveCategory>> getCategories(int page, int pageSize) async => const [];

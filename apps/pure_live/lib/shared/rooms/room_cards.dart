@@ -117,6 +117,11 @@ final class AudiencePolicy {
       audience: isIptv ? null : audienceOf(room),
       restrictionLabel: roomMark(room),
       platformName: platformName(room.platform),
+      proxyMode: switch (SiteIds.descriptorOf(room.platform).networkMode) {
+        NetworkMode.proxyRequired => ProxyBadgeMode.proxyRequired,
+        NetworkMode.proxyRecommended => ProxyBadgeMode.proxyRecommended,
+        NetworkMode.direct => ProxyBadgeMode.direct,
+      },
       isOffline: room.isExplicitlyOfflineNow,
       // A09.11 (UPGRADES 11-5): a title that is already the streamer's
       // name (Picarto's and CHZZK's channels, Kuaishou's streamers, …)

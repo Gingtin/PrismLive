@@ -109,6 +109,16 @@ final class IptvImporter {
   /// High-availability curated public IPTV playlist presets.
   static const List<({String name, String url, String desc})> curatedPresets = [
     (
+      name: 'vbskycn/iptv (IPv4/IPv6 双栈精选)',
+      url: 'https://raw.githubusercontent.com/vbskycn/iptv/master/tv/api.m3u',
+      desc: '双栈网络自适应，全套央视高清、主流卫视与精选地方台',
+    ),
+    (
+      name: 'fanmingming/live (含台标与纯净流)',
+      url: 'https://raw.githubusercontent.com/fanmingming/live/main/tv/m3u/ipv6.m3u',
+      desc: '含高清台标、EPG 频道映射及 CCTV/各大卫视纯净源',
+    ),
+    (
       name: '央视与各省卫视（每日测速）',
       url: 'https://fastly.jsdelivr.net/gh/best-fan/iptv-sources@main/cn_all.m3u8',
       desc: '每日自动化测试高可用直播源，包含 CCTV 全套及各大主流省市卫视',
@@ -124,6 +134,16 @@ final class IptvImporter {
       desc: '湖南卫视、浙江卫视、江苏卫视、北京卫视、东方卫视等全套',
     ),
     (
+      name: 'Free-TV/IPTV (全球综合公益源)',
+      url: 'https://raw.githubusercontent.com/Free-TV/IPTV/master/playlist.m3u8',
+      desc: '全球开源公益直播源，涵盖世界多国新闻、电台与综合频道',
+    ),
+    (
+      name: 'Romaxa55/world_ip_tv (多国国际源)',
+      url: 'https://raw.githubusercontent.com/Romaxa55/world_ip_tv/master/channels.m3u',
+      desc: '多国国际频道聚合，适合国际新闻与外语电台爱好者',
+    ),
+    (
       name: '热门赛事与游戏专线',
       url: 'https://raw.githubusercontent.com/YanG-1989/m3u/main/Gather.m3u',
       desc: '电竞赛事轮播与体育专线聚合',
@@ -132,6 +152,25 @@ final class IptvImporter {
       name: 'iptv-org 综合列表（国际社区源）',
       url: 'https://iptv-org.github.io/iptv/countries/cn.m3u',
       desc: 'iptv-org 国际开源社区维护的中国频道列表',
+    ),
+  ];
+
+  /// High-availability curated public EPG programme guide presets.
+  static const List<({String name, String url, String desc})> curatedEpgPresets = [
+    (
+      name: 'suzukua EPG (精选主源 gzip 压缩)',
+      url: 'https://epg.zsdc.eu.org/t.xml.gz',
+      desc: '覆盖央视、各大省市卫视及主要数字频道，体积小加载快',
+    ),
+    (
+      name: 'fanmingming EPG (备用纯净源)',
+      url: 'https://live.fanmingming.com/e.xml',
+      desc: '包含央视、卫视、数字电台等节目预告单',
+    ),
+    (
+      name: '112114 EPG (经典国内镜像)',
+      url: 'https://epg.112114.xyz/pp.xml',
+      desc: '经典高可用 EPG 节目预告数据源',
     ),
   ];
 
